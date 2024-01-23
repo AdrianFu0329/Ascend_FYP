@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "95963291805",
+    "project_id": "ascend-app-6e800",
+    "storage_bucket": "ascend-app-6e800.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95963291805:android:7fa73b23838d3a657fb474",
+        "android_client_info": {
+          "package_name": "com.example.ascend_fyp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaSKYT7jbfLhjDJztJYXss1lDeYXql08U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
