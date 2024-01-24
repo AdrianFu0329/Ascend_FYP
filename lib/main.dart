@@ -18,9 +18,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SplashScreen(),
+    return MaterialApp(
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(
+            fontSize: 36,
+            fontFamily: 'Merriweather Sans',
+            fontWeight: FontWeight.bold,
+            color: Color.fromRGBO(247, 243, 237, 1),
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 16,
+            fontFamily: 'Merriweather Sans',
+            fontWeight: FontWeight.normal,
+            color: Color.fromRGBO(247, 243, 237, 1),
+          ),
+        ),
+        scaffoldBackgroundColor: const Color.fromRGBO(32, 47, 57, 1),
+      ),
     );
   }
 }
