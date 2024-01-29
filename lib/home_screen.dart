@@ -9,11 +9,11 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+          padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
           child: Image.asset(
             "lib/assets/images/logo_noBg.png",
-            width: 160,
-            height: 60,
+            width: 130,
+            height: 50,
           ),
         ),
       ),
