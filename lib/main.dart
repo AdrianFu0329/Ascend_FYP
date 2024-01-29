@@ -27,16 +27,16 @@ class MyApp extends StatelessWidget {
             fontSize: 36,
             fontFamily: 'Merriweather Sans',
             fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(247, 243, 237, 1),
+            color: Color.fromRGBO(32, 47, 57, 1),
           ),
           bodyMedium: TextStyle(
             fontSize: 16,
             fontFamily: 'Merriweather Sans',
             fontWeight: FontWeight.normal,
-            color: Color.fromRGBO(247, 243, 237, 1),
+            color: Color.fromRGBO(32, 47, 57, 1),
           ),
         ),
-        scaffoldBackgroundColor: const Color.fromRGBO(32, 47, 57, 1),
+        scaffoldBackgroundColor: const Color.fromRGBO(247, 243, 237, 1),
       ),
     );
   }
