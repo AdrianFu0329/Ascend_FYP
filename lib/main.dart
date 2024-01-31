@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         scaffoldBackgroundColor: const Color.fromRGBO(247, 243, 237, 1),
+        cardColor: const Color.fromRGBO(32, 47, 57, 1),
       ),
     );
   }
