@@ -85,6 +85,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
                     "adrian_2002",
