@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
               color: Color.fromRGBO(32, 47, 57, 1),
             ),
             bodySmall: TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               fontFamily: 'Merriweather Sans',
               fontWeight: FontWeight.normal,
               color: Color.fromRGBO(247, 243, 237, 1),

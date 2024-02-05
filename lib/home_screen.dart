@@ -35,7 +35,7 @@ class _CustomButtonState extends State<CustomButton> {
         child: Icon(
           widget.icon,
           color: widget.isLiked ? widget.pressedColor : widget.defaultColor,
-          size: 16,
+          size: 15,
         ),
       ),
     );
@@ -61,7 +61,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
 
   @override
   Widget build(BuildContext context) {
-    double cardHeight = widget.index == 0 ? 275.0 : 300.0;
+    double cardHeight = widget.index == 0 ? 235.0 : 255.0;
 
     return SizedBox(
       width: 135,
@@ -69,32 +69,28 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
       child: Card(
         elevation: 4.0,
         color: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Expanded(
+              child: Image.asset(
+                "lib/assets/images/logo.png",
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "adrian_2002",
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: Image.asset(
-                  "lib/assets/images/logo.png",
-                  fit: BoxFit.contain,
-                  height: cardHeight * 1.5,
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: CustomButton(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                children: [
+                  Text(
+                    "adrian_2002",
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  CustomButton(
                     icon: Icons.favorite,
                     defaultColor: const Color.fromRGBO(247, 243, 237, 1),
                     pressedColor: Colors.red,
@@ -103,8 +99,8 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                     },
                     isLiked: isLiked,
                   ),
-                )
-              ],
+                ],
+              ),
             ),
           ],
         ),
