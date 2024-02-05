@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-class CustomButton extends StatelessWidget {
+class CustomButton extends StatefulWidget {
   final IconData icon;
   final Color defaultColor;
   final Color pressedColor;
   final Function onPressed;
+  final bool isLiked;
 
   const CustomButton({
     super.key,
@@ -13,22 +15,26 @@ class CustomButton extends StatelessWidget {
     required this.defaultColor,
     required this.pressedColor,
     required this.onPressed,
+    required this.isLiked,
   });
 
+  @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          onPressed();
-        });
+        widget.onPressed();
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(4),
         child: Icon(
-          icon,
-          color: defaultColor,
+          widget.icon,
+          color: widget.isLiked ? widget.pressedColor : widget.defaultColor,
           size: 16,
         ),
       ),
@@ -55,32 +61,39 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
 
   @override
   Widget build(BuildContext context) {
+    double cardHeight = widget.index == 0 ? 275.0 : 300.0;
+
     return SizedBox(
       width: 135,
+      height: cardHeight,
       child: Card(
         elevation: 4.0,
         color: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(8.0),
               child: Text(
                 "adrian_2002",
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
-            Center(
-              child: Image.asset(
-                "lib/assets/images/logo.png",
+            Expanded(
+              child: Center(
+                child: Image.asset(
+                  "lib/assets/images/logo.png",
+                  fit: BoxFit.contain,
+                  height: cardHeight * 1.5,
+                ),
               ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(4.0),
                   child: CustomButton(
                     icon: Icons.favorite,
                     defaultColor: const Color.fromRGBO(247, 243, 237, 1),
@@ -88,6 +101,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                     onPressed: () {
                       onLikePressed();
                     },
+                    isLiked: isLiked,
                   ),
                 )
               ],
@@ -109,7 +123,7 @@ class HomeScreen extends StatelessWidget {
         SliverAppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           title: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 24, 0, 36),
+            padding: const EdgeInsets.fromLTRB(0, 36, 0, 36),
             child: Image.asset(
               "lib/assets/images/logo_noBg.png",
               width: 130,
@@ -119,8 +133,8 @@ class HomeScreen extends StatelessWidget {
         ),
         SliverMasonryGrid.count(
           crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 4,
           itemBuilder: (BuildContext context, int index) {
             return SocialMediaCard(
               index: index,
