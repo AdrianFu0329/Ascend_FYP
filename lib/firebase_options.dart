@@ -49,6 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '95963291805',
     projectId: 'ascend-app-6e800',
     authDomain: 'ascend-app-6e800.firebaseapp.com',
+    databaseURL: 'https://ascend-app-6e800-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'ascend-app-6e800.appspot.com',
     measurementId: 'G-Z1LPREGG87',
   );
@@ -58,6 +59,7 @@ class DefaultFirebaseOptions {
     appId: '1:95963291805:android:7fa73b23838d3a657fb474',
     messagingSenderId: '95963291805',
     projectId: 'ascend-app-6e800',
+    databaseURL: 'https://ascend-app-6e800-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'ascend-app-6e800.appspot.com',
   );
 
@@ -66,6 +68,7 @@ class DefaultFirebaseOptions {
     appId: '1:95963291805:ios:0d9a6f103a7bd19a7fb474',
     messagingSenderId: '95963291805',
     projectId: 'ascend-app-6e800',
+    databaseURL: 'https://ascend-app-6e800-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'ascend-app-6e800.appspot.com',
     iosBundleId: 'com.example.ascendFyp',
   );
@@ -75,6 +78,7 @@ class DefaultFirebaseOptions {
     appId: '1:95963291805:ios:d0afa4c02c4c68fe7fb474',
     messagingSenderId: '95963291805',
     projectId: 'ascend-app-6e800',
+    databaseURL: 'https://ascend-app-6e800-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'ascend-app-6e800.appspot.com',
     iosBundleId: 'com.example.ascendFyp.RunnerTests',
   );
