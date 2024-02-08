@@ -44,7 +44,7 @@ class _CustomButtonState extends State<CustomButton> {
 
 class SocialMediaCard extends StatefulWidget {
   final int index;
-  final Widget image;
+  final ImageWithDimension image;
   final String title;
   final String user;
   final int likes;
@@ -83,7 +83,9 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
 
   @override
   Widget build(BuildContext context) {
-    double cardHeight = widget.index == 0 ? 235.0 : 255.0;
+    double imageHeight = (widget.image.height) / 3;
+    double cardHeight =
+        widget.index == 0 ? imageHeight + 75.0 : imageHeight + 100.0;
 
     return SizedBox(
       width: 135,
@@ -97,7 +99,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: widget.image),
+              Expanded(child: widget.image.image),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
@@ -184,7 +186,7 @@ class HomeScreen extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     return SocialMediaCard(
                       index: index,
-                      image: posts[index].imageUrl,
+                      image: posts[index].image,
                       title: posts[index].title,
                       user: posts[index].user,
                       likes: posts[index].likes,
