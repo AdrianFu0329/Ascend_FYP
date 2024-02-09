@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ascend_fyp/home_screen.dart';
+import 'package:ascend_fyp/pages/home_screen.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});

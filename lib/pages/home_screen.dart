@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'database_service.dart';
+import '../database_service.dart';
 
 class CustomButton extends StatefulWidget {
   final IconData icon;
@@ -87,58 +87,63 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
     double cardHeight =
         widget.index == 0 ? imageHeight + 75.0 : imageHeight + 100.0;
 
-    return SizedBox(
-      width: 135,
-      height: cardHeight,
-      child: Card(
-        elevation: 4.0,
-        color: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: widget.image.image),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  widget.title,
-                  style: Theme.of(context).textTheme.titleSmall,
+    return GestureDetector(
+      onTap: () => {Navigator.pushNamed(context, '/mediaPostScreen')},
+      child: SizedBox(
+        width: 135,
+        height: cardHeight,
+        child: Card(
+          elevation: 4.0,
+          color: Theme.of(context).cardColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: widget.image.image),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    widget.title,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "adrian_2002",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          likeCount.toString(),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        CustomButton(
-                          icon: Icons.favorite,
-                          defaultColor: const Color.fromRGBO(247, 243, 237, 1),
-                          pressedColor: Colors.red,
-                          onPressed: () {
-                            onLikePressed();
-                          },
-                          isLiked: isLiked,
-                        ),
-                      ],
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "adrian_2002",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            likeCount.toString(),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          CustomButton(
+                            icon: Icons.favorite,
+                            defaultColor:
+                                const Color.fromRGBO(247, 243, 237, 1),
+                            pressedColor: Colors.red,
+                            onPressed: () {
+                              onLikePressed();
+                            },
+                            isLiked: isLiked,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
