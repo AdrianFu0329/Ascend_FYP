@@ -69,7 +69,6 @@ flutter:
     - android/app/src/main/res/mipmap-hdpi/logo.png
     - ios/Runner/Assets.xcassets/AppIcon.appiconset/logo.png
     - lib/assets/images/logo_noBg.png
-    - lib/assets/images/sample_post.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

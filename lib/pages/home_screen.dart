@@ -1,3 +1,5 @@
+import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/media_post_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../database_service.dart';
@@ -88,7 +90,10 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
         widget.index == 0 ? imageHeight + 75.0 : imageHeight + 100.0;
 
     return GestureDetector(
-      onTap: () => {Navigator.pushNamed(context, '/mediaPostScreen')},
+      onTap: () => {
+        Navigator.of(context)
+            .push(SlidingNav(builder: (context) => const MediaPostScreen()))
+      },
       child: SizedBox(
         width: 135,
         height: cardHeight,
@@ -165,7 +170,7 @@ class HomeScreen extends StatelessWidget {
             body: Center(
                 child: CircularProgressIndicator(
               color: Color.fromRGBO(194, 0, 0, 1),
-              backgroundColor: Color.fromRGBO(32, 47, 57, 1),
+              backgroundColor: Color.fromRGBO(247, 243, 237, 1),
             )),
           );
         } else if (snapshot.hasError) {

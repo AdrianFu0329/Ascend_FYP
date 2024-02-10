@@ -27,35 +27,36 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(
-            fontSize: 36,
-            fontFamily: 'Merriweather Sans',
-            fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(32, 47, 57, 1),
+          textTheme: const TextTheme(
+            bodyLarge: TextStyle(
+              fontSize: 36,
+              fontFamily: 'Merriweather Sans',
+              fontWeight: FontWeight.bold,
+              color: Color.fromRGBO(32, 47, 57, 1),
+            ),
+            bodyMedium: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Merriweather Sans',
+              fontWeight: FontWeight.normal,
+              color: Color.fromRGBO(32, 47, 57, 1),
+            ),
+            bodySmall: TextStyle(
+              fontSize: 11,
+              fontFamily: 'Merriweather Sans',
+              fontWeight: FontWeight.normal,
+              color: Color.fromRGBO(247, 243, 237, 1),
+            ),
+            titleSmall: TextStyle(
+              fontSize: 13,
+              fontFamily: 'Merriweather Sans',
+              fontWeight: FontWeight.normal,
+              color: Color.fromRGBO(247, 243, 237, 1),
+            ),
           ),
-          bodyMedium: TextStyle(
-            fontSize: 16,
-            fontFamily: 'Merriweather Sans',
-            fontWeight: FontWeight.normal,
-            color: Color.fromRGBO(32, 47, 57, 1),
-          ),
-          bodySmall: TextStyle(
-            fontSize: 11,
-            fontFamily: 'Merriweather Sans',
-            fontWeight: FontWeight.normal,
-            color: Color.fromRGBO(247, 243, 237, 1),
-          ),
-          titleSmall: TextStyle(
-            fontSize: 13,
-            fontFamily: 'Merriweather Sans',
-            fontWeight: FontWeight.normal,
-            color: Color.fromRGBO(247, 243, 237, 1),
-          ),
-        ),
-        scaffoldBackgroundColor: const Color.fromRGBO(247, 243, 237, 1),
-        cardColor: const Color.fromRGBO(32, 47, 57, 1),
-      ),
+          scaffoldBackgroundColor: const Color.fromRGBO(32, 47, 57, 1),
+          cardColor: const Color.fromRGBO(32, 47, 57, 1),
+          buttonTheme: const ButtonThemeData(
+              buttonColor: Color.fromRGBO(247, 243, 237, 1))),
       routes: {
         '/homeScreen': (context) => const HomeScreen(),
         '/mediaPostScreen': (context) => const MediaPostScreen(),
