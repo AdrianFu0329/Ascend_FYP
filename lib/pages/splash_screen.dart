@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:ascend_fyp/navigation/wrapper_nav.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
+import 'package:ascend_fyp/pages/nav_screen.dart';
+import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -9,7 +11,7 @@ class SplashScreen extends StatelessWidget {
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const WrapperNav()),
       );
     });
 

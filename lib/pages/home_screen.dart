@@ -2,7 +2,7 @@ import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/media_post_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../database_service.dart';
+import '../database/database_service.dart';
 
 class CustomButton extends StatefulWidget {
   final IconData icon;
@@ -122,7 +122,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "adrian_2002",
+                        widget.user,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       Row(
@@ -157,62 +157,42 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
 }
 
 class HomeScreen extends StatelessWidget {
-  // ignore: use_key_in_widget_constructors
-  const HomeScreen({Key? key});
+  final List<Post> posts;
+  const HomeScreen({super.key, required this.posts});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Post>>(
-      future: getPostsFromDatabase(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-                child: CircularProgressIndicator(
-              color: Color.fromRGBO(194, 0, 0, 1),
-              backgroundColor: Color.fromRGBO(247, 243, 237, 1),
-            )),
-          );
-        } else if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(child: Text('Error: ${snapshot.error}')),
-          );
-        } else {
-          List<Post> posts = snapshot.data!;
-          return Scaffold(
-            body: CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  title: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 36, 0, 36),
-                    child: Image.asset(
-                      "lib/assets/images/logo_noBg.png",
-                      width: 130,
-                      height: 50,
-                    ),
-                  ),
-                ),
-                SliverMasonryGrid.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 4,
-                  itemBuilder: (BuildContext context, int index) {
-                    return SocialMediaCard(
-                      index: index,
-                      image: posts[index].image,
-                      title: posts[index].title,
-                      user: posts[index].user,
-                      likes: posts[index].likes,
-                    );
-                  },
-                  childCount: posts.length,
-                ),
-              ],
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            title: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 36, 0, 36),
+              child: Image.asset(
+                "lib/assets/images/logo_noBg.png",
+                width: 130,
+                height: 50,
+              ),
             ),
-          );
-        }
-      },
+          ),
+          SliverMasonryGrid.count(
+            crossAxisCount: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 4,
+            itemBuilder: (BuildContext context, int index) {
+              return SocialMediaCard(
+                index: index,
+                image: posts[index].image,
+                title: posts[index].title,
+                user: posts[index].user,
+                likes: posts[index].likes,
+              );
+            },
+            childCount: posts.length,
+          ),
+        ],
+      ),
     );
   }
 }
