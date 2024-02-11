@@ -1,7 +1,5 @@
-import 'package:ascend_fyp/firebase_options.dart';
-import 'package:ascend_fyp/pages/home_screen.dart';
-import 'package:ascend_fyp/pages/media_post_screen.dart';
-import 'package:ascend_fyp/splash_screen.dart';
+import 'package:ascend_fyp/database/firebase_options.dart';
+import 'package:ascend_fyp/pages/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -57,10 +55,6 @@ class MyApp extends StatelessWidget {
           cardColor: const Color.fromRGBO(32, 47, 57, 1),
           buttonTheme: const ButtonThemeData(
               buttonColor: Color.fromRGBO(247, 243, 237, 1))),
-      routes: {
-        '/homeScreen': (context) => const HomeScreen(),
-        '/mediaPostScreen': (context) => const MediaPostScreen(),
-      },
     );
   }
 }
