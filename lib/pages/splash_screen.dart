@@ -1,6 +1,4 @@
 import 'package:ascend_fyp/navigation/wrapper_nav.dart';
-import 'package:ascend_fyp/pages/home_screen.dart';
-import 'package:ascend_fyp/pages/nav_screen.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {

@@ -20,54 +20,70 @@ class _NavScreenState extends State<NavScreen> {
     });
   }
 
-  final double iconSize = 24;
+  final double iconSize = 26;
+
+  final List<Map<String, dynamic>> _navigationItems = [
+    {
+      'selected': 'lib/assets/images/home_pressed.png',
+      'unselected': 'lib/assets/images/home.png',
+      'label': 'Home',
+    },
+    {
+      'selected': 'lib/assets/images/messages_pressed.png',
+      'unselected': 'lib/assets/images/messages.png',
+      'label': 'Messages',
+    },
+    {
+      'selected': 'lib/assets/images/events.png',
+      'unselected': 'lib/assets/images/events.png',
+      'label': 'Events',
+    },
+    {
+      'selected': 'lib/assets/images/profile_pressed.png',
+      'unselected': 'lib/assets/images/profile.png',
+      'label': 'Profile',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     final List pages = [
       HomeScreen(posts: widget.posts),
       const MediaPostScreen(),
+      Container(),
+      Container()
     ];
     return Scaffold(
       body: pages[_selectedIndex],
-      backgroundColor: Theme.of(context).cardColor,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _navigate,
-        items: [
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'lib/assets/images/home.png',
-              width: iconSize,
-              height: iconSize,
-            ),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'lib/assets/images/messages.png',
-              width: iconSize,
-              height: iconSize,
-            ),
-            label: "Messages",
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'lib/assets/images/events.png',
-              width: iconSize,
-              height: iconSize,
-            ),
-            label: "Events",
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'lib/assets/images/profile.png',
-              width: iconSize,
-              height: iconSize,
-            ),
-            label: "Profile",
-          ),
-        ],
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _selectedIndex,
+          onTap: _navigate,
+          backgroundColor: Theme.of(context).cardColor,
+          items: _navigationItems.map(
+            (item) {
+              return BottomNavigationBarItem(
+                icon: Image.asset(
+                  _selectedIndex == _navigationItems.indexOf(item)
+                      ? item['selected']
+                      : item['unselected'],
+                  width: iconSize,
+                  height: iconSize,
+                ),
+                label: item['label'],
+              );
+            },
+          ).toList(),
+          selectedItemColor: const Color.fromRGBO(247, 243, 237, 1),
+          unselectedItemColor: const Color.fromRGBO(247, 243, 237, 1),
+          selectedFontSize: 10,
+          unselectedFontSize: 9,
+        ),
       ),
     );
   }
