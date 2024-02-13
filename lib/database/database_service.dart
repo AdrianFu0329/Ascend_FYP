@@ -43,33 +43,34 @@ String generateUniqueId() {
 
 Future<List<Post>> getPostsFromDatabase() async {
   try {
-    DataSnapshot snapshot =
-        (FirebaseDatabase.instance.ref('posts').once()) as DataSnapshot;
-
+    DatabaseReference _ref = FirebaseDatabase.instance.ref().child('posts');
     List<Post> posts = [];
 
-    Map<dynamic, dynamic>? data = snapshot.value as Map?;
-    if (data != null) {
-      for (var entry in data.entries) {
-        String postId = entry.key;
-        Map<String, dynamic> postValue = entry.value;
+    _ref.onValue.listen((event) async {
+      DataSnapshot snapshot = event.snapshot;
+      Map<dynamic, dynamic>? data = snapshot.value as Map?;
+      if (data != null) {
+        for (var entry in data.entries) {
+          String postId = entry.key;
+          Map<String, dynamic> postValue = entry.value;
 
-        String title = postValue['title'];
-        ImageWithDimension image = await getPostImg(postId);
-        int likes = postValue['likes'];
-        String user = postValue['user'];
+          String title = postValue['title'];
+          ImageWithDimension image = await getPostImg(postId);
+          int likes = postValue['likes'];
+          String user = postValue['user'];
 
-        Post post = Post(
-          title: title,
-          image: image,
-          likes: likes,
-          user: user,
-        );
-        posts.add(post);
+          Post post = Post(
+            title: title,
+            image: image,
+            likes: likes,
+            user: user,
+          );
+          posts.add(post);
+        }
+      } else {
+        print("No data");
       }
-    } else {
-      print("No data");
-    }
+    });
     return posts;
   } catch (e) {
     Center(child: Text('Error getting posts: $e'));
