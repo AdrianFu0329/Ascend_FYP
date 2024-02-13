@@ -43,17 +43,14 @@ String generateUniqueId() {
 
 Future<List<Post>> getPostsFromDatabase() async {
   try {
-    DataSnapshot snapshot = (await FirebaseDatabase.instance
-        .ref()
-        .child('posts')
-        .once()) as DataSnapshot;
+    DataSnapshot snapshot =
+        (FirebaseDatabase.instance.ref('posts').once()) as DataSnapshot;
 
     List<Post> posts = [];
 
     Map<dynamic, dynamic>? data = snapshot.value as Map?;
     if (data != null) {
       for (var entry in data.entries) {
-        print('Post ID: ${entry.key}, Data: ${entry.value}');
         String postId = entry.key;
         Map<String, dynamic> postValue = entry.value;
 
