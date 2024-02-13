@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -27,32 +29,54 @@ class ImageWithDimension {
       {required this.image, required this.height, required this.width});
 }
 
+String generateUniqueId() {
+  const String chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  final Random random = Random.secure();
+  final StringBuffer buffer = StringBuffer();
+
+  for (int i = 0; i < 20; i++) {
+    buffer.write(chars[random.nextInt(chars.length)]);
+  }
+
+  return buffer.toString();
+}
+
 Future<List<Post>> getPostsFromDatabase() async {
   try {
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance.collection('posts').get();
+    DataSnapshot snapshot = (await FirebaseDatabase.instance
+        .ref()
+        .child('posts')
+        .once()) as DataSnapshot;
 
     List<Post> posts = [];
 
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs) {
-      String title = doc['title'];
-      ImageWithDimension image = await getPostImg(doc.id);
-      int likes = doc['likes'];
-      String user = doc['user'];
+    Map<dynamic, dynamic>? data = snapshot.value as Map?;
+    if (data != null) {
+      for (var entry in data.entries) {
+        print('Post ID: ${entry.key}, Data: ${entry.value}');
+        String postId = entry.key;
+        Map<String, dynamic> postValue = entry.value;
 
-      Post post = Post(
-        title: title,
-        image: image,
-        likes: likes,
-        user: user,
-      );
-      posts.add(post);
+        String title = postValue['title'];
+        ImageWithDimension image = await getPostImg(postId);
+        int likes = postValue['likes'];
+        String user = postValue['user'];
+
+        Post post = Post(
+          title: title,
+          image: image,
+          likes: likes,
+          user: user,
+        );
+        posts.add(post);
+      }
+    } else {
+      print("No data");
     }
-
     return posts;
   } catch (e) {
     Center(child: Text('Error getting posts: $e'));
-    return []; // Return an empty list in case of error
+    return [];
   }
 }
 

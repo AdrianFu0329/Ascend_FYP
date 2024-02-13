@@ -50,6 +50,7 @@ class SocialMediaCard extends StatefulWidget {
   final String title;
   final String user;
   final int likes;
+
   const SocialMediaCard(
       {super.key,
       required this.index,
@@ -91,8 +92,16 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
 
     return GestureDetector(
       onTap: () => {
-        Navigator.of(context)
-            .push(SlidingNav(builder: (context) => const MediaPostScreen()))
+        Navigator.of(context).push(
+          SlidingNav(
+            builder: (context) => MediaPostScreen(
+              image: widget.image,
+              title: widget.title,
+              user: widget.user,
+              likes: widget.likes,
+            ),
+          ),
+        ),
       },
       child: SizedBox(
         width: 135,

@@ -49,7 +49,7 @@ class _NavScreenState extends State<NavScreen> {
   Widget build(BuildContext context) {
     final List pages = [
       HomeScreen(posts: widget.posts),
-      const MediaPostScreen(),
+      Container(),
       Container(),
       Container()
     ];
