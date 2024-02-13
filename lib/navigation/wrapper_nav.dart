@@ -2,13 +2,26 @@ import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/pages/nav_screen.dart';
 import 'package:flutter/material.dart';
 
-class WrapperNav extends StatelessWidget {
+class WrapperNav extends StatefulWidget {
   const WrapperNav({super.key});
+
+  @override
+  State<WrapperNav> createState() => _WrapperNavState();
+}
+
+class _WrapperNavState extends State<WrapperNav> {
+  late Future<List<Post>> _postsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _postsFuture = getPostsFromDatabase();
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Post>>(
-      future: getPostsFromDatabase(),
+      future: _postsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -20,7 +33,9 @@ class WrapperNav extends StatelessWidget {
           );
         } else if (snapshot.hasError) {
           return Scaffold(
-            body: Center(child: Text('Error: ${snapshot.error}')),
+            body: Center(
+              child: Text('Error: ${snapshot.error}'),
+            ),
           );
         } else {
           return NavScreen(posts: snapshot.data!);

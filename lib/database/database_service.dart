@@ -42,40 +42,36 @@ String generateUniqueId() {
 }
 
 Future<List<Post>> getPostsFromDatabase() async {
+  Completer<List<Post>> completer = Completer<List<Post>>();
   try {
-    DatabaseReference _ref = FirebaseDatabase.instance.ref().child('posts');
+    DatabaseReference database = FirebaseDatabase.instance.ref().child('posts');
     List<Post> posts = [];
 
-    _ref.onValue.listen((event) async {
+    database.onValue.listen((event) async {
       DataSnapshot snapshot = event.snapshot;
       Map<dynamic, dynamic>? data = snapshot.value as Map?;
-      if (data != null) {
-        for (var entry in data.entries) {
-          String postId = entry.key;
-          Map<String, dynamic> postValue = entry.value;
+      data?.forEach((key, value) async {
+        String title = value['title'];
+        ImageWithDimension image = await getPostImg(key);
+        int likes = value['likes'];
+        String user = value['user'];
 
-          String title = postValue['title'];
-          ImageWithDimension image = await getPostImg(postId);
-          int likes = postValue['likes'];
-          String user = postValue['user'];
-
-          Post post = Post(
-            title: title,
-            image: image,
-            likes: likes,
-            user: user,
-          );
-          posts.add(post);
-        }
-      } else {
-        print("No data");
-      }
+        Post post = Post(
+          title: title,
+          image: image,
+          likes: likes,
+          user: user,
+        );
+        posts.add(post);
+      });
+      completer.complete(posts);
     });
-    return posts;
   } catch (e) {
+    completer.completeError(e);
     Center(child: Text('Error getting posts: $e'));
     return [];
   }
+  return completer.future;
 }
 
 Future<ImageWithDimension> getPostImg(String path) async {
