@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
               color: Color.fromRGBO(247, 243, 237, 1),
             ),
           ),
-          scaffoldBackgroundColor: const Color.fromRGBO(32, 47, 57, 1),
+          scaffoldBackgroundColor: const Color.fromRGBO(20, 23, 26, 1),
           cardColor: const Color.fromRGBO(32, 47, 57, 1),
           buttonTheme: const ButtonThemeData(
               buttonColor: Color.fromRGBO(247, 243, 237, 1))),
