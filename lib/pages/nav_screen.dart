@@ -1,6 +1,5 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
-import 'package:ascend_fyp/pages/media_post_screen.dart';
 import 'package:flutter/material.dart';
 
 class NavScreen extends StatefulWidget {
@@ -20,7 +19,7 @@ class _NavScreenState extends State<NavScreen> {
     });
   }
 
-  final double iconSize = 26;
+  final double iconSize = 30;
 
   final List<Map<String, dynamic>> _navigationItems = [
     {

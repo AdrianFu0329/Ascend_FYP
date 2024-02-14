@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -11,12 +10,16 @@ class Post {
   final ImageWithDimension image;
   final int likes;
   final String user;
+  final Timestamp timestamp;
+  final String description;
 
   Post({
     required this.title,
     required this.image,
     required this.likes,
     required this.user,
+    required this.timestamp,
+    required this.description,
   });
 }
 
@@ -42,36 +45,37 @@ String generateUniqueId() {
 }
 
 Future<List<Post>> getPostsFromDatabase() async {
-  Completer<List<Post>> completer = Completer<List<Post>>();
   try {
-    DatabaseReference database = FirebaseDatabase.instance.ref().child('posts');
+    QuerySnapshot<Map<String, dynamic>> snapshot =
+        await FirebaseFirestore.instance.collection('posts').get();
+
     List<Post> posts = [];
 
-    database.onValue.listen((event) async {
-      DataSnapshot snapshot = event.snapshot;
-      Map<dynamic, dynamic>? data = snapshot.value as Map?;
-      data?.forEach((key, value) async {
-        String title = value['title'];
-        ImageWithDimension image = await getPostImg(key);
-        int likes = value['likes'];
-        String user = value['user'];
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs) {
+      String title = doc['title'];
+      ImageWithDimension image = await getPostImg(doc.id);
+      int likes = doc['likes'];
+      String user = doc['user'];
+      Timestamp timestamp = doc['timestamp'];
+      //TimestampToString.dddmmmddyyyy(doc['timestamp'].toString()) as String;
+      String description = doc['description'];
 
-        Post post = Post(
-          title: title,
-          image: image,
-          likes: likes,
-          user: user,
-        );
-        posts.add(post);
-      });
-      completer.complete(posts);
-    });
+      Post post = Post(
+        title: title,
+        image: image,
+        likes: likes,
+        user: user,
+        timestamp: timestamp,
+        description: description,
+      );
+      posts.add(post);
+    }
+
+    return posts;
   } catch (e) {
-    completer.completeError(e);
     Center(child: Text('Error getting posts: $e'));
-    return [];
+    return []; // Return an empty list in case of error
   }
-  return completer.future;
 }
 
 Future<ImageWithDimension> getPostImg(String path) async {

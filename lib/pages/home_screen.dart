@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/media_post_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../database/database_service.dart';
@@ -50,14 +51,19 @@ class SocialMediaCard extends StatefulWidget {
   final String title;
   final String user;
   final int likes;
+  final Timestamp timestamp;
+  final String description;
 
-  const SocialMediaCard(
-      {super.key,
-      required this.index,
-      required this.image,
-      required this.user,
-      required this.likes,
-      required this.title});
+  const SocialMediaCard({
+    super.key,
+    required this.index,
+    required this.image,
+    required this.user,
+    required this.likes,
+    required this.title,
+    required this.timestamp,
+    required this.description,
+  });
 
   @override
   State<SocialMediaCard> createState() => _SocialMediaCardState();
@@ -99,6 +105,8 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
               title: widget.title,
               user: widget.user,
               likes: widget.likes,
+              timestamp: widget.timestamp,
+              description: widget.description,
             ),
           ),
         ),
@@ -196,6 +204,8 @@ class HomeScreen extends StatelessWidget {
                 title: posts[index].title,
                 user: posts[index].user,
                 likes: posts[index].likes,
+                timestamp: posts[index].timestamp,
+                description: posts[index].description,
               );
             },
             childCount: posts.length,
