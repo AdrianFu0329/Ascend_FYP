@@ -22,9 +22,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const SplashScreen(),
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+        home: const SplashScreen(),
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
           textTheme: const TextTheme(
             bodyLarge: TextStyle(
               fontSize: 16,
@@ -50,11 +50,15 @@ class MyApp extends StatelessWidget {
               fontWeight: FontWeight.normal,
               color: Color.fromRGBO(247, 243, 237, 1),
             ),
+            labelSmall: TextStyle(
+              fontSize: 9,
+              fontFamily: 'Merriweather Sans',
+              fontWeight: FontWeight.normal,
+              color: Color.fromRGBO(247, 243, 237, 1),
+            ),
           ),
           scaffoldBackgroundColor: const Color.fromRGBO(20, 23, 26, 1),
           cardColor: const Color.fromRGBO(32, 47, 57, 1),
-          buttonTheme: const ButtonThemeData(
-              buttonColor: Color.fromRGBO(247, 243, 237, 1))),
-    );
+        ));
   }
 }

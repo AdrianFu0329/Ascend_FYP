@@ -1,49 +1,10 @@
+import 'package:ascend_fyp/custom_widgets/button.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/media_post_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../database/database_service.dart';
-
-class CustomButton extends StatefulWidget {
-  final IconData icon;
-  final Color defaultColor;
-  final Color pressedColor;
-  final Function onPressed;
-  final bool isLiked;
-
-  const CustomButton({
-    super.key,
-    required this.icon,
-    required this.defaultColor,
-    required this.pressedColor,
-    required this.onPressed,
-    required this.isLiked,
-  });
-
-  @override
-  State<CustomButton> createState() => _CustomButtonState();
-}
-
-class _CustomButtonState extends State<CustomButton> {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        widget.onPressed();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(4),
-        child: Icon(
-          widget.icon,
-          color: widget.isLiked ? widget.pressedColor : widget.defaultColor,
-          size: 15,
-        ),
-      ),
-    );
-  }
-}
 
 class SocialMediaCard extends StatefulWidget {
   final int index;
@@ -150,7 +111,8 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           CustomButton(
-                            icon: Icons.favorite,
+                            icon: Icons.favorite_border,
+                            pressedIcon: Icons.favorite,
                             defaultColor:
                                 const Color.fromRGBO(247, 243, 237, 1),
                             pressedColor: Colors.red,
@@ -158,6 +120,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                               onLikePressed();
                             },
                             isLiked: isLiked,
+                            size: 15,
                           ),
                         ],
                       ),
@@ -195,7 +158,7 @@ class HomeScreen extends StatelessWidget {
           ),
           SliverMasonryGrid.count(
             crossAxisCount: 2,
-            mainAxisSpacing: 8,
+            mainAxisSpacing: 4,
             crossAxisSpacing: 4,
             itemBuilder: (BuildContext context, int index) {
               return SocialMediaCard(

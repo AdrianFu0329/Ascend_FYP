@@ -1,7 +1,120 @@
+import 'package:ascend_fyp/custom_widgets/button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../database/database_service.dart';
 import 'package:intl/intl.dart';
+
+class BottomBar extends StatefulWidget {
+  final int likes;
+  const BottomBar({super.key, required this.likes});
+
+  @override
+  State<BottomBar> createState() => _BottomBarState();
+}
+
+class _BottomBarState extends State<BottomBar> {
+  bool isLiked = false;
+  late int likeCount;
+
+  @override
+  void initState() {
+    super.initState();
+    likeCount = widget.likes;
+  }
+
+  void onLikePressed() {
+    setState(() {
+      isLiked = !isLiked;
+      if (isLiked == true) {
+        likeCount++;
+      } else {
+        likeCount--;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: 250,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Comment Something...',
+                        hintStyle: Theme.of(context).textTheme.bodySmall,
+                        labelStyle: Theme.of(context).textTheme.bodySmall,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(
+                            color: Color.fromRGBO(247, 243, 237, 1),
+                          ),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(
+                            color: Color.fromRGBO(247, 243, 237, 1),
+                          ),
+                        ),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.send,
+                      color: Color.fromRGBO(247, 243, 237, 1),
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      // Implement sending the comment
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CustomButton(
+                  icon: Icons.favorite_border,
+                  pressedIcon: Icons.favorite,
+                  defaultColor: const Color.fromRGBO(247, 243, 237, 1),
+                  pressedColor: Colors.red,
+                  onPressed: () {
+                    onLikePressed();
+                  },
+                  isLiked: isLiked,
+                  size: 25,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
+                  child: Text(
+                    likeCount.toString(),
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class MediaPostScreen extends StatelessWidget {
   final ImageWithDimension image;
@@ -12,14 +125,14 @@ class MediaPostScreen extends StatelessWidget {
   final String description;
 
   const MediaPostScreen({
-    super.key,
+    Key? key,
     required this.image,
     required this.title,
     required this.user,
     required this.likes,
     required this.timestamp,
     required this.description,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,48 +147,50 @@ class MediaPostScreen extends StatelessWidget {
             Icons.arrow_back_ios_new,
             color: Color.fromRGBO(247, 243, 237, 1),
           ),
-          onPressed: () => (Navigator.of(context).pop()),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           user,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: image.height * 5,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  image.image,
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                image.image,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                  child: Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      formatted,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: Text(
+                    formatted,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 100),
+              ],
             ),
-          )
+          ),
         ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: BottomBar(likes: likes),
       ),
     );
   }
