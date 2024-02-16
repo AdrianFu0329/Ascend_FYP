@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/database/firebase_options.dart';
 import 'package:ascend_fyp/pages/splash_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +10,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
   } catch (e) {
     // ignore: avoid_print
     print('Error initializing Firebase: $e');
