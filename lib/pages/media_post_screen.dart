@@ -51,10 +51,10 @@ class _BottomBarState extends State<BottomBar> {
                 children: [
                   Expanded(
                     child: TextField(
+                      style: Theme.of(context).textTheme.bodySmall,
                       decoration: InputDecoration(
                         hintText: 'Comment Something...',
                         hintStyle: Theme.of(context).textTheme.bodySmall,
-                        labelStyle: Theme.of(context).textTheme.bodySmall,
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                           borderSide: const BorderSide(
@@ -125,14 +125,14 @@ class MediaPostScreen extends StatelessWidget {
   final String description;
 
   const MediaPostScreen({
-    Key? key,
+    super.key,
     required this.image,
     required this.title,
     required this.user,
     required this.likes,
     required this.timestamp,
     required this.description,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
