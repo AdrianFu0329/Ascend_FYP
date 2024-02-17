@@ -3,8 +3,7 @@ import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class NavScreen extends StatefulWidget {
-  final List<Post> posts;
-  const NavScreen({super.key, required this.posts});
+  const NavScreen({super.key});
 
   @override
   State<NavScreen> createState() => _NavScreenState();
@@ -47,10 +46,10 @@ class _NavScreenState extends State<NavScreen> {
   @override
   Widget build(BuildContext context) {
     final List pages = [
-      HomeScreen(posts: widget.posts),
+      const HomeScreen(),
       Container(),
       Container(),
-      Container()
+      Container(),
     ];
     return Scaffold(
       body: pages[_selectedIndex],

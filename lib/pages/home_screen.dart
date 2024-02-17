@@ -137,8 +137,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
 }
 
 class HomeScreen extends StatelessWidget {
-  final List<Post> posts;
-  const HomeScreen({super.key, required this.posts});
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -156,22 +155,48 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          SliverMasonryGrid.count(
-            crossAxisCount: 2,
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 4,
-            itemBuilder: (BuildContext context, int index) {
-              return SocialMediaCard(
-                index: index,
-                image: posts[index].image,
-                title: posts[index].title,
-                user: posts[index].user,
-                likes: posts[index].likes,
-                timestamp: posts[index].timestamp,
-                description: posts[index].description,
-              );
+          FutureBuilder<List<Post>>(
+            future: getPostsFromDatabase(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Color.fromRGBO(194, 0, 0, 1),
+                        backgroundColor: Color.fromRGBO(247, 243, 237, 1),
+                      ),
+                    ),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return SliverToBoxAdapter(
+                  child: Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  ),
+                );
+              } else {
+                List<Post> posts = snapshot.data!;
+                return SliverMasonryGrid.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 4,
+                  crossAxisSpacing: 4,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SocialMediaCard(
+                      index: index,
+                      image: posts[index].image,
+                      title: posts[index].title,
+                      user: posts[index].user,
+                      likes: posts[index].likes,
+                      timestamp: posts[index].timestamp,
+                      description: posts[index].description,
+                    );
+                  },
+                  childCount: posts.length,
+                );
+              }
             },
-            childCount: posts.length,
           ),
         ],
       ),
