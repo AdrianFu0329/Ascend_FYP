@@ -12,6 +12,7 @@ class Post {
   final String user;
   final Timestamp timestamp;
   final String description;
+  final Map<String, double> coordinates;
 
   Post({
     required this.title,
@@ -20,6 +21,7 @@ class Post {
     required this.user,
     required this.timestamp,
     required this.description,
+    required this.coordinates,
   });
 }
 
@@ -57,8 +59,14 @@ Future<List<Post>> getPostsFromDatabase() async {
       int likes = doc['likes'];
       String user = doc['user'];
       Timestamp timestamp = doc['timestamp'];
-      //TimestampToString.dddmmmddyyyy(doc['timestamp'].toString()) as String;
       String description = doc['description'];
+      double latitude = doc['latitude'];
+      double longitude = doc['longitude'];
+
+      Map<String, double> coordinates = {
+        'latitude': latitude,
+        'longitude': longitude,
+      };
 
       Post post = Post(
         title: title,
@@ -67,6 +75,7 @@ Future<List<Post>> getPostsFromDatabase() async {
         user: user,
         timestamp: timestamp,
         description: description,
+        coordinates: coordinates,
       );
       posts.add(post);
     }

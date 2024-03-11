@@ -14,6 +14,7 @@ class SocialMediaCard extends StatefulWidget {
   final int likes;
   final Timestamp timestamp;
   final String description;
+  final Map<String, double> coordinates;
 
   const SocialMediaCard({
     super.key,
@@ -24,6 +25,7 @@ class SocialMediaCard extends StatefulWidget {
     required this.title,
     required this.timestamp,
     required this.description,
+    required this.coordinates,
   });
 
   @override
@@ -68,6 +70,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
               likes: widget.likes,
               timestamp: widget.timestamp,
               description: widget.description,
+              coordinates: widget.coordinates,
             ),
           ),
         ),
@@ -180,8 +183,8 @@ class HomeScreen extends StatelessWidget {
                 List<Post> posts = snapshot.data!;
                 return SliverMasonryGrid.count(
                   crossAxisCount: 2,
-                  mainAxisSpacing: 4,
-                  crossAxisSpacing: 4,
+                  mainAxisSpacing: 2,
+                  crossAxisSpacing: 2,
                   itemBuilder: (BuildContext context, int index) {
                     return SocialMediaCard(
                       index: index,
@@ -191,6 +194,7 @@ class HomeScreen extends StatelessWidget {
                       likes: posts[index].likes,
                       timestamp: posts[index].timestamp,
                       description: posts[index].description,
+                      coordinates: posts[index].coordinates,
                     );
                   },
                   childCount: posts.length,

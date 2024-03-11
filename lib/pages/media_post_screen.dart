@@ -1,18 +1,19 @@
 import 'package:ascend_fyp/custom_widgets/button.dart';
+import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../database/database_service.dart';
 import 'package:intl/intl.dart';
 
-class BottomBar extends StatefulWidget {
+class PostInteractionBar extends StatefulWidget {
   final int likes;
-  const BottomBar({super.key, required this.likes});
+  const PostInteractionBar({super.key, required this.likes});
 
   @override
-  State<BottomBar> createState() => _BottomBarState();
+  State<PostInteractionBar> createState() => _PostInteractionBarState();
 }
 
-class _BottomBarState extends State<BottomBar> {
+class _PostInteractionBarState extends State<PostInteractionBar> {
   bool isLiked = false;
   late int likeCount;
 
@@ -44,7 +45,7 @@ class _BottomBarState extends State<BottomBar> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
-              width: 250,
+              width: 300,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -123,6 +124,7 @@ class MediaPostScreen extends StatelessWidget {
   final int likes;
   final Timestamp timestamp;
   final String description;
+  final Map<String, double> coordinates;
 
   const MediaPostScreen({
     super.key,
@@ -132,12 +134,15 @@ class MediaPostScreen extends StatelessWidget {
     required this.likes,
     required this.timestamp,
     required this.description,
+    required this.coordinates,
   });
 
   @override
   Widget build(BuildContext context) {
     DateTime dateTime = timestamp.toDate();
     String formatted = DateFormat('MMM dd, yyyy HH:mm').format(dateTime);
+    double latitude = coordinates['latitude'] ?? 0.0;
+    double longitude = coordinates['longitude'] ?? 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -154,44 +159,54 @@ class MediaPostScreen extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                image.image,
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyLarge,
+      body: FutureBuilder<String?>(
+          future: GeoLocation().getCityFromCoordinates(latitude, longitude),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              String city = snapshot.data ?? "Unknown";
+              return Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        image.image,
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                          child: Text(
+                            title,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                          child: Text(
+                            description,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                          child: Text(
+                            "$formatted $city",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        PostInteractionBar(
+                          likes: likes,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                  child: Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: Text(
-                    formatted,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                const SizedBox(height: 100),
-              ],
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: BottomBar(likes: likes),
-      ),
+                ],
+              );
+            }
+          }),
     );
   }
 }

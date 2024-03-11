@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/navigation/wrapper_nav.dart';
+import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:ascend_fyp/pages/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,10 +11,12 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Future.delayed(const Duration(seconds: 2), () async {
       try {
-        await getLocation();
+        Position currentPosition = await getLocation();
+        print('Latitude: ${currentPosition.latitude}');
+        print('Longitude: ${currentPosition.longitude}');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -45,6 +45,7 @@ dependencies:
   geolocator: ^11.0.0
   google_sign_in: ^6.2.1
   firebase_auth: ^4.17.4
+  geocoding: ^2.2.0
 
 dev_dependencies:
   flutter_test:
