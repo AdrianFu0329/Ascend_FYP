@@ -9,7 +9,7 @@ class GeoLocation {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
-        return placemarks[0].locality;
+        return placemarks[0].subLocality;
       } else {
         return "Unknown";
       }

@@ -140,7 +140,7 @@ class MediaPostScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateTime dateTime = timestamp.toDate();
-    String formatted = DateFormat('MMM dd, yyyy HH:mm').format(dateTime);
+    String formatted = DateFormat('MMM dd, yyyy').format(dateTime);
     double latitude = coordinates['latitude'] ?? 0.0;
     double longitude = coordinates['longitude'] ?? 0.0;
 
@@ -192,7 +192,7 @@ class MediaPostScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                           child: Text(
-                            "$formatted $city",
+                            "$formatted \n$city",
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
