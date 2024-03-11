@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/custom_widgets/button.dart';
+import 'package:ascend_fyp/custom_widgets/loading.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -163,7 +164,7 @@ class MediaPostScreen extends StatelessWidget {
           future: GeoLocation().getCityFromCoordinates(latitude, longitude),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const CustomLoadingAnimation();
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else {

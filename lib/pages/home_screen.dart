@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/custom_widgets/button.dart';
+import 'package:ascend_fyp/custom_widgets/loading.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/media_post_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -163,15 +164,7 @@ class HomeScreen extends StatelessWidget {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: Color.fromRGBO(194, 0, 0, 1),
-                        backgroundColor: Color.fromRGBO(247, 243, 237, 1),
-                      ),
-                    ),
-                  ),
+                  child: CustomLoadingAnimation(),
                 );
               } else if (snapshot.hasError) {
                 return SliverToBoxAdapter(
