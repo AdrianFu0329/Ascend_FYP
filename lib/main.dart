@@ -28,6 +28,12 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           textTheme: const TextTheme(
+            titleLarge: TextStyle(
+              fontSize: 24,
+              fontFamily: 'Merriweather Sans',
+              fontWeight: FontWeight.bold,
+              color: Color.fromRGBO(247, 243, 237, 1),
+            ),
             bodyLarge: TextStyle(
               fontSize: 16,
               fontFamily: 'Merriweather Sans',

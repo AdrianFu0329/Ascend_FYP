@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/pages/event_screen.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -47,7 +48,7 @@ class _NavScreenState extends State<NavScreen> {
     final List pages = [
       const HomeScreen(),
       Container(),
-      Container(),
+      const EventScreen(),
       Container(),
     ];
     return Scaffold(

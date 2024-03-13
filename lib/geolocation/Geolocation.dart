@@ -9,9 +9,20 @@ class GeoLocation {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
-        return placemarks[0].subLocality;
+        Placemark placemark = placemarks[0];
+        String? state = placemark.administrativeArea;
+        String? locality = placemark.locality;
+        if (state != null && locality != null) {
+          return '$locality, $state';
+        } else if (state != null) {
+          return state;
+        } else if (locality != null) {
+          return locality;
+        } else {
+          return 'Unknown';
+        }
       } else {
-        return "Unknown";
+        return 'Unknown';
       }
     } catch (e) {
       return e.toString();

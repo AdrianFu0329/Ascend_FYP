@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/navigation/wrapper_nav.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:ascend_fyp/pages/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +21,7 @@ class SplashScreen extends StatelessWidget {
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) => const WrapperNav()),
           );
         }
         Position currentPosition = await getLocation();
