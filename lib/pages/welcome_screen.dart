@@ -138,39 +138,42 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ],
                 ),
                 Expanded(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            SlidingNav(
-                                builder: (context) =>
-                                    const RegistrationScreen()),
-                          );
-                        },
-                        child: RichText(
-                          text: const TextSpan(
-                            text: "Don't have an account yet? ",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Merriweather Sans',
-                              fontWeight: FontWeight.normal,
-                              color: Color.fromRGBO(247, 243, 237, 1),
-                            ),
-                            children: [
-                              TextSpan(
-                                text: "Create one today!",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'Merriweather Sans',
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.normal,
-                                  decoration: TextDecoration.underline,
-                                ),
+                  child: SizedBox(
+                    height: double.infinity,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              SlidingNav(
+                                  builder: (context) =>
+                                      const RegistrationScreen()),
+                            );
+                          },
+                          child: RichText(
+                            text: const TextSpan(
+                              text: "Don't have an account yet? ",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'Merriweather Sans',
+                                fontWeight: FontWeight.normal,
+                                color: Color.fromRGBO(247, 243, 237, 1),
                               ),
-                            ],
+                              children: [
+                                TextSpan(
+                                  text: "Create one today!",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'Merriweather Sans',
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.normal,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
