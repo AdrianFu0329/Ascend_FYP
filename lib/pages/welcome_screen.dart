@@ -79,7 +79,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     },
                     icon: Icon(
                       obscureText ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.grey,
+                      color: const Color.fromRGBO(247, 243, 237, 1),
                     ),
                   ),
                 ),
@@ -104,14 +104,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
+                  SizedBox(
                     width: 60,
                     height: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: const Color.fromRGBO(247, 243, 237, 1),
-                    ),
                     child: IconButton(
+                      style: ButtonStyle(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                            side: const BorderSide(
+                                color: Color.fromRGBO(247, 243, 237, 1),
+                                width: 3.0),
+                          ),
+                        ),
+                      ),
                       onPressed: () async {
                         String message = await AuthService().signInWithGoogle();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -128,8 +135,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       },
                       icon: Image.asset(
                         'lib/assets/images/google_logo.png',
-                        width: 30,
-                        height: 30,
+                        width: 25,
+                        height: 25,
                       ),
                     ),
                   ),
