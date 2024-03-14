@@ -62,7 +62,7 @@ class _NavScreenState extends State<NavScreen> {
           type: BottomNavigationBarType.fixed,
           currentIndex: _selectedIndex,
           onTap: _navigate,
-          backgroundColor: Theme.of(context).cardColor,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           items: _navigationItems.map(
             (item) {
               return BottomNavigationBarItem(

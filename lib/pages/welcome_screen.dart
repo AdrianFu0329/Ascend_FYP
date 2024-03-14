@@ -32,11 +32,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 125),
@@ -46,10 +47,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
               const SizedBox(height: 50),
               TextField(
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
-                  hintText: 'Enter your email',
-                  hintStyle: Theme.of(context).textTheme.bodySmall,
+                  hintText: 'Email',
+                  hintStyle: Theme.of(context).textTheme.titleMedium,
                   focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(
                       color: Color.fromRGBO(247, 243, 237, 1),
@@ -60,11 +61,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
               const SizedBox(height: 32.0),
               TextField(
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.titleMedium,
                 obscureText: obscureText,
                 decoration: InputDecoration(
-                  hintText: 'Enter your password',
-                  hintStyle: Theme.of(context).textTheme.bodySmall,
+                  hintText: 'Password',
+                  hintStyle: Theme.of(context).textTheme.titleMedium,
                   focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(
                       color: Color.fromRGBO(247, 243, 237, 1),
@@ -78,7 +79,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       });
                     },
                     icon: Icon(
-                      obscureText ? Icons.visibility : Icons.visibility_off,
+                      !obscureText ? Icons.visibility : Icons.visibility_off,
                       color: const Color.fromRGBO(247, 243, 237, 1),
                     ),
                   ),
@@ -135,53 +136,54 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       },
                       icon: Image.asset(
                         'lib/assets/images/google_logo.png',
-                        width: 25,
-                        height: 25,
+                        width: 30,
+                        height: 30,
                       ),
                     ),
                   ),
                 ],
               ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          SlidingNav(
-                              builder: (context) => const RegistrationScreen()),
-                        );
-                      },
-                      child: RichText(
-                        text: const TextSpan(
-                          text: "Don't have an account yet? ",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'Merriweather Sans',
-                            fontWeight: FontWeight.normal,
-                            color: Color.fromRGBO(247, 243, 237, 1),
-                          ),
-                          children: [
-                            TextSpan(
-                              text: "Create one today!",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontFamily: 'Merriweather Sans',
-                                color: Colors.blue,
-                                fontWeight: FontWeight.normal,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ],
-                        ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  SlidingNav(builder: (context) => const RegistrationScreen()),
+                );
+              },
+              child: RichText(
+                text: const TextSpan(
+                  text: "Don't have an account yet? ",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'Merriweather Sans',
+                    fontWeight: FontWeight.normal,
+                    color: Color.fromRGBO(247, 243, 237, 1),
+                  ),
+                  children: [
+                    TextSpan(
+                      text: "Create one today!",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'Merriweather Sans',
+                        color: Colors.blue,
+                        fontWeight: FontWeight.normal,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

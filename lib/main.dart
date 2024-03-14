@@ -46,6 +46,12 @@ class MyApp extends StatelessWidget {
               fontWeight: FontWeight.normal,
               color: Color.fromRGBO(247, 243, 237, 1),
             ),
+            titleMedium: TextStyle(
+              fontSize: 12,
+              fontFamily: 'Merriweather Sans',
+              fontWeight: FontWeight.normal,
+              color: Color.fromRGBO(247, 243, 237, 1),
+            ),
             bodySmall: TextStyle(
               fontSize: 11,
               fontFamily: 'Merriweather Sans',
