@@ -162,6 +162,23 @@ class MediaPostScreen extends StatefulWidget {
 
 class _MediaPostScreenState extends State<MediaPostScreen> {
   final currentUser = FirebaseAuth.instance.currentUser!;
+  bool isLiked = false;
+  late int likeCount;
+
+  void onLikePressed() {
+    setState(() {
+      isLiked = !isLiked;
+      if (isLiked) {
+        likeCount++;
+        widget.likes.add(currentUser.email!);
+      } else {
+        likeCount--;
+        widget.likes.remove(currentUser.email);
+      }
+    });
+
+    widget.updateLikes(widget.likes);
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -38,31 +38,12 @@ class SocialMediaCard extends StatefulWidget {
 
 class _SocialMediaCardState extends State<SocialMediaCard> {
   final currentUser = FirebaseAuth.instance.currentUser!;
-  bool isLiked = false;
   late int likeCount;
 
   @override
   void initState() {
     super.initState();
     likeCount = widget.likes.length;
-    isLiked = widget.likes.contains(currentUser.email);
-  }
-
-  void onLikePressed() {
-    setState(() {
-      isLiked = !isLiked;
-      if (isLiked == true) {
-        likeCount++;
-        widget.likes.add(currentUser.email!);
-      } else {
-        likeCount--;
-        widget.likes.remove(currentUser.email);
-      }
-    });
-
-    DocumentReference postRef =
-        FirebaseFirestore.instance.collection('posts').doc(widget.postId);
-    postRef.update({'likes': widget.likes});
   }
 
   @override
@@ -113,33 +94,12 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         widget.user,
                         style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            likeCount.toString(),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          CustomButton(
-                            icon: Icons.favorite_border,
-                            pressedIcon: Icons.favorite,
-                            defaultColor:
-                                const Color.fromRGBO(247, 243, 237, 1),
-                            pressedColor: Colors.red,
-                            onPressed: () {
-                              onLikePressed();
-                            },
-                            isLiked: isLiked,
-                            size: 15,
-                          ),
-                        ],
                       ),
                     ],
                   ),
