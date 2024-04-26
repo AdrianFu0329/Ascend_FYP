@@ -94,12 +94,38 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         widget.user,
                         style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            likeCount.toString(),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(
+                            Icons.favorite,
+                            color: Color.fromRGBO(247, 243, 237, 1),
+                            size: 15,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            likeCount.toString(),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(
+                            Icons.chat_bubble,
+                            color: Color.fromRGBO(247, 243, 237, 1),
+                            size: 15,
+                          ),
+                        ],
                       ),
                     ],
                   ),
