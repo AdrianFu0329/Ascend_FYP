@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/pages/event_screen.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
+import 'package:ascend_fyp/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class NavScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _NavScreenState extends State<NavScreen> {
       const HomeScreen(),
       Container(),
       const EventScreen(),
-      Container(),
+      const ProfileScreen(),
     ];
     return Scaffold(
       body: pages[_selectedIndex],
