@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class Post {
+  final String postId;
   final String title;
   final ImageWithDimension image;
   final List<String> likes;
@@ -15,6 +16,7 @@ class Post {
   final Map<String, double> coordinates;
 
   Post({
+    required this.postId,
     required this.title,
     required this.image,
     required this.likes,
@@ -54,9 +56,10 @@ Future<List<Post>> getPostsFromDatabase() async {
     List<Post> posts = [];
 
     for (QueryDocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs) {
+      String postId = doc.id;
       String title = doc['title'];
       ImageWithDimension image = await getPostImg(doc.id);
-      List<String> likes = doc['likes'];
+      List<String> likes = List<String>.from(doc['likes']);
       String user = doc['user'];
       Timestamp timestamp = doc['timestamp'];
       String description = doc['description'];
@@ -69,6 +72,7 @@ Future<List<Post>> getPostsFromDatabase() async {
       };
 
       Post post = Post(
+        postId: postId,
         title: title,
         image: image,
         likes: likes,

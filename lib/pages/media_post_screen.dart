@@ -1,27 +1,36 @@
 import 'package:ascend_fyp/custom_widgets/button.dart';
 import 'package:ascend_fyp/custom_widgets/loading.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
+import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../database/database_service.dart';
 import 'package:intl/intl.dart';
 
 class PostInteractionBar extends StatefulWidget {
-  final int likes;
-  const PostInteractionBar({super.key, required this.likes});
+  final List<String> likes;
+  final String postId;
+  const PostInteractionBar({
+    super.key,
+    required this.likes,
+    required this.postId,
+  });
 
   @override
   State<PostInteractionBar> createState() => _PostInteractionBarState();
 }
 
 class _PostInteractionBarState extends State<PostInteractionBar> {
+  final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
   late int likeCount;
 
   @override
   void initState() {
     super.initState();
-    likeCount = widget.likes;
+    likeCount = widget.likes.length;
+    isLiked = widget.likes.contains(currentUser.email);
   }
 
   void onLikePressed() {
@@ -29,10 +38,16 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
       isLiked = !isLiked;
       if (isLiked == true) {
         likeCount++;
+        widget.likes.add(currentUser.email!);
       } else {
         likeCount--;
+        widget.likes.remove(currentUser.email);
       }
     });
+
+    DocumentReference postRef =
+        FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+    postRef.update({'likes': widget.likes});
   }
 
   @override
@@ -118,7 +133,8 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
   }
 }
 
-class MediaPostScreen extends StatelessWidget {
+class MediaPostScreen extends StatefulWidget {
+  final String postId;
   final ImageWithDimension image;
   final String title;
   final String user;
@@ -129,6 +145,7 @@ class MediaPostScreen extends StatelessWidget {
 
   const MediaPostScreen({
     super.key,
+    required this.postId,
     required this.image,
     required this.title,
     required this.user,
@@ -139,11 +156,18 @@ class MediaPostScreen extends StatelessWidget {
   });
 
   @override
+  State<MediaPostScreen> createState() => _MediaPostScreenState();
+}
+
+class _MediaPostScreenState extends State<MediaPostScreen> {
+  final currentUser = FirebaseAuth.instance.currentUser!;
+
+  @override
   Widget build(BuildContext context) {
-    DateTime dateTime = timestamp.toDate();
+    DateTime dateTime = widget.timestamp.toDate();
     String formatted = DateFormat('MMM dd, yyyy').format(dateTime);
-    double latitude = coordinates['latitude'] ?? 0.0;
-    double longitude = coordinates['longitude'] ?? 0.0;
+    double latitude = widget.coordinates['latitude'] ?? 0.0;
+    double longitude = widget.coordinates['longitude'] ?? 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -153,10 +177,12 @@ class MediaPostScreen extends StatelessWidget {
             Icons.arrow_back_ios_new,
             color: Color.fromRGBO(247, 243, 237, 1),
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: Text(
-          user,
+          widget.user,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
@@ -175,18 +201,18 @@ class MediaPostScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        image.image,
+                        widget.image.image,
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
                           child: Text(
-                            title,
+                            widget.title,
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
                           child: Text(
-                            description,
+                            widget.description,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
@@ -199,7 +225,8 @@ class MediaPostScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
                         PostInteractionBar(
-                          likes: likes.length,
+                          likes: widget.likes,
+                          postId: widget.postId,
                         ),
                       ],
                     ),
