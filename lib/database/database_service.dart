@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class Post {
   final String title;
   final ImageWithDimension image;
-  final int likes;
+  final List<String> likes;
   final String user;
   final Timestamp timestamp;
   final String description;
@@ -56,7 +56,7 @@ Future<List<Post>> getPostsFromDatabase() async {
     for (QueryDocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs) {
       String title = doc['title'];
       ImageWithDimension image = await getPostImg(doc.id);
-      int likes = doc['likes'];
+      List<String> likes = doc['likes'];
       String user = doc['user'];
       Timestamp timestamp = doc['timestamp'];
       String description = doc['description'];

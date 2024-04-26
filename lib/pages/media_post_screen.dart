@@ -122,7 +122,7 @@ class MediaPostScreen extends StatelessWidget {
   final ImageWithDimension image;
   final String title;
   final String user;
-  final int likes;
+  final List<String> likes;
   final Timestamp timestamp;
   final String description;
   final Map<String, double> coordinates;
@@ -199,7 +199,7 @@ class MediaPostScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
                         PostInteractionBar(
-                          likes: likes,
+                          likes: likes.length,
                         ),
                       ],
                     ),

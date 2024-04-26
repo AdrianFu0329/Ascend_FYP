@@ -3,6 +3,7 @@ import 'package:ascend_fyp/custom_widgets/loading.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/media_post_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../database/database_service.dart';
@@ -12,7 +13,7 @@ class SocialMediaCard extends StatefulWidget {
   final ImageWithDimension image;
   final String title;
   final String user;
-  final int likes;
+  final List<String> likes;
   final Timestamp timestamp;
   final String description;
   final Map<String, double> coordinates;
@@ -34,13 +35,15 @@ class SocialMediaCard extends StatefulWidget {
 }
 
 class _SocialMediaCardState extends State<SocialMediaCard> {
+  final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
   late int likeCount;
 
   @override
   void initState() {
     super.initState();
-    likeCount = widget.likes;
+    likeCount = widget.likes.length;
+    isLiked = widget.likes.contains(currentUser.email);
   }
 
   void onLikePressed() {
