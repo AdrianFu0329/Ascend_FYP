@@ -1,7 +1,6 @@
 import 'package:ascend_fyp/custom_widgets/button.dart';
 import 'package:ascend_fyp/custom_widgets/loading.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
-import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -142,6 +141,7 @@ class MediaPostScreen extends StatefulWidget {
   final Timestamp timestamp;
   final String description;
   final Map<String, double> coordinates;
+  final Function(List<String>) updateLikes;
 
   const MediaPostScreen({
     super.key,
@@ -153,6 +153,7 @@ class MediaPostScreen extends StatefulWidget {
     required this.timestamp,
     required this.description,
     required this.coordinates,
+    required this.updateLikes,
   });
 
   @override
@@ -178,6 +179,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
             color: Color.fromRGBO(247, 243, 237, 1),
           ),
           onPressed: () {
+            widget.updateLikes(widget.likes);
             Navigator.pop(context);
           },
         ),

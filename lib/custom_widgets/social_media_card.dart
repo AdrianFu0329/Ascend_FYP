@@ -16,6 +16,7 @@ class SocialMediaCard extends StatefulWidget {
   final Timestamp timestamp;
   final String description;
   final Map<String, double> coordinates;
+  final Function(List<String>) updateLikes;
 
   const SocialMediaCard({
     super.key,
@@ -28,6 +29,7 @@ class SocialMediaCard extends StatefulWidget {
     required this.timestamp,
     required this.description,
     required this.coordinates,
+    required this.updateLikes,
   });
 
   @override
@@ -82,6 +84,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
               timestamp: widget.timestamp,
               description: widget.description,
               coordinates: widget.coordinates,
+              updateLikes: widget.updateLikes,
             ),
           ),
         )

@@ -1,11 +1,18 @@
 import 'package:ascend_fyp/custom_widgets/loading.dart';
 import 'package:ascend_fyp/custom_widgets/social_media_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../database/database_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  Future<void> updateLikes(String postId, List<String> updatedLikes) async {
+    DocumentReference postRef =
+        FirebaseFirestore.instance.collection('posts').doc(postId);
+    await postRef.update({'likes': updatedLikes});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +60,9 @@ class HomeScreen extends StatelessWidget {
                       timestamp: posts[index].timestamp,
                       description: posts[index].description,
                       coordinates: posts[index].coordinates,
+                      updateLikes: (updatedLikes) {
+                        updateLikes(posts[index].postId, updatedLikes);
+                      },
                     );
                   },
                   childCount: posts.length,
