@@ -1,4 +1,4 @@
-import 'package:ascend_fyp/custom_widgets/button.dart';
+import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/media_post_screen.dart';
@@ -101,7 +101,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                         widget.user,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      Row(
+                      /*Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
@@ -126,7 +126,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                             size: 15,
                           ),
                         ],
-                      ),
+                      ),*/
                     ],
                   ),
                 ),

@@ -126,3 +126,39 @@ Future<ImageWithDimension> getPostImg(String path) async {
     );
   }
 }
+
+Future<ImageWithDimension> getProfilePic(String userId) async {
+  try {
+    Reference ref = FirebaseStorage.instance.ref().child("users/$userId.png");
+    String imgDownload = await ref.getDownloadURL();
+    Image imageWidget = Image.network(
+      imgDownload,
+      fit: BoxFit.fitHeight,
+    );
+
+    Completer<ImageInfo> completer = Completer<ImageInfo>();
+    imageWidget.image.resolve(const ImageConfiguration()).addListener(
+      ImageStreamListener(
+        (ImageInfo info, bool _) {
+          completer.complete(info);
+        },
+      ),
+    );
+
+    ImageInfo imageInfo = await completer.future;
+    double imageHeight = imageInfo.image.height.toDouble();
+    double imageWidth = imageInfo.image.width.toDouble();
+
+    return ImageWithDimension(
+      image: imageWidget,
+      height: imageHeight,
+      width: imageWidth,
+    );
+  } catch (e) {
+    return ImageWithDimension(
+      image: Center(child: Text('Error getting image: $e')),
+      height: 0,
+      width: 0,
+    );
+  }
+}

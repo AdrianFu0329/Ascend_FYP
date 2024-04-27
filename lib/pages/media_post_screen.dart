@@ -1,6 +1,9 @@
-import 'package:ascend_fyp/custom_widgets/button.dart';
-import 'package:ascend_fyp/custom_widgets/loading.dart';
+import 'package:ascend_fyp/widgets/button.dart';
+import 'package:ascend_fyp/widgets/comment_card.dart';
+import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
+import 'package:ascend_fyp/navigation/wrapper_nav.dart';
+import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +27,7 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
   late int likeCount;
+  TextEditingController commentController = TextEditingController();
 
   @override
   void initState() {
@@ -49,6 +53,18 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
     postRef.update({'likes': widget.likes});
   }
 
+  void addComment(String text) {
+    FirebaseFirestore.instance
+        .collection("posts")
+        .doc(widget.postId)
+        .collection("comments")
+        .add({
+      "comment": text,
+      "timestamp": Timestamp.now(),
+      "userId": FirebaseAuth.instance.currentUser!.uid,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -67,6 +83,7 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: commentController,
                       style: Theme.of(context).textTheme.bodySmall,
                       decoration: InputDecoration(
                         hintText: 'Comment Something...',
@@ -95,7 +112,8 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
                       size: 20,
                     ),
                     onPressed: () {
-                      // Implement sending the comment
+                      addComment(commentController.text);
+                      commentController.clear();
                     },
                   ),
                 ],
@@ -180,10 +198,15 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     widget.updateLikes(widget.likes);
   }
 
+  String fromDateToString(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    String formatted = DateFormat('MMM dd, yyyy').format(dateTime);
+    return formatted;
+  }
+
   @override
   Widget build(BuildContext context) {
-    DateTime dateTime = widget.timestamp.toDate();
-    String formatted = DateFormat('MMM dd, yyyy').format(dateTime);
+    String formatted = fromDateToString(widget.timestamp);
     double latitude = widget.coordinates['latitude'] ?? 0.0;
     double longitude = widget.coordinates['longitude'] ?? 0.0;
 
@@ -246,6 +269,49 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                         PostInteractionBar(
                           likes: widget.likes,
                           postId: widget.postId,
+                        ),
+                        const SizedBox(height: 24),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection("posts")
+                              .doc(widget.postId)
+                              .collection("comments")
+                              .orderBy("timestamp", descending: true)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                child: CustomLoadingAnimation(),
+                              );
+                            }
+
+                            return ListView(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: snapshot.data!.docs.map((doc) {
+                                final commentData =
+                                    doc.data() as Map<String, dynamic>;
+                                return CommentPost(
+                                  text: commentData["comment"],
+                                  userId: commentData["userId"],
+                                  time: fromDateToString(
+                                      commentData["timestamp"]),
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 4),
+                        const Center(
+                          child: Text(
+                            "~END~",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'Merriweather Sans',
+                              fontWeight: FontWeight.normal,
+                              color: Color.fromRGBO(211, 211, 211, 1),
+                            ),
+                          ),
                         ),
                       ],
                     ),
