@@ -34,15 +34,15 @@ class CommentPost extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     ProfilePicture(
                       userId: userId,
                       photoURL: photoUrl,
                       radius: 15,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 8),
                     Text(
                       username,
                       style: const TextStyle(
