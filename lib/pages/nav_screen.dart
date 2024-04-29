@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/pages/create_post_screen.dart';
 import 'package:ascend_fyp/pages/event_screen.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:ascend_fyp/pages/profile_screen.dart';
@@ -21,26 +22,44 @@ class _NavScreenState extends State<NavScreen> {
 
   final double iconSize = 24;
 
+  final Map<String, double> _iconSizes = {
+    'home': 24,
+    'messages': 24,
+    'add': 60,
+    'events': 24,
+    'profile': 24,
+  };
+
   final List<Map<String, dynamic>> _navigationItems = [
     {
       'selected': 'lib/assets/images/home_pressed.png',
       'unselected': 'lib/assets/images/home.png',
       'label': 'Home',
+      'sizeKey': 'home',
     },
     {
       'selected': 'lib/assets/images/messages_pressed.png',
       'unselected': 'lib/assets/images/messages.png',
       'label': 'Messages',
+      'sizeKey': 'messages',
+    },
+    {
+      'selected': 'lib/assets/images/add.png',
+      'unselected': 'lib/assets/images/add.png',
+      'label': '',
+      'sizeKey': 'add',
     },
     {
       'selected': 'lib/assets/images/events.png',
       'unselected': 'lib/assets/images/events.png',
       'label': 'Events',
+      'sizeKey': 'events',
     },
     {
       'selected': 'lib/assets/images/profile_pressed.png',
       'unselected': 'lib/assets/images/profile.png',
       'label': 'Profile',
+      'sizeKey': 'profile',
     },
   ];
 
@@ -49,6 +68,7 @@ class _NavScreenState extends State<NavScreen> {
     final List pages = [
       const HomeScreen(),
       Container(),
+      const CreatePostScreen(),
       const EventScreen(),
       const ProfileScreen(),
     ];
@@ -71,8 +91,8 @@ class _NavScreenState extends State<NavScreen> {
                   _selectedIndex == _navigationItems.indexOf(item)
                       ? item['selected']
                       : item['unselected'],
-                  width: iconSize,
-                  height: iconSize,
+                  width: _iconSizes[item['sizeKey']],
+                  height: _iconSizes[item['sizeKey']],
                 ),
                 label: item['label'],
               );

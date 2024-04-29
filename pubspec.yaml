@@ -46,6 +46,11 @@ dependencies:
   google_sign_in: ^6.2.1
   firebase_auth: ^4.17.4
   geocoding: ^3.0.0
+  file_picker: ^8.0.3
+  permission_handler: ^11.3.1
+  photo_manager: ^3.0.0
+  photo_manager_image_provider: ^2.1.1
+  transparent_image: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +91,7 @@ flutter:
     - lib/assets/images/welcome_img1.png
     - lib/assets/images/register.png
     - lib/assets/images/default_profile_image.png
+    - lib/assets/images/add.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
