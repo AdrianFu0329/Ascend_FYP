@@ -30,6 +30,8 @@ class _PickerScreenState extends State<PickerScreen> {
       });
 
       _loadMedias();
+    } else {
+      debugPrint("Albums are empty");
     }
   }
 
@@ -50,8 +52,8 @@ class _PickerScreenState extends State<PickerScreen> {
 
   @override
   void initState() {
-    _selectedMedias.addAll(widget.selectedMedia);
     _loadAlbums();
+    _selectedMedias.addAll(widget.selectedMedia);
     super.initState();
     _scrollController.addListener(_loadMoreMedias);
   }
@@ -100,10 +102,10 @@ class _PickerScreenState extends State<PickerScreen> {
             color: Color.fromRGBO(247, 243, 237, 1),
           ),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, _selectedMedias);
           },
         ),
-        title: DropdownButton<AssetPathEntity>(
+        /*title: DropdownButton<AssetPathEntity>(
           borderRadius: BorderRadius.circular(16),
           value: _currentAlbum,
           items: _albums
@@ -121,7 +123,7 @@ class _PickerScreenState extends State<PickerScreen> {
             _loadMedias();
             _scrollController.jumpTo(0.0);
           },
-        ),
+        ),*/
       ),
       body: MediaGridView(
         medias: _medias,

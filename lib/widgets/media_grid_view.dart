@@ -23,7 +23,7 @@ class MediaGridView extends StatelessWidget {
       physics: const BouncingScrollPhysics(),
       itemCount: medias.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+        crossAxisCount: 4,
         mainAxisExtent: 3,
         crossAxisSpacing: 3,
       ),

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 Future<void> grantPermissions() async {
   try {
@@ -51,8 +50,7 @@ Future<List<Media>> fetchMedias({
     for (var entity in entities) {
       Media media = Media(
         assetEntity: entity,
-        widget: FadeInImage(
-          placeholder: MemoryImage(kTransparentImage),
+        widget: Image(
           image: AssetEntityImageProvider(
             entity,
             thumbnailSize: const ThumbnailSize.square(500),

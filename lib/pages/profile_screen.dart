@@ -1,3 +1,5 @@
+import 'package:ascend_fyp/widgets/profile_pic.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -5,6 +7,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+
     ButtonStyle buttonStyle = ButtonStyle(
       textStyle: MaterialStateProperty.all<TextStyle>(
         const TextStyle(
@@ -13,8 +17,8 @@ class ProfileScreen extends StatelessWidget {
           fontWeight: FontWeight.normal,
         ),
       ),
-      foregroundColor:
-          MaterialStateProperty.all<Color>(Color.fromRGBO(247, 243, 237, 1)),
+      foregroundColor: MaterialStateProperty.all<Color>(
+          const Color.fromRGBO(247, 243, 237, 1)),
       backgroundColor: MaterialStateProperty.all<Color>(
         Theme.of(context).scaffoldBackgroundColor,
       ),
@@ -32,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
-          'Username',
+          currentUser.displayName!,
           style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
@@ -41,9 +45,10 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, color: Colors.black),
+            ProfilePicture(
+              userId: currentUser.uid,
+              photoURL: currentUser.photoURL!,
+              radius: 40,
             ),
             ListTile(
               title: Text(

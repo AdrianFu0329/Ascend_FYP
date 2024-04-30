@@ -10,7 +10,7 @@ class Post {
   final String title;
   final ImageWithDimension image;
   final List<String> likes;
-  final String user;
+  final String userId;
   final Timestamp timestamp;
   final String description;
   final Map<String, double> coordinates;
@@ -20,7 +20,7 @@ class Post {
     required this.title,
     required this.image,
     required this.likes,
-    required this.user,
+    required this.userId,
     required this.timestamp,
     required this.description,
     required this.coordinates,
@@ -60,7 +60,7 @@ Future<List<Post>> getPostsFromDatabase() async {
       String title = doc['title'];
       ImageWithDimension image = await getPostImg(doc.id);
       List<String> likes = List<String>.from(doc['likes']);
-      String user = doc['user'];
+      String userId = doc['userId'];
       Timestamp timestamp = doc['timestamp'];
       String description = doc['description'];
       double latitude = doc['latitude'];
@@ -76,7 +76,7 @@ Future<List<Post>> getPostsFromDatabase() async {
         title: title,
         image: image,
         likes: likes,
-        user: user,
+        userId: userId,
         timestamp: timestamp,
         description: description,
         coordinates: coordinates,

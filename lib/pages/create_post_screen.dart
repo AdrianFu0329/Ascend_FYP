@@ -2,7 +2,6 @@ import 'package:ascend_fyp/getters/user_media.dart';
 import 'package:ascend_fyp/models/media.dart';
 import 'package:ascend_fyp/pages/picker_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({
@@ -17,8 +16,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final List<Media> _selectedMedias = [];
 
   Future<void> obtainMedia() async {
-    await grantPermissions();
-
     final List<Media>? result = await Navigator.push<List<Media>>(
       context,
       MaterialPageRoute(
@@ -36,26 +33,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       _selectedMedias.clear();
       _selectedMedias.addAll(result);
     });
-  }
-
-  Future<void> grantPermissions() async {
-    try {
-      final bool photosGranted = await Permission.photos.isGranted;
-
-      if (!photosGranted) {
-        final PermissionStatus status = await Permission.photos.request();
-        if (!status.isGranted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content:
-                  Text('Permission denied. Please grant access to photos.'),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('Error granting permissions: $e');
-    }
   }
 
   Widget displayMedia(List<Media> selectedMedia) {

@@ -55,7 +55,7 @@ class HomeScreen extends StatelessWidget {
                       postId: posts[index].postId,
                       image: posts[index].image,
                       title: posts[index].title,
-                      user: posts[index].user,
+                      userId: posts[index].userId,
                       likes: List<String>.from(posts[index].likes),
                       timestamp: posts[index].timestamp,
                       description: posts[index].description,

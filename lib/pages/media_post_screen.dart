@@ -313,6 +313,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 4),
                       ],
                     ),
                   ),

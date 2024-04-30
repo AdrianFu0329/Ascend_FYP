@@ -28,8 +28,8 @@ class ProfilePicture extends StatelessWidget {
           if (photoURL != "Unknown") {
             return CircleAvatar(
               radius: radius,
-              backgroundImage: NetworkImage(photoURL),
               backgroundColor: Colors.transparent,
+              backgroundImage: NetworkImage(photoURL),
             );
           } /*else if (currentUser.photoURL == null) {
             return CircleAvatar(
@@ -39,6 +39,7 @@ class ProfilePicture extends StatelessWidget {
             );
           }*/
           else {
+            debugPrint("No profile picture detected...");
             return CircleAvatar(
               radius: radius,
               backgroundImage: const AssetImage(

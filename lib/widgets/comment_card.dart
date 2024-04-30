@@ -29,7 +29,7 @@ class CommentPost extends StatelessWidget {
           } else {
             final userData = snapshot.data!;
             final username = userData['username'] ?? 'Unknown';
-            final photoUrl = userData['photoUrl'] ?? 'Unknown';
+            final photoUrl = userData['photoURL'] ?? 'Unknown';
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
