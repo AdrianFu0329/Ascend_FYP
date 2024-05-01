@@ -105,7 +105,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                         ProfilePicture(
                           userId: widget.userId,
                           photoURL: photoUrl,
-                          radius: 15,
+                          radius: 12,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -131,7 +131,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
           postId: widget.postId,
           image: widget.image,
           title: widget.title,
-          user: widget.userId,
+          userId: widget.userId,
           likes: widget.likes,
           timestamp: widget.timestamp,
           description: widget.description,

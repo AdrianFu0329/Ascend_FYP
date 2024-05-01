@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/auth_service/AuthService.dart';
+import 'package:ascend_fyp/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -55,34 +56,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 25),
-              TextField(
+              CustomTextField(
                 controller: usernameController,
-                style: Theme.of(context).textTheme.titleMedium,
-                decoration: InputDecoration(
-                  hintText: 'Username',
-                  hintStyle: Theme.of(context).textTheme.titleMedium,
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color.fromRGBO(247, 243, 237, 1),
-                      width: 2.5,
-                    ),
-                  ),
-                ),
+                hintText: "Username",
               ),
               const SizedBox(height: 35),
-              TextField(
+              CustomTextField(
                 controller: emailController,
-                style: Theme.of(context).textTheme.titleMedium,
-                decoration: InputDecoration(
-                  hintText: 'Email',
-                  hintStyle: Theme.of(context).textTheme.titleMedium,
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color.fromRGBO(247, 243, 237, 1),
-                      width: 2.5,
-                    ),
-                  ),
-                ),
+                hintText: "Email",
               ),
               const SizedBox(height: 35),
               TextField(

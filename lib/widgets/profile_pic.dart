@@ -39,7 +39,6 @@ class ProfilePicture extends StatelessWidget {
             );
           }*/
           else {
-            debugPrint("No profile picture detected...");
             return CircleAvatar(
               radius: radius,
               backgroundImage: const AssetImage(

@@ -40,7 +40,7 @@ class CommentPost extends StatelessWidget {
                     ProfilePicture(
                       userId: userId,
                       photoURL: photoUrl,
-                      radius: 15,
+                      radius: 12,
                     ),
                     const SizedBox(width: 8),
                     Text(

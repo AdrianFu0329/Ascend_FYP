@@ -1,9 +1,11 @@
+import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/comment_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:ascend_fyp/navigation/wrapper_nav.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
+import 'package:ascend_fyp/widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -154,7 +156,7 @@ class MediaPostScreen extends StatefulWidget {
   final String postId;
   final ImageWithDimension image;
   final String title;
-  final String user;
+  final String userId;
   final List<String> likes;
   final Timestamp timestamp;
   final String description;
@@ -166,7 +168,7 @@ class MediaPostScreen extends StatefulWidget {
     required this.postId,
     required this.image,
     required this.title,
-    required this.user,
+    required this.userId,
     required this.likes,
     required this.timestamp,
     required this.description,
@@ -210,117 +212,147 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     double latitude = widget.coordinates['latitude'] ?? 0.0;
     double longitude = widget.coordinates['longitude'] ?? 0.0;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Color.fromRGBO(247, 243, 237, 1),
-          ),
-          onPressed: () {
-            widget.updateLikes(widget.likes);
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          widget.user,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ),
-      body: FutureBuilder<String?>(
-          future: GeoLocation().getCityFromCoordinates(latitude, longitude),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CustomLoadingAnimation();
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else {
-              String city = snapshot.data ?? "Unknown";
-              return Stack(
-                children: [
-                  SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        widget.image.image,
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                          child: Text(
-                            widget.title,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                          child: Text(
-                            widget.description,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                          child: Text(
-                            "$formatted \n$city",
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        PostInteractionBar(
-                          likes: widget.likes,
-                          postId: widget.postId,
-                        ),
-                        const SizedBox(height: 24),
-                        StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection("posts")
-                              .doc(widget.postId)
-                              .collection("comments")
-                              .orderBy("timestamp", descending: true)
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                child: CustomLoadingAnimation(),
-                              );
-                            }
+    return FutureBuilder<Map<String, String>>(
+      future: getUserData(widget.userId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CustomLoadingAnimation();
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          final userData = snapshot.data!;
+          final username = userData["username"] ?? "Unknown";
+          final photoUrl = userData["photoURL"] ?? "Unknown";
 
-                            return ListView(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: snapshot.data!.docs.map((doc) {
-                                final commentData =
-                                    doc.data() as Map<String, dynamic>;
-                                return CommentPost(
-                                  text: commentData["comment"],
-                                  userId: commentData["userId"],
-                                  time: fromDateToString(
-                                      commentData["timestamp"]),
-                                );
-                              }).toList(),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 4),
-                        const Center(
-                          child: Text(
-                            "~END~",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Merriweather Sans',
-                              fontWeight: FontWeight.normal,
-                              color: Color.fromRGBO(211, 211, 211, 1),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                      ],
-                    ),
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Color.fromRGBO(247, 243, 237, 1),
+                ),
+                onPressed: () {
+                  widget.updateLikes(widget.likes);
+                  Navigator.pop(context);
+                },
+              ),
+              title: Row(
+                children: [
+                  ProfilePicture(
+                    userId: widget.userId,
+                    photoURL: photoUrl,
+                    radius: 15,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    username,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
-              );
-            }
-          }),
+              ),
+            ),
+            body: FutureBuilder<String?>(
+                future:
+                    GeoLocation().getCityFromCoordinates(latitude, longitude),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CustomLoadingAnimation();
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    String city = snapshot.data ?? "Unknown";
+                    return Stack(
+                      children: [
+                        SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              widget.image.image,
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                                child: Text(
+                                  widget.title,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                                child: Text(
+                                  widget.description,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                                child: Text(
+                                  "$formatted \n$city",
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              PostInteractionBar(
+                                likes: widget.likes,
+                                postId: widget.postId,
+                              ),
+                              const SizedBox(height: 24),
+                              StreamBuilder<QuerySnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection("posts")
+                                    .doc(widget.postId)
+                                    .collection("comments")
+                                    .orderBy("timestamp", descending: true)
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) {
+                                    return const Center(
+                                      child: CustomLoadingAnimation(),
+                                    );
+                                  }
+
+                                  return ListView(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    children: snapshot.data!.docs.map((doc) {
+                                      final commentData =
+                                          doc.data() as Map<String, dynamic>;
+                                      return CommentPost(
+                                        text: commentData["comment"],
+                                        userId: commentData["userId"],
+                                        time: fromDateToString(
+                                            commentData["timestamp"]),
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 4),
+                              const Center(
+                                child: Text(
+                                  "~END~",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'Merriweather Sans',
+                                    fontWeight: FontWeight.normal,
+                                    color: Color.fromRGBO(211, 211, 211, 1),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                }),
+          );
+        }
+      },
     );
   }
 }
