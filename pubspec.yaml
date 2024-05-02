@@ -51,6 +51,7 @@ dependencies:
   photo_manager: ^3.0.0
   photo_manager_image_provider: ^2.1.1
   transparent_image: ^2.0.1
+  image_picker: 
 
 dev_dependencies:
   flutter_test:
