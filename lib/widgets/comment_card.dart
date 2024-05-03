@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/widgets/profile_pic.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:flutter/material.dart';
-import 'package:ascend_fyp/getters/user_data.dart'; // Assuming getUsername is defined here
+import 'package:ascend_fyp/getters/user_data.dart';
 
 class CommentPost extends StatelessWidget {
   final String text;

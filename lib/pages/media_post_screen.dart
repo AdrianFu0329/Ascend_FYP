@@ -154,7 +154,7 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
 
 class MediaPostScreen extends StatefulWidget {
   final String postId;
-  final ImageWithDimension image;
+  final List<ImageWithDimension> images;
   final String title;
   final String userId;
   final List<String> likes;
@@ -166,7 +166,7 @@ class MediaPostScreen extends StatefulWidget {
   const MediaPostScreen({
     super.key,
     required this.postId,
-    required this.image,
+    required this.images,
     required this.title,
     required this.userId,
     required this.likes,
@@ -184,6 +184,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
   late int likeCount;
+  late int currentIndex = 0;
 
   void onLikePressed() {
     setState(() {
@@ -268,7 +269,51 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              widget.image.image,
+                              PageView(
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    currentIndex = index;
+                                  });
+                                },
+                                children: widget.images.map((image) {
+                                  return Center(
+                                    child: image.image,
+                                  );
+                                }).toList(),
+                              ),
+                              // Navigation indicators
+                              Positioned(
+                                bottom: 16,
+                                left: 0,
+                                right: 0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: widget.images
+                                      .asMap()
+                                      .entries
+                                      .map((entry) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          currentIndex = entry.key;
+                                        });
+                                      },
+                                      child: Container(
+                                        width: 10,
+                                        height: 10,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 4),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: currentIndex == entry.key
+                                              ? Colors.blue
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
                               Padding(
                                 padding:
                                     const EdgeInsets.fromLTRB(16, 4, 16, 4),

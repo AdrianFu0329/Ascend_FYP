@@ -53,7 +53,8 @@ class HomeScreen extends StatelessWidget {
                     return SocialMediaCard(
                       index: index,
                       postId: posts[index].postId,
-                      image: posts[index].image,
+                      images:
+                          List<ImageWithDimension>.from(posts[index].images),
                       title: posts[index].title,
                       userId: posts[index].userId,
                       likes: List<String>.from(posts[index].likes),

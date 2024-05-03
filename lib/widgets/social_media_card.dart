@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 class SocialMediaCard extends StatefulWidget {
   final int index;
   final String postId;
-  final ImageWithDimension image;
+  final List<ImageWithDimension> images;
   final String title;
   final String userId;
   final List<String> likes;
@@ -20,10 +20,10 @@ class SocialMediaCard extends StatefulWidget {
   final Function(List<String>) updateLikes;
 
   const SocialMediaCard({
-    Key? key,
+    super.key,
     required this.postId,
     required this.index,
-    required this.image,
+    required this.images,
     required this.userId,
     required this.likes,
     required this.title,
@@ -31,7 +31,7 @@ class SocialMediaCard extends StatefulWidget {
     required this.description,
     required this.coordinates,
     required this.updateLikes,
-  }) : super(key: key);
+  });
 
   @override
   State<SocialMediaCard> createState() => _SocialMediaCardState();
@@ -39,11 +39,13 @@ class SocialMediaCard extends StatefulWidget {
 
 class _SocialMediaCardState extends State<SocialMediaCard> {
   late int likeCount;
+  late ImageWithDimension firstImage;
 
   @override
   void initState() {
     super.initState();
     likeCount = widget.likes.length;
+    firstImage = widget.images[0];
   }
 
   @override
@@ -70,7 +72,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
   }
 
   Widget _buildCard(String username, String photoUrl) {
-    double imageHeight = (widget.image.height) / 3;
+    double imageHeight = (firstImage.height) / 3;
     double cardHeight =
         widget.index == 0 ? imageHeight + 75.0 : imageHeight + 100.0;
 
@@ -86,7 +88,12 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: widget.image.image),
+              Expanded(
+                child: widget.images.isNotEmpty
+                    ? firstImage.image
+                    : Image.asset(
+                        "lib/assets/images/default_profile_image.png"),
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
@@ -129,7 +136,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
       SlidingNav(
         builder: (context) => MediaPostScreen(
           postId: widget.postId,
-          image: widget.image,
+          images: widget.images,
           title: widget.title,
           userId: widget.userId,
           likes: widget.likes,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,7 +9,7 @@ import 'package:flutter/material.dart';
 class Post {
   final String postId;
   final String title;
-  final ImageWithDimension image;
+  final List<ImageWithDimension> images;
   final List<String> likes;
   final String userId;
   final Timestamp timestamp;
@@ -18,7 +19,7 @@ class Post {
   Post({
     required this.postId,
     required this.title,
-    required this.image,
+    required this.images,
     required this.likes,
     required this.userId,
     required this.timestamp,
@@ -56,9 +57,9 @@ Future<List<Post>> getPostsFromDatabase() async {
     List<Post> posts = [];
 
     for (QueryDocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs) {
-      String postId = doc.id;
+      String postId = doc['postId'];
       String title = doc['title'];
-      ImageWithDimension image = await getPostImg(doc.id);
+      List<ImageWithDimension> images = await getPostImg(doc['imageURLs']);
       List<String> likes = List<String>.from(doc['likes']);
       String userId = doc['userId'];
       Timestamp timestamp = doc['timestamp'];
@@ -74,7 +75,7 @@ Future<List<Post>> getPostsFromDatabase() async {
       Post post = Post(
         postId: postId,
         title: title,
-        image: image,
+        images: images,
         likes: likes,
         userId: userId,
         timestamp: timestamp,
@@ -91,7 +92,49 @@ Future<List<Post>> getPostsFromDatabase() async {
   }
 }
 
-Future<ImageWithDimension> getPostImg(String path) async {
+Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
+  List<ImageWithDimension> images = [];
+
+  try {
+    for (String imageURL in imageURLs) {
+      Image imageWidget = Image.network(
+        imageURL,
+        fit: BoxFit.fitHeight,
+      );
+
+      Completer<ImageInfo> completer = Completer<ImageInfo>();
+      imageWidget.image.resolve(const ImageConfiguration()).addListener(
+        ImageStreamListener(
+          (ImageInfo info, bool _) {
+            completer.complete(info);
+          },
+        ),
+      );
+
+      ImageInfo imageInfo = await completer.future;
+      double imageHeight = imageInfo.image.height.toDouble();
+      double imageWidth = imageInfo.image.width.toDouble();
+
+      ImageWithDimension imageWithDimension = ImageWithDimension(
+        image: imageWidget,
+        height: imageHeight,
+        width: imageWidth,
+      );
+
+      images.add(imageWithDimension);
+    }
+  } catch (e) {
+    images.add(ImageWithDimension(
+      image: Image.asset("lib/assets/images/default_profile_image.png"),
+      height: 0,
+      width: 0,
+    ));
+  }
+
+  return images;
+}
+
+/*Future<ImageWithDimension> getPostImg(String path) async {
   try {
     Reference ref = FirebaseStorage.instance.ref().child("posts/$path.png");
     String imgDownload = await ref.getDownloadURL();
@@ -125,7 +168,7 @@ Future<ImageWithDimension> getPostImg(String path) async {
       width: 0,
     );
   }
-}
+}*/
 
 Future<ImageWithDimension> getProfilePic(String userId) async {
   try {
