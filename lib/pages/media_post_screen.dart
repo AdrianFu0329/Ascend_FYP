@@ -3,8 +3,6 @@ import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/comment_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
-import 'package:ascend_fyp/navigation/wrapper_nav.dart';
-import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
