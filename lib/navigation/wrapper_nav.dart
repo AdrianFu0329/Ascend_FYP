@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/pages/nav_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class WrapperNav extends StatefulWidget {
@@ -10,12 +11,12 @@ class WrapperNav extends StatefulWidget {
 }
 
 class _WrapperNavState extends State<WrapperNav> {
-  late Future<List<Post>> _postsFuture;
+  late Stream<QuerySnapshot> _postsStream;
 
   @override
   void initState() {
     super.initState();
-    _postsFuture = getPostsFromDatabase();
+    _postsStream = getPostsFromDatabase();
   }
 
   @override

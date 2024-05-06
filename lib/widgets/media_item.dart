@@ -12,7 +12,7 @@ class MediaItem extends StatelessWidget {
     super.key,
     required this.media,
     required this.isSelected,
-    required this.selectMedia, // Default size if not provided
+    required this.selectMedia,
   });
 
   @override

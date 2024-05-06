@@ -94,8 +94,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             'userId': FirebaseAuth.instance.currentUser!.uid,
             'likes': [],
             'timestamp': Timestamp.now(),
-            'latitude': "",
-            'longitude': "",
+            'latitude': 0.0,
+            'longitude': 0.0,
             'imageURLs': imageURLs,
           };
 

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -49,47 +48,13 @@ String generateUniqueId() {
   return buffer.toString();
 }
 
-Future<List<Post>> getPostsFromDatabase() async {
-  try {
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance.collection('posts').get();
+Stream<QuerySnapshot> getPostsFromDatabase() {
+  final CollectionReference posts =
+      FirebaseFirestore.instance.collection("posts");
 
-    List<Post> posts = [];
+  final postsStream = posts.orderBy('timestamp', descending: true).snapshots();
 
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs) {
-      String postId = doc['postId'];
-      String title = doc['title'];
-      List<ImageWithDimension> images = await getPostImg(doc['imageURLs']);
-      List<String> likes = List<String>.from(doc['likes']);
-      String userId = doc['userId'];
-      Timestamp timestamp = doc['timestamp'];
-      String description = doc['description'];
-      double latitude = doc['latitude'];
-      double longitude = doc['longitude'];
-
-      Map<String, double> coordinates = {
-        'latitude': latitude,
-        'longitude': longitude,
-      };
-
-      Post post = Post(
-        postId: postId,
-        title: title,
-        images: images,
-        likes: likes,
-        userId: userId,
-        timestamp: timestamp,
-        description: description,
-        coordinates: coordinates,
-      );
-      posts.add(post);
-    }
-
-    return posts;
-  } catch (e) {
-    Center(child: Text('Error getting posts: $e'));
-    return []; // Return an empty list in case of error
-  }
+  return postsStream;
 }
 
 Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
@@ -133,42 +98,6 @@ Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
 
   return images;
 }
-
-/*Future<ImageWithDimension> getPostImg(String path) async {
-  try {
-    Reference ref = FirebaseStorage.instance.ref().child("posts/$path.png");
-    String imgDownload = await ref.getDownloadURL();
-    Image imageWidget = Image.network(
-      imgDownload,
-      fit: BoxFit.fitHeight,
-    );
-
-    Completer<ImageInfo> completer = Completer<ImageInfo>();
-    imageWidget.image.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener(
-        (ImageInfo info, bool _) {
-          completer.complete(info);
-        },
-      ),
-    );
-
-    ImageInfo imageInfo = await completer.future;
-    double imageHeight = imageInfo.image.height.toDouble();
-    double imageWidth = imageInfo.image.width.toDouble();
-
-    return ImageWithDimension(
-      image: imageWidget,
-      height: imageHeight,
-      width: imageWidth,
-    );
-  } catch (e) {
-    return ImageWithDimension(
-      image: Center(child: Text('Error getting image: $e')),
-      height: 0,
-      width: 0,
-    );
-  }
-}*/
 
 Future<ImageWithDimension> getProfilePic(String userId) async {
   try {

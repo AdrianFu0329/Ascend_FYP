@@ -72,60 +72,64 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
   }
 
   Widget _buildCard(String username, String photoUrl) {
-    double imageHeight = (firstImage.height) / 3;
-    double cardHeight =
-        widget.index == 0 ? imageHeight + 75.0 : imageHeight + 100.0;
+    double imageHeight = firstImage.height > 250 ? 250 : firstImage.height;
 
     return SizedBox(
       width: 135,
-      height: cardHeight,
       child: Card(
         elevation: 4.0,
         color: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: widget.images.isNotEmpty
-                    ? firstImage.image
-                    : Image.asset(
-                        "lib/assets/images/default_profile_image.png"),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  widget.title,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        ProfilePicture(
-                          userId: widget.userId,
-                          photoURL: photoUrl,
-                          radius: 12,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          username,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                Center(
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      height: imageHeight,
+                      child: ClipRect(
+                        child: firstImage.image,
+                      ),
                     ),
-                  ],
+                  ),
                 ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                widget.title,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      ProfilePicture(
+                        userId: widget.userId,
+                        photoURL: photoUrl,
+                        radius: 12,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        username,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
         ),
       ),
     );

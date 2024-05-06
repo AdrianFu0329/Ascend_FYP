@@ -269,50 +269,16 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              PageView(
-                                onPageChanged: (index) {
-                                  setState(() {
-                                    currentIndex = index;
-                                  });
-                                },
-                                children: widget.images.map((image) {
-                                  return Center(
-                                    child: image.image,
-                                  );
-                                }).toList(),
-                              ),
-                              // Navigation indicators
-                              Positioned(
-                                bottom: 16,
-                                left: 0,
-                                right: 0,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: widget.images
-                                      .asMap()
-                                      .entries
-                                      .map((entry) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          currentIndex = entry.key;
-                                        });
-                                      },
-                                      child: Container(
-                                        width: 10,
-                                        height: 10,
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 4),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: currentIndex == entry.key
-                                              ? Colors.blue
-                                              : Colors.grey,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
+                              Center(
+                                child: widget.images.isNotEmpty
+                                    ? Container(
+                                        constraints: const BoxConstraints(
+                                            maxHeight: 500),
+                                        child: widget.images.first.image,
+                                      )
+                                    : const Center(
+                                        child: Text(
+                                            "Error fetching image. Please try again")), // Show a placeholder if no images
                               ),
                               Padding(
                                 padding:

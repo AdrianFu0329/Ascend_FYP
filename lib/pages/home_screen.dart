@@ -5,9 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../database/database_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   Future<void> updateLikes(String postId, List<String> updatedLikes) async {
     DocumentReference postRef =
         FirebaseFirestore.instance.collection('posts').doc(postId);
@@ -30,12 +35,14 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          FutureBuilder<List<Post>>(
-            future: getPostsFromDatabase(),
+          StreamBuilder<QuerySnapshot>(
+            stream: getPostsFromDatabase(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverToBoxAdapter(
-                  child: CustomLoadingAnimation(),
+                return const SliverFillRemaining(
+                  child: Center(
+                    child: CustomLoadingAnimation(),
+                  ),
                 );
               } else if (snapshot.hasError) {
                 return SliverToBoxAdapter(
@@ -44,29 +51,62 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               } else {
-                List<Post> posts = snapshot.data!;
+                List postList = snapshot.data!.docs;
                 return SliverMasonryGrid.count(
                   crossAxisCount: 2,
-                  mainAxisSpacing: 2,
-                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 0,
+                  crossAxisSpacing: 0,
                   itemBuilder: (BuildContext context, int index) {
-                    return SocialMediaCard(
-                      index: index,
-                      postId: posts[index].postId,
-                      images:
-                          List<ImageWithDimension>.from(posts[index].images),
-                      title: posts[index].title,
-                      userId: posts[index].userId,
-                      likes: List<String>.from(posts[index].likes),
-                      timestamp: posts[index].timestamp,
-                      description: posts[index].description,
-                      coordinates: posts[index].coordinates,
-                      updateLikes: (updatedLikes) {
-                        updateLikes(posts[index].postId, updatedLikes);
+                    DocumentSnapshot doc = postList[index];
+                    Map<String, dynamic> data =
+                        doc.data() as Map<String, dynamic>;
+                    String postId = data['postId'];
+                    String title = data['title'];
+                    List<String> imageURLs =
+                        List<String>.from(data['imageURLs']);
+                    List<String> likes = List<String>.from(data['likes']);
+                    String userId = data['userId'];
+                    Timestamp timestamp = data['timestamp'];
+                    String description = data['description'];
+                    double latitude = data['latitude'];
+                    double longitude = data['longitude'];
+
+                    Map<String, double> coordinates = {
+                      'latitude': latitude,
+                      'longitude': longitude,
+                    };
+
+                    return FutureBuilder<List<ImageWithDimension>>(
+                      future: getPostImg(imageURLs),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox
+                              .shrink(); // Placeholder while loading
+                        } else if (snapshot.hasError) {
+                          // Handle error
+                          return Container(); // Placeholder for error handling
+                        } else {
+                          List<ImageWithDimension> images = snapshot.data!;
+                          return SocialMediaCard(
+                            index: index,
+                            postId: postId,
+                            images: images,
+                            title: title,
+                            userId: userId,
+                            likes: likes,
+                            timestamp: timestamp,
+                            description: description,
+                            coordinates: coordinates,
+                            updateLikes: (updatedLikes) {
+                              updateLikes(postId, updatedLikes);
+                            },
+                          );
+                        }
                       },
                     );
                   },
-                  childCount: posts.length,
+                  childCount: postList.length,
                 );
               }
             },
