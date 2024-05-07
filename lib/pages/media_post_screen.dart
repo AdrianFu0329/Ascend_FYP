@@ -159,7 +159,6 @@ class MediaPostScreen extends StatefulWidget {
   final Timestamp timestamp;
   final String description;
   final Map<String, double> coordinates;
-  final Function(List<String>) updateLikes;
 
   const MediaPostScreen({
     super.key,
@@ -171,7 +170,6 @@ class MediaPostScreen extends StatefulWidget {
     required this.timestamp,
     required this.description,
     required this.coordinates,
-    required this.updateLikes,
   });
 
   @override
@@ -181,7 +179,7 @@ class MediaPostScreen extends StatefulWidget {
 class _MediaPostScreenState extends State<MediaPostScreen> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
-  late int likeCount;
+  int likeCount = 0;
   late int currentIndex = 0;
 
   void onLikePressed() {
@@ -196,7 +194,9 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       }
     });
 
-    widget.updateLikes(widget.likes);
+    DocumentReference postRef =
+        FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+    postRef.update({'likes': widget.likes});
   }
 
   String fromDateToString(Timestamp timestamp) {
@@ -232,8 +232,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                   color: Color.fromRGBO(247, 243, 237, 1),
                 ),
                 onPressed: () {
-                  widget.updateLikes(widget.likes);
-                  Navigator.pop(context);
+                  Navigator.pop(context, widget.likes);
                 },
               ),
               title: Row(

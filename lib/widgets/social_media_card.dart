@@ -5,6 +5,7 @@ import 'package:ascend_fyp/pages/media_post_screen.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SocialMediaCard extends StatefulWidget {
@@ -17,7 +18,6 @@ class SocialMediaCard extends StatefulWidget {
   final Timestamp timestamp;
   final String description;
   final Map<String, double> coordinates;
-  final Function(List<String>) updateLikes;
 
   const SocialMediaCard({
     super.key,
@@ -30,7 +30,6 @@ class SocialMediaCard extends StatefulWidget {
     required this.timestamp,
     required this.description,
     required this.coordinates,
-    required this.updateLikes,
   });
 
   @override
@@ -38,7 +37,9 @@ class SocialMediaCard extends StatefulWidget {
 }
 
 class _SocialMediaCardState extends State<SocialMediaCard> {
-  late int likeCount;
+  final currentUser = FirebaseAuth.instance.currentUser!;
+  bool isLiked = false;
+  int likeCount = 0;
   late ImageWithDimension firstImage;
 
   @override
@@ -128,6 +129,21 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                       ),
                     ],
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        likeCount.toString(),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(width: 2),
+                      const Icon(
+                        Icons.favorite,
+                        color: Color.fromRGBO(247, 243, 237, 1),
+                        size: 15,
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -150,7 +166,6 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
           timestamp: widget.timestamp,
           description: widget.description,
           coordinates: widget.coordinates,
-          updateLikes: widget.updateLikes,
         ),
       ),
     );

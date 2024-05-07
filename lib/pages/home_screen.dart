@@ -15,12 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Future<void> updateLikes(String postId, List<String> updatedLikes) async {
-    DocumentReference postRef =
-        FirebaseFirestore.instance.collection('posts').doc(postId);
-    await postRef.update({'likes': updatedLikes});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,9 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             timestamp: timestamp,
                             description: description,
                             coordinates: coordinates,
-                            updateLikes: (updatedLikes) {
-                              updateLikes(postId, updatedLikes);
-                            },
                           );
                         }
                       },
