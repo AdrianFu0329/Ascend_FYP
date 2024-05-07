@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/database/database_service.dart';
+import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 
@@ -17,28 +18,20 @@ class ProfilePicture extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<ImageWithDimension>(
-      future: getProfilePic(userId), // Assuming getProfilePic is defined
+      future: getProfilePic(userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CustomLoadingAnimation());
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
-          //final profilePic = snapshot.data;
           if (photoURL != "Unknown") {
             return CircleAvatar(
               radius: radius,
               backgroundColor: Colors.transparent,
               backgroundImage: NetworkImage(photoURL),
             );
-          } /*else if (currentUser.photoURL == null) {
-            return CircleAvatar(
-              radius: radius,
-              child:Image.network(profilePic),
-              backgroundColor: Colors.transparent,
-            );
-          }*/
-          else {
+          } else {
             return CircleAvatar(
               radius: radius,
               backgroundImage: const AssetImage(

@@ -24,6 +24,7 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
       ),
+      cursorColor: const Color.fromRGBO(247, 243, 237, 1),
     );
   }
 }

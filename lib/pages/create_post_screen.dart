@@ -1,10 +1,14 @@
 import 'dart:io';
 
+import 'package:ascend_fyp/geolocation/Geolocation.dart';
+import 'package:ascend_fyp/pages/set_location_screen.dart';
 import 'package:ascend_fyp/widgets/custom_text_field.dart';
+import 'package:ascend_fyp/widgets/location_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreatePostScreen extends StatefulWidget {
@@ -18,6 +22,8 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final List<File> _images = [];
+  Map<String, dynamic> _locationData = {};
+  String? location;
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
@@ -27,7 +33,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     final picker = ImagePicker();
-    int mediaCount = 0;
 
     void _showMessage(String message) {
       showDialog(
@@ -55,7 +60,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       );
     }
 
-    Future<List<String>> _uploadImages(String postId) async {
+    Future<List<String>> uploadImages(String postId) async {
       List<String> imageURLs = [];
 
       try {
@@ -78,43 +83,67 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       return imageURLs;
     }
 
-    Future<void> _createPost() async {
-      if (_formKey.currentState!.validate()) {
-        try {
-          final String postId =
-              FirebaseFirestore.instance.collection('posts').doc().id;
+    bool validatePost() {
+      if (titleController.text.trim().isEmpty) {
+        _showMessage('Please enter a title.');
+        return false;
+      }
 
-          // Upload images to Firebase Storage
-          List<String> imageURLs = await _uploadImages(postId);
+      if (_images.isEmpty) {
+        _showMessage('Please select at least one image.');
+        return false;
+      }
 
-          final Map<String, dynamic> postData = {
-            'postId': postId,
-            'title': titleController.text.trim(),
-            'description': descriptionController.text.trim(),
-            'userId': FirebaseAuth.instance.currentUser!.uid,
-            'likes': [],
-            'timestamp': Timestamp.now(),
-            'latitude': 0.0,
-            'longitude': 0.0,
-            'imageURLs': imageURLs,
-          };
+      if (_locationData.isEmpty) {
+        _showMessage('Please set a location.');
+        return false;
+      }
 
-          // Add the post document to Firestore
-          await FirebaseFirestore.instance
-              .collection('posts')
-              .doc(postId)
-              .set(postData);
+      return true;
+    }
 
-          _showMessage('Post created successfully');
+    Future<void> createPost() async {
+      if (validatePost() && _locationData != null) {
+        double latitude = _locationData['latitude'] ?? 0.0;
+        double longitude = _locationData['longitude'] ?? 0.0;
 
-          titleController.clear();
-          descriptionController.clear();
-          locationController.clear();
-          setState(() {
-            _images.clear();
-          });
-        } catch (error) {
-          _showMessage('Error creating post: $error');
+        if (_formKey.currentState!.validate()) {
+          try {
+            final String postId =
+                FirebaseFirestore.instance.collection('posts').doc().id;
+
+            // Upload images to Firebase Storage
+            List<String> imageURLs = await uploadImages(postId);
+
+            final Map<String, dynamic> postData = {
+              'postId': postId,
+              'title': titleController.text.trim(),
+              'description': descriptionController.text.trim(),
+              'userId': FirebaseAuth.instance.currentUser!.uid,
+              'likes': [],
+              'timestamp': Timestamp.now(),
+              'latitude': latitude,
+              'longitude': longitude,
+              'imageURLs': imageURLs,
+            };
+
+            // Add the post document to Firestore
+            await FirebaseFirestore.instance
+                .collection('posts')
+                .doc(postId)
+                .set(postData);
+
+            _showMessage('Post created successfully');
+
+            titleController.clear();
+            descriptionController.clear();
+            locationController.clear();
+            setState(() {
+              _images.clear();
+            });
+          } catch (error) {
+            _showMessage('Error creating post: $error');
+          }
         }
       }
     }
@@ -123,19 +152,32 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       final pickedImages = await picker.pickMultiImage();
 
       setState(() {
-        if (pickedImages != null) {
-          int remainingSlots = 10 - _images.length;
-          _images.addAll(pickedImages
-              .take(remainingSlots)
-              .map((pickedImage) => File(pickedImage.path)));
-          mediaCount = _images.length;
-          if (pickedImages.length > remainingSlots) {
-            _showMessage("You can only select up to 10 media items.");
-          }
-        } else {
-          debugPrint("No images picked");
+        int remainingSlots = 10 - _images.length;
+        _images.addAll(pickedImages
+            .take(remainingSlots)
+            .map((pickedImage) => File(pickedImage.path)));
+        if (pickedImages.length > remainingSlots) {
+          _showMessage("You can only select up to 10 media items.");
         }
       });
+    }
+
+    Future<void> getLocation() async {
+      final Map<String, dynamic> locationData = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SetLocationScreen(),
+        ),
+      );
+      String? city = await GeoLocation().getCityFromCoordinates(
+          locationData['latitude'], locationData['longitude']);
+      if (locationData.isNotEmpty) {
+        _locationData = locationData;
+        location = city;
+        setState(() {});
+      } else {
+        debugPrint("No location data...");
+      }
     }
 
     TextStyle textStyle = const TextStyle(
@@ -167,6 +209,28 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       ),
     );
 
+    ButtonStyle locationButtonStyle = ButtonStyle(
+      textStyle: MaterialStateProperty.all<TextStyle>(
+        const TextStyle(
+          fontSize: 14,
+          fontFamily: 'Merriweather Sans',
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+      foregroundColor: MaterialStateProperty.all<Color>(
+          const Color.fromRGBO(247, 243, 237, 1)),
+      backgroundColor: MaterialStateProperty.all<Color>(
+        Theme.of(context).scaffoldBackgroundColor,
+      ),
+      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+          side: const BorderSide(
+              color: Color.fromRGBO(247, 243, 237, 1), width: 1.5),
+        ),
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -178,7 +242,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
             child: ElevatedButton(
-              onPressed: _createPost,
+              onPressed: () {
+                if (validatePost()) {
+                  createPost();
+                }
+              },
               style: buttonStyle,
               child: const Text('Create'),
             ),
@@ -201,7 +269,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     Text(
-                      "$mediaCount/10",
+                      "${_images.length}/10",
                       style: textStyle,
                     )
                   ],
@@ -210,20 +278,25 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 if (_images.isNotEmpty) ...[
                   SizedBox(
                     height: 150,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _images.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.file(
-                            _images[index],
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        );
-                      },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _images.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.file(
+                              _images[index],
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   // Add button to select more images
@@ -291,9 +364,32 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   ),
                 ),
                 const SizedBox(height: 36.0),
-                CustomTextField(
-                  controller: locationController,
-                  hintText: "Location",
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: getLocation,
+                    style: locationButtonStyle,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: 18,
+                        ),
+                        SizedBox(width: 4),
+                        Text('Set Location'),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: LocationListTile(
+                    location: _locationData.isNotEmpty
+                        ? location!
+                        : "No Location Selected",
+                    onPress: null,
+                  ),
                 ),
               ],
             ),

@@ -97,6 +97,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                   ),
                 ),
+                cursorColor: const Color.fromRGBO(247, 243, 237, 1),
               ),
               const SizedBox(height: 35),
               TextField(
@@ -129,6 +130,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                   ),
                 ),
+                cursorColor: const Color.fromRGBO(247, 243, 237, 1),
               ),
               const SizedBox(height: 20),
               Row(

@@ -1,7 +1,9 @@
+import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/social_media_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../database/database_service.dart';
 
@@ -111,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
       ),
     );

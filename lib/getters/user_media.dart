@@ -1,8 +1,6 @@
-import 'package:ascend_fyp/models/media.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 Future<void> grantPermissions() async {
   try {
@@ -35,34 +33,4 @@ Future<List<AssetPathEntity>> fetchAlbums() async {
     debugPrint('Error fetching albums: $e');
     return [];
   }
-}
-
-Future<List<Media>> fetchMedias({
-  required AssetPathEntity album,
-  required int page,
-}) async {
-  List<Media> medias = [];
-
-  try {
-    final List<AssetEntity> entities =
-        await album.getAssetListPaged(page: page, size: 30);
-
-    for (var entity in entities) {
-      Media media = Media(
-        assetEntity: entity,
-        widget: Image(
-          image: AssetEntityImageProvider(
-            entity,
-            thumbnailSize: const ThumbnailSize.square(500),
-            isOriginal: false,
-          ),
-          fit: BoxFit.cover,
-        ),
-      );
-      medias.add(media);
-    }
-  } catch (e) {
-    debugPrint('Error fetching media: $e');
-  }
-  return medias;
 }

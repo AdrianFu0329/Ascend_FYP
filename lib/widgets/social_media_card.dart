@@ -1,5 +1,5 @@
-import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
+import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/media_post_screen.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
@@ -85,13 +85,16 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
           children: [
             Stack(
               children: [
-                Center(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      height: imageHeight,
-                      child: ClipRect(
-                        child: firstImage.image,
+                Container(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        height: imageHeight,
+                        child: ClipRect(
+                          child: firstImage.image,
+                        ),
                       ),
                     ),
                   ),

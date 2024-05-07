@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/getters/user_data.dart';
+import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/comment_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
@@ -7,7 +8,6 @@ import 'package:ascend_fyp/widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../database/database_service.dart';
 import 'package:intl/intl.dart';
 
 class PostInteractionBar extends StatefulWidget {

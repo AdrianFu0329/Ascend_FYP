@@ -52,6 +52,7 @@ dependencies:
   photo_manager_image_provider: ^2.1.1
   transparent_image: ^2.0.1
   image_picker: 
+  http: ^1.2.1
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +94,7 @@ flutter:
     - lib/assets/images/register.png
     - lib/assets/images/default_profile_image.png
     - lib/assets/images/add.png
+    - lib/assets/images/location_icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
