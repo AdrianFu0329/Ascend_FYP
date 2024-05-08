@@ -2,9 +2,11 @@ import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/comment_card.dart';
+import 'package:ascend_fyp/widgets/image_page_view.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -260,101 +262,90 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
                     String city = snapshot.data ?? "Unknown";
-                    return Stack(
-                      children: [
-                        SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: widget.images.isNotEmpty
-                                    ? Container(
-                                        constraints: const BoxConstraints(
-                                            maxHeight: 500),
-                                        child: widget.images.first.image,
-                                      )
-                                    : const Center(
-                                        child: Text(
-                                            "Error fetching image. Please try again")), // Show a placeholder if no images
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                                child: Text(
-                                  widget.title,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                                child: Text(
-                                  widget.description,
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                child: Text(
-                                  "$formatted \n$city",
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              PostInteractionBar(
-                                likes: widget.likes,
-                                postId: widget.postId,
-                              ),
-                              const SizedBox(height: 24),
-                              StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection("posts")
-                                    .doc(widget.postId)
-                                    .collection("comments")
-                                    .orderBy("timestamp", descending: true)
-                                    .snapshots(),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return const Center(
-                                      child: CustomLoadingAnimation(),
-                                    );
-                                  }
+                    double imgHeight = widget.images[0].height;
+                    double maxHeight = imgHeight > 500 ? 500 : imgHeight;
+                    int currentPage = 0;
 
-                                  return ListView(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    children: snapshot.data!.docs.map((doc) {
-                                      final commentData =
-                                          doc.data() as Map<String, dynamic>;
-                                      return CommentPost(
-                                        text: commentData["comment"],
-                                        userId: commentData["userId"],
-                                        time: fromDateToString(
-                                            commentData["timestamp"]),
-                                      );
-                                    }).toList(),
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 4),
-                              const Center(
-                                child: Text(
-                                  "~END~",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontFamily: 'Merriweather Sans',
-                                    fontWeight: FontWeight.normal,
-                                    color: Color.fromRGBO(211, 211, 211, 1),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                            ],
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ImagePageView(
+                            images: widget.images,
+                            maxHeight: maxHeight,
                           ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                            child: Text(
+                              widget.title,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                            child: Text(
+                              widget.description,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            child: Text(
+                              "$formatted \n$city",
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          PostInteractionBar(
+                            likes: widget.likes,
+                            postId: widget.postId,
+                          ),
+                          const SizedBox(height: 24),
+                          StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection("posts")
+                                .doc(widget.postId)
+                                .collection("comments")
+                                .orderBy("timestamp", descending: true)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Center(
+                                  child: CustomLoadingAnimation(),
+                                );
+                              }
+
+                              return ListView(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: snapshot.data!.docs.map((doc) {
+                                  final commentData =
+                                      doc.data() as Map<String, dynamic>;
+                                  return CommentPost(
+                                    text: commentData["comment"],
+                                    userId: commentData["userId"],
+                                    time: fromDateToString(
+                                        commentData["timestamp"]),
+                                  );
+                                }).toList(),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          const Center(
+                            child: Text(
+                              "~END~",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'Merriweather Sans',
+                                fontWeight: FontWeight.normal,
+                                color: Color.fromRGBO(211, 211, 211, 1),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
                     );
                   }
                 }),

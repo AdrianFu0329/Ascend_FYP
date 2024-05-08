@@ -344,7 +344,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     controller: descriptionController,
                     style: Theme.of(context).textTheme.titleMedium,
                     decoration: InputDecoration(
-                      hintText: "Description",
+                      hintText: "Create a caption",
                       hintStyle: Theme.of(context).textTheme.titleMedium,
                       border: OutlineInputBorder(
                         borderSide: const BorderSide(

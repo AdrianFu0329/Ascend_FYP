@@ -82,25 +82,19 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
         color: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Stack(
-              children: [
-                Container(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  child: Center(
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        height: imageHeight,
-                        child: ClipRect(
-                          child: firstImage.image,
-                        ),
-                      ),
-                    ),
+            Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    height: imageHeight,
+                    child: firstImage.image,
                   ),
                 ),
-              ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

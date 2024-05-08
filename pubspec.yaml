@@ -53,6 +53,7 @@ dependencies:
   transparent_image: ^2.0.1
   image_picker: 
   http: ^1.2.1
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:

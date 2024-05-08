@@ -54,6 +54,7 @@ Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
         image: imageWidget,
         height: imageHeight,
         width: imageWidth,
+        aspectRatio: imageWidth / imageHeight,
       );
 
       images.add(imageWithDimension);
@@ -63,6 +64,7 @@ Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
       image: Image.asset("lib/assets/images/default_profile_image.png"),
       height: 0,
       width: 0,
+      aspectRatio: 0,
     ));
   }
 
@@ -95,12 +97,14 @@ Future<ImageWithDimension> getProfilePic(String userId) async {
       image: imageWidget,
       height: imageHeight,
       width: imageWidth,
+      aspectRatio: imageWidth / imageHeight,
     );
   } catch (e) {
     return ImageWithDimension(
       image: Center(child: Text('Error getting image: $e')),
       height: 0,
       width: 0,
+      aspectRatio: 0,
     );
   }
 }
