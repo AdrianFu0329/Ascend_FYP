@@ -13,15 +13,12 @@ class GeoLocation {
         Placemark placemark = placemarks[0];
         String? country = placemark.country;
         String? state = placemark.administrativeArea;
-        String? locality = placemark.locality;
-        if (state != null && locality != null && country != null) {
-          return '$locality, $state, $country';
+        if (state != null && country != null) {
+          return '$state, $country';
         } else if (country != null) {
           return country;
         } else if (state != null) {
           return state;
-        } else if (locality != null) {
-          return locality;
         } else {
           return 'Unknown';
         }

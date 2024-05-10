@@ -21,59 +21,78 @@ class _ImagePageViewState extends State<ImagePageView> {
   @override
   Widget build(BuildContext context) {
     return widget.images.isNotEmpty
-        ? Stack(
+        ? Column(
             children: [
-              Container(
-                constraints: BoxConstraints(maxHeight: widget.maxHeight),
-                child: PageView.builder(
-                  controller: pageController,
-                  onPageChanged: (int page) {
-                    setState(() {
-                      activePage = page;
-                    });
-                  },
-                  itemCount: widget.images.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: Expanded(
-                            child: widget.images[index].image,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              widget.images.length > 1
-                  ? Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: 100,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List<Widget>.generate(
-                          widget.images.length,
-                          (index) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: InkWell(
-                              onTap: () {
-                                pageController.animateToPage(
-                                  index,
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeIn,
-                                );
-                              },
-                              child: CircleAvatar(
-                                radius: 4,
-                                backgroundColor: activePage == index
-                                    ? Colors.white
-                                    : Colors.grey,
+              Stack(
+                children: [
+                  Container(
+                    constraints: BoxConstraints(maxHeight: widget.maxHeight),
+                    child: PageView.builder(
+                      controller: pageController,
+                      onPageChanged: (int page) {
+                        setState(() {
+                          activePage = page;
+                        });
+                      },
+                      itemCount: widget.images.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                              child: Expanded(
+                                child: widget.images[index].image,
                               ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  widget.images.length > 1
+                      ? Positioned(
+                          top: 8,
+                          right: 12,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(63, 63, 77, 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${activePage + 1}/${widget.images.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(),
+                ],
+              ),
+              const SizedBox(height: 8),
+              widget.images.length > 1
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List<Widget>.generate(
+                        widget.images.length,
+                        (index) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: InkWell(
+                            onTap: () {
+                              pageController.animateToPage(
+                                index,
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeIn,
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 3,
+                              backgroundColor: activePage == index
+                                  ? Colors.red[700]
+                                  : Colors.white,
                             ),
                           ),
                         ),

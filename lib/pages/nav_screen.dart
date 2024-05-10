@@ -25,7 +25,7 @@ class _NavScreenState extends State<NavScreen> {
   final Map<String, double> _iconSizes = {
     'home': 24,
     'messages': 24,
-    'add': 60,
+    'add': 55,
     'events': 24,
     'profile': 24,
   };
@@ -44,13 +44,13 @@ class _NavScreenState extends State<NavScreen> {
       'sizeKey': 'messages',
     },
     {
-      'selected': 'lib/assets/images/add.png',
+      'selected': 'lib/assets/images/add_pressed.png',
       'unselected': 'lib/assets/images/add.png',
       'label': '',
       'sizeKey': 'add',
     },
     {
-      'selected': 'lib/assets/images/events.png',
+      'selected': 'lib/assets/images/events_pressed.png',
       'unselected': 'lib/assets/images/events.png',
       'label': 'Events',
       'sizeKey': 'events',

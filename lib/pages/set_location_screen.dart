@@ -45,10 +45,19 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
 
   Future<void> selectLocation(String location) async {
     try {
-      List<Location> locations = await locationFromAddress(location);
+      String? name;
+      String? country;
+      List<String> parts = location.split(',');
+
+      if (parts.isNotEmpty) {
+        name = parts[0].trim();
+      }
+
+      if (parts.length > 1) {
+        country = parts.last.trim();
+      }
       Map<String, dynamic> result = {
-        'latitude': locations.first.latitude,
-        'longitude': locations.first.longitude,
+        'location': "$name, $country",
       };
       setState(() {
         locationController.text = location;
@@ -62,9 +71,11 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
   Future<void> getCurrentPosition() async {
     Position position = await geoLocation.getLocation();
 
+    String? address = await GeoLocation()
+        .getCityFromCoordinates(position.latitude, position.longitude);
+
     Map<String, dynamic> result = {
-      'latitude': position.latitude,
-      'longitude': position.longitude,
+      'location': address,
     };
 
     setState(() {

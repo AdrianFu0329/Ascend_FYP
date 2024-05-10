@@ -64,13 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     String userId = data['userId'];
                     Timestamp timestamp = data['timestamp'];
                     String description = data['description'];
-                    double latitude = data['latitude'];
-                    double longitude = data['longitude'];
-
-                    Map<String, double> coordinates = {
-                      'latitude': latitude,
-                      'longitude': longitude,
-                    };
+                    String location = data['location'];
 
                     return FutureBuilder<List<ImageWithDimension>>(
                       future: getPostImg(imageURLs),
@@ -93,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             likes: likes,
                             timestamp: timestamp,
                             description: description,
-                            coordinates: coordinates,
+                            location: location,
                           );
                         }
                       },

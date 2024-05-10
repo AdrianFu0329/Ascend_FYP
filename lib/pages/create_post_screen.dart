@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:ascend_fyp/pages/set_location_screen.dart';
 import 'package:ascend_fyp/widgets/custom_text_field.dart';
+import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/location_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,6 +30,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   TextEditingController locationController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isCreatingPost = false;
 
   @override
   Widget build(BuildContext context) {
@@ -104,10 +106,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     Future<void> createPost() async {
       if (validatePost() && _locationData != null) {
-        double latitude = _locationData['latitude'] ?? 0.0;
-        double longitude = _locationData['longitude'] ?? 0.0;
+        String location = _locationData['location'] ?? "Unknown";
 
         if (_formKey.currentState!.validate()) {
+          setState(() {
+            _isCreatingPost = true;
+          });
+
           try {
             final String postId =
                 FirebaseFirestore.instance.collection('posts').doc().id;
@@ -122,8 +127,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               'userId': FirebaseAuth.instance.currentUser!.uid,
               'likes': [],
               'timestamp': Timestamp.now(),
-              'latitude': latitude,
-              'longitude': longitude,
+              'location': location,
               'imageURLs': imageURLs,
             };
 
@@ -137,12 +141,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
             titleController.clear();
             descriptionController.clear();
-            locationController.clear();
+            _locationData.clear();
             setState(() {
               _images.clear();
+              _isCreatingPost = false;
             });
           } catch (error) {
             _showMessage('Error creating post: $error');
+            setState(() {
+              _isCreatingPost = false;
+            });
           }
         }
       }
@@ -169,8 +177,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           builder: (context) => const SetLocationScreen(),
         ),
       );
-      String? city = await GeoLocation().getCityFromCoordinates(
-          locationData['latitude'], locationData['longitude']);
+      String? city = locationData['location'];
       if (locationData.isNotEmpty) {
         _locationData = locationData;
         location = city;
@@ -253,147 +260,166 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(36),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Selected Media",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      "${_images.length}/10",
-                      style: textStyle,
-                    )
-                  ],
-                ),
-                // Display selected images
-                if (_images.isNotEmpty) ...[
-                  SizedBox(
-                    height: 150,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _images.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Image.file(
-                              _images[index],
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  // Add button to select more images
-                  GestureDetector(
-                    onTap: getImage,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: const Center(
-                        child: Icon(
-                          Icons.add,
-                          size: 40,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  ),
-                ] else ...[
-                  GestureDetector(
-                    onTap: getImage,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: const Center(
-                        child: Icon(
-                          Icons.add,
-                          size: 40,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 36.0),
-                CustomTextField(
-                  controller: titleController,
-                  hintText: "Title",
-                ),
-                const SizedBox(height: 36.0),
-                SingleChildScrollView(
-                  child: TextField(
-                    maxLines: null,
-                    controller: descriptionController,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    decoration: InputDecoration(
-                      hintText: "Create a caption",
-                      hintStyle: Theme.of(context).textTheme.titleMedium,
-                      border: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: Color.fromRGBO(247, 243, 237, 1),
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: Color.fromRGBO(247, 243, 237, 1),
-                          width: 2.5,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 36.0),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: getLocation,
-                    style: locationButtonStyle,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 18,
+                        Text(
+                          "Selected Media",
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                        SizedBox(width: 4),
-                        Text('Set Location'),
+                        Text(
+                          "${_images.length}/10",
+                          style: textStyle,
+                        )
                       ],
                     ),
-                  ),
+                    // Display selected images
+                    if (_images.isNotEmpty) ...[
+                      SizedBox(
+                        height: 150,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: _images.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Image.file(
+                                        _images[index],
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: getImage,
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 40,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      GestureDetector(
+                        onTap: getImage,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          child: const Center(
+                            child: Icon(
+                              Icons.add,
+                              size: 40,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 36.0),
+                    CustomTextField(
+                      controller: titleController,
+                      hintText: "Title",
+                    ),
+                    const SizedBox(height: 36.0),
+                    SingleChildScrollView(
+                      child: TextField(
+                        maxLines: null,
+                        controller: descriptionController,
+                        style: Theme.of(context).textTheme.titleMedium,
+                        decoration: InputDecoration(
+                          hintText: "Create a caption",
+                          hintStyle: Theme.of(context).textTheme.titleMedium,
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Color.fromRGBO(247, 243, 237, 1),
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Color.fromRGBO(247, 243, 237, 1),
+                              width: 2.5,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 36.0),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: getLocation,
+                        style: locationButtonStyle,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              size: 18,
+                            ),
+                            SizedBox(width: 4),
+                            Text('Set Location'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Center(
+                      child: LocationListTile(
+                        location: _locationData.isNotEmpty
+                            ? location!
+                            : "No Location Selected",
+                        onPress: null,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                Center(
-                  child: LocationListTile(
-                    location: _locationData.isNotEmpty
-                        ? location!
-                        : "No Location Selected",
-                    onPress: null,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            if (_isCreatingPost)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: const Center(
+                    child: ContainerLoadingAnimation(),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

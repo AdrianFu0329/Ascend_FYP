@@ -160,7 +160,7 @@ class MediaPostScreen extends StatefulWidget {
   final List<String> likes;
   final Timestamp timestamp;
   final String description;
-  final Map<String, double> coordinates;
+  final String location;
 
   const MediaPostScreen({
     super.key,
@@ -171,7 +171,7 @@ class MediaPostScreen extends StatefulWidget {
     required this.likes,
     required this.timestamp,
     required this.description,
-    required this.coordinates,
+    required this.location,
   });
 
   @override
@@ -210,8 +210,6 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   @override
   Widget build(BuildContext context) {
     String formatted = fromDateToString(widget.timestamp);
-    double latitude = widget.coordinates['latitude'] ?? 0.0;
-    double longitude = widget.coordinates['longitude'] ?? 0.0;
 
     return FutureBuilder<Map<String, String>>(
       future: getUserData(widget.userId),
@@ -224,6 +222,9 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
           final userData = snapshot.data!;
           final username = userData["username"] ?? "Unknown";
           final photoUrl = userData["photoURL"] ?? "Unknown";
+          String city = widget.location;
+          double imgHeight = widget.images[0].height;
+          double maxHeight = imgHeight > 500 ? 500 : imgHeight;
 
           return Scaffold(
             appBar: AppBar(
@@ -252,103 +253,86 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                 ],
               ),
             ),
-            body: FutureBuilder<String?>(
-                future:
-                    GeoLocation().getCityFromCoordinates(latitude, longitude),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CustomLoadingAnimation();
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    String city = snapshot.data ?? "Unknown";
-                    double imgHeight = widget.images[0].height;
-                    double maxHeight = imgHeight > 500 ? 500 : imgHeight;
-                    int currentPage = 0;
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ImagePageView(
+                    images: widget.images,
+                    maxHeight: maxHeight,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Text(
+                      widget.title,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                    child: Text(
+                      widget.description,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    child: Text(
+                      "$formatted \n$city",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  PostInteractionBar(
+                    likes: widget.likes,
+                    postId: widget.postId,
+                  ),
+                  const SizedBox(height: 24),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection("posts")
+                        .doc(widget.postId)
+                        .collection("comments")
+                        .orderBy("timestamp", descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CustomLoadingAnimation(),
+                        );
+                      }
 
-                    return SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ImagePageView(
-                            images: widget.images,
-                            maxHeight: maxHeight,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                            child: Text(
-                              widget.title,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                            child: Text(
-                              widget.description,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                            child: Text(
-                              "$formatted \n$city",
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          PostInteractionBar(
-                            likes: widget.likes,
-                            postId: widget.postId,
-                          ),
-                          const SizedBox(height: 24),
-                          StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection("posts")
-                                .doc(widget.postId)
-                                .collection("comments")
-                                .orderBy("timestamp", descending: true)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return const Center(
-                                  child: CustomLoadingAnimation(),
-                                );
-                              }
-
-                              return ListView(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: snapshot.data!.docs.map((doc) {
-                                  final commentData =
-                                      doc.data() as Map<String, dynamic>;
-                                  return CommentPost(
-                                    text: commentData["comment"],
-                                    userId: commentData["userId"],
-                                    time: fromDateToString(
-                                        commentData["timestamp"]),
-                                  );
-                                }).toList(),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 4),
-                          const Center(
-                            child: Text(
-                              "~END~",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontFamily: 'Merriweather Sans',
-                                fontWeight: FontWeight.normal,
-                                color: Color.fromRGBO(211, 211, 211, 1),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
+                      return ListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: snapshot.data!.docs.map((doc) {
+                          final commentData =
+                              doc.data() as Map<String, dynamic>;
+                          return CommentPost(
+                            text: commentData["comment"],
+                            userId: commentData["userId"],
+                            time: fromDateToString(commentData["timestamp"]),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 4),
+                  const Center(
+                    child: Text(
+                      "~END~",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'Merriweather Sans',
+                        fontWeight: FontWeight.normal,
+                        color: Color.fromRGBO(211, 211, 211, 1),
                       ),
-                    );
-                  }
-                }),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
           );
         }
       },

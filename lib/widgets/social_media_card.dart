@@ -17,7 +17,7 @@ class SocialMediaCard extends StatefulWidget {
   final List<String> likes;
   final Timestamp timestamp;
   final String description;
-  final Map<String, double> coordinates;
+  final String location;
 
   const SocialMediaCard({
     super.key,
@@ -29,7 +29,7 @@ class SocialMediaCard extends StatefulWidget {
     required this.title,
     required this.timestamp,
     required this.description,
-    required this.coordinates,
+    required this.location,
   });
 
   @override
@@ -82,7 +82,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
         color: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               color: Theme.of(context).scaffoldBackgroundColor,
@@ -159,7 +159,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
           likes: widget.likes,
           timestamp: widget.timestamp,
           description: widget.description,
-          coordinates: widget.coordinates,
+          location: widget.location,
         ),
       ),
     );

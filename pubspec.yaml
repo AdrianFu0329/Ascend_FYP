@@ -90,11 +90,13 @@ flutter:
     - lib/assets/images/home.png
     - lib/assets/images/home_pressed.png
     - lib/assets/images/events.png
+    - lib/assets/images/events_pressed.png
     - lib/assets/images/google_logo.png
     - lib/assets/images/welcome_img1.png
     - lib/assets/images/register.png
     - lib/assets/images/default_profile_image.png
     - lib/assets/images/add.png
+    - lib/assets/images/add_pressed.png
     - lib/assets/images/location_icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
