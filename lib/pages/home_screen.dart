@@ -71,11 +71,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const SizedBox
-                              .shrink(); // Placeholder while loading
+                          return const CustomLoadingAnimation();
                         } else if (snapshot.hasError) {
-                          // Handle error
-                          return Container(); // Placeholder for error handling
+                          return const Center(
+                            child: Text(
+                              "An unexpected error occurred. Try again later...",
+                            ),
+                          );
                         } else {
                           List<ImageWithDimension> images = snapshot.data!;
                           return SocialMediaCard(
