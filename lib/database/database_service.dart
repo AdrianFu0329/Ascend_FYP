@@ -27,6 +27,18 @@ Stream<QuerySnapshot> getPostsFromDatabase() {
   return postsStream;
 }
 
+Stream<QuerySnapshot> getPostsForCurrentUser(String currentUserUid) {
+  final DocumentReference userRef =
+      FirebaseFirestore.instance.collection("users").doc(currentUserUid);
+
+  final postsStream = userRef
+      .collection('posts')
+      .orderBy('timestamp', descending: true)
+      .snapshots();
+
+  return postsStream;
+}
+
 Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
   List<ImageWithDimension> images = [];
 

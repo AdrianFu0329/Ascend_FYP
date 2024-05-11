@@ -106,6 +106,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     Future<void> createPost() async {
       if (validatePost() && _locationData != null) {
+        final currentUser = FirebaseAuth.instance.currentUser!;
         String location = _locationData['location'] ?? "Unknown";
 
         if (_formKey.currentState!.validate()) {
@@ -133,6 +134,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
             // Add the post document to Firestore
             await FirebaseFirestore.instance
+                .collection('posts')
+                .doc(postId)
+                .set(postData);
+
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(currentUser.uid)
                 .collection('posts')
                 .doc(postId)
                 .set(postData);

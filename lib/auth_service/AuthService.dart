@@ -52,7 +52,8 @@ class AuthService {
             {
               'displayName': user.displayName,
               'email': user.email,
-              'photoURL': user.photoURL,
+              'photoURL': user.photoURL ?? "",
+              'description': "",
             },
           );
         }
@@ -91,6 +92,7 @@ class AuthService {
               'displayName': user.displayName,
               'email': user.email,
               'photoURL': user.photoURL,
+              'description': "",
             },
           );
         }

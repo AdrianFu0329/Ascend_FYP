@@ -7,6 +7,8 @@ Future<Map<String, String>> getUserData(String userId) async {
   final Map<String, String> userData = {
     'username': docSnapshot.data()?["displayName"] ?? 'Unknown',
     'photoURL': docSnapshot.data()?["photoURL"] ?? 'Unknown',
+    'email': docSnapshot.data()?["email"] ?? 'Unknown',
+    'description': docSnapshot.data()?["description"] ?? 'Unknown',
   };
 
   return userData;
