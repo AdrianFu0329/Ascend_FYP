@@ -26,7 +26,7 @@ class _NavScreenState extends State<NavScreen> {
     'home': 24,
     'messages': 24,
     'add': 55,
-    'events': 24,
+    'community': 32,
     'profile': 24,
   };
 
@@ -50,10 +50,10 @@ class _NavScreenState extends State<NavScreen> {
       'sizeKey': 'add',
     },
     {
-      'selected': 'lib/assets/images/events_pressed.png',
-      'unselected': 'lib/assets/images/events.png',
-      'label': 'Events',
-      'sizeKey': 'events',
+      'selected': 'lib/assets/images/community_pressed.png',
+      'unselected': 'lib/assets/images/community.png',
+      'label': 'Community',
+      'sizeKey': 'community',
     },
     {
       'selected': 'lib/assets/images/profile_pressed.png',

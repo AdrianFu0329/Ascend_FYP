@@ -4,9 +4,7 @@ import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/comment_card.dart';
 import 'package:ascend_fyp/widgets/image_page_view.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
-import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +13,12 @@ import 'package:intl/intl.dart';
 class PostInteractionBar extends StatefulWidget {
   final List<String> likes;
   final String postId;
+  final String userId;
   const PostInteractionBar({
     super.key,
     required this.likes,
     required this.postId,
+    required this.userId,
   });
 
   @override
@@ -53,6 +53,13 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
     DocumentReference postRef =
         FirebaseFirestore.instance.collection('posts').doc(widget.postId);
     postRef.update({'likes': widget.likes});
+
+    DocumentReference userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('posts')
+        .doc(widget.postId);
+    userRef.update({'likes': widget.likes});
   }
 
   void addComment(String text) {
@@ -65,6 +72,32 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
       "timestamp": Timestamp.now(),
       "userId": FirebaseAuth.instance.currentUser!.uid,
     });
+  }
+
+  void _showMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'OK',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -114,8 +147,14 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
                       size: 20,
                     ),
                     onPressed: () {
-                      addComment(commentController.text);
-                      commentController.clear();
+                      if (commentController.text.isEmpty) {
+                        _showMessage(
+                          "Please input a comment before sending...",
+                        );
+                      } else {
+                        addComment(commentController.text);
+                        commentController.clear();
+                      }
                     },
                   ),
                 ],
@@ -286,6 +325,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                   PostInteractionBar(
                     likes: widget.likes,
                     postId: widget.postId,
+                    userId: widget.userId,
                   ),
                   const SizedBox(height: 24),
                   StreamBuilder<QuerySnapshot>(

@@ -98,6 +98,10 @@ flutter:
     - lib/assets/images/add.png
     - lib/assets/images/add_pressed.png
     - lib/assets/images/location_icon.png
+    - lib/assets/images/edit_profile.png
+    - lib/assets/images/change_pwd.png
+    - lib/assets/images/community_pressed.png
+    - lib/assets/images/community.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

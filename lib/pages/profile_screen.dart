@@ -1,6 +1,9 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/edit_profile_screen.dart';
+import 'package:ascend_fyp/pages/welcome_screen.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_media_card.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
@@ -38,6 +41,28 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
 
+    ButtonStyle logOutStyle = ButtonStyle(
+      textStyle: MaterialStateProperty.all<TextStyle>(
+        const TextStyle(
+          fontSize: 12,
+          fontFamily: 'Merriweather Sans',
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+      foregroundColor: MaterialStateProperty.all<Color>(
+          const Color.fromRGBO(247, 243, 237, 1)),
+      backgroundColor: MaterialStateProperty.all<Color>(
+        Theme.of(context).scaffoldBackgroundColor,
+      ),
+      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+          side:
+              const BorderSide(color: Color.fromRGBO(194, 0, 0, 1), width: 1.5),
+        ),
+      ),
+    );
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -50,6 +75,25 @@ class ProfileScreen extends StatelessWidget {
             height: 50,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+            child: ElevatedButton(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const WelcomeScreen()),
+                  (route) => false,
+                );
+              },
+              style: logOutStyle,
+              child: const Text('Log out'),
+            ),
+          ),
+        ],
       ),
       body: CustomScrollView(
         slivers: [
@@ -89,7 +133,18 @@ class ProfileScreen extends StatelessWidget {
                               ),
                               trailing: ElevatedButton(
                                 onPressed: () {
-                                  // Handle Edit Profile button press
+                                  Navigator.of(context).push(
+                                    SlidingNav(
+                                      builder: (context) => EditProfileScreen(
+                                        username: userData['username']!,
+                                        email: userData['email']!,
+                                        description:
+                                            userData["description"] == ""
+                                                ? "Empty~~ Add one today!"
+                                                : userData["description"]!,
+                                      ),
+                                    ),
+                                  );
                                 },
                                 style: buttonStyle,
                                 child: const Text('Edit Profile'),
@@ -152,7 +207,6 @@ class ProfileScreen extends StatelessWidget {
                                   ConnectionState.waiting) {
                                 return const CustomLoadingAnimation();
                               } else if (snapshot.hasError) {
-                                // Handle error
                                 return const Center(
                                   child: Text(
                                     "An unexpected error occurred. Try again later...",
