@@ -41,6 +41,7 @@ class CommentPost extends StatelessWidget {
                       userId: userId,
                       photoURL: photoUrl,
                       radius: 12,
+                      onTap: () {},
                     ),
                     const SizedBox(width: 8),
                     Text(

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChangePwdScreen extends StatefulWidget {
@@ -13,19 +14,55 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
   bool passwordsMatch = false;
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+  final currentUser = FirebaseAuth.instance.currentUser!;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _showMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'OK',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  bool passwordMatch() {
+    return passwordController.text == confirmPasswordController.text;
+  }
+
+  bool isEditButtonEnabled() {
+    return passwordController.text.isNotEmpty &&
+        confirmPasswordController.text.isNotEmpty &&
+        passwordMatch();
+  }
+
+  Future<void> _updatePassword() async {
+    await currentUser.updatePassword(passwordController.text);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Password changed successfully')),
+    );
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
-    bool passwordMatch() {
-      return passwordController.text == confirmPasswordController.text;
-    }
-
-    bool isEditButtonEnabled() {
-      return passwordController.text.isNotEmpty &&
-          confirmPasswordController.text.isNotEmpty &&
-          passwordMatch();
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -55,7 +92,6 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
               obscureText: passwordText,
               onChanged: (value) {
                 setState(() {
-                  passwordText = value.isNotEmpty;
                   passwordsMatch = passwordMatch();
                 });
               },
@@ -88,7 +124,9 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
               style: Theme.of(context).textTheme.titleMedium,
               obscureText: confirmPasswordText,
               onChanged: (value) {
-                setState(() {});
+                setState(() {
+                  passwordsMatch = passwordMatch();
+                });
               },
               decoration: InputDecoration(
                 hintText: 'Confirm Password',
@@ -155,11 +193,15 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
                             borderRadius: BorderRadius.circular(20.0),
                             side: BorderSide(
                                 color: const Color.fromRGBO(247, 243, 237, 1),
-                                width: !isEditButtonEnabled() ? 1.0 : 3.0),
+                                width: isEditButtonEnabled() ? 3.0 : 1.0),
                           ),
                         ),
                       ),
-                      onPressed: !isEditButtonEnabled() ? null : () {},
+                      onPressed: isEditButtonEnabled()
+                          ? () {
+                              _updatePassword();
+                            }
+                          : null,
                       icon: Image.asset(
                         'lib/assets/images/register.png',
                         width: 30,

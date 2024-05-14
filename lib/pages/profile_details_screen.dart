@@ -1,7 +1,9 @@
 import 'package:ascend_fyp/widgets/custom_text_field.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ProfileDetailsScreen extends StatelessWidget {
+class ProfileDetailsScreen extends StatefulWidget {
   final String username;
   final String email;
   final String description;
@@ -13,17 +15,82 @@ class ProfileDetailsScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    TextEditingController usernameController = TextEditingController();
-    TextEditingController emailController = TextEditingController();
-    TextEditingController descriptionController = TextEditingController();
+  _ProfileDetailsScreenState createState() => _ProfileDetailsScreenState();
+}
 
-    bool isEditButtonEnabled() {
-      return usernameController.text.isNotEmpty &&
-          emailController.text.isNotEmpty &&
-          descriptionController.text.isNotEmpty;
+class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
+  late TextEditingController usernameController;
+  late TextEditingController emailController;
+  late TextEditingController descriptionController;
+  final currentUser = FirebaseAuth.instance.currentUser!;
+
+  @override
+  void initState() {
+    super.initState();
+    usernameController = TextEditingController(text: widget.username);
+    emailController = TextEditingController(text: widget.email);
+    descriptionController = TextEditingController(text: widget.description);
+  }
+
+  void _showMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'OK',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  bool isEditButtonEnabled() {
+    return usernameController.text.isNotEmpty ||
+        emailController.text.isNotEmpty ||
+        descriptionController.text.isNotEmpty;
+  }
+
+  Future<void> updateFields() async {
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+
+    try {
+      await userRef.update({
+        'displayName': usernameController.text,
+        'email': emailController.text,
+        'description': descriptionController.text,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile updated successfully')),
+      );
+      Navigator.of(context).pop({
+        'username': usernameController.text,
+        'email': emailController.text,
+        'description': descriptionController.text,
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred. Failed to update profile')),
+      );
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -51,38 +118,39 @@ class ProfileDetailsScreen extends StatelessWidget {
               const SizedBox(height: 25),
               CustomTextField(
                 controller: usernameController,
-                hintText: username,
+                hintText: 'Username',
               ),
               const SizedBox(height: 35),
               CustomTextField(
                 controller: emailController,
-                hintText: email,
+                hintText: 'Email',
               ),
               const SizedBox(height: 35),
-              SingleChildScrollView(
-                child: TextField(
-                  maxLines: null,
-                  controller: descriptionController,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  decoration: InputDecoration(
-                    hintText: description,
-                    hintStyle: Theme.of(context).textTheme.titleMedium,
-                    border: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Color.fromRGBO(247, 243, 237, 1),
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
+              TextField(
+                maxLines: null,
+                controller: descriptionController,
+                style: Theme.of(context).textTheme.titleMedium,
+                decoration: InputDecoration(
+                  hintText: 'Description',
+                  hintStyle: Theme.of(context).textTheme.titleMedium,
+                  border: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color.fromRGBO(247, 243, 237, 1),
+                      width: 1,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Color.fromRGBO(247, 243, 237, 1),
-                        width: 2.5,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color.fromRGBO(247, 243, 237, 1),
+                      width: 2.5,
                     ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                onChanged: (value) {
+                  setState(() {});
+                },
               ),
               const SizedBox(height: 35),
               Padding(
@@ -102,12 +170,17 @@ class ProfileDetailsScreen extends StatelessWidget {
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20.0),
                               side: BorderSide(
-                                  color: const Color.fromRGBO(247, 243, 237, 1),
-                                  width: !isEditButtonEnabled() ? 1.0 : 3.0),
+                                color: const Color.fromRGBO(247, 243, 237, 1),
+                                width: isEditButtonEnabled() ? 3.0 : 1.0,
+                              ),
                             ),
                           ),
                         ),
-                        onPressed: !isEditButtonEnabled() ? null : () {},
+                        onPressed: isEditButtonEnabled()
+                            ? () async {
+                                await updateFields();
+                              }
+                            : null,
                         icon: Image.asset(
                           'lib/assets/images/register.png',
                           width: 30,

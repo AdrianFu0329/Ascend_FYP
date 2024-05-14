@@ -102,6 +102,7 @@ flutter:
     - lib/assets/images/change_pwd.png
     - lib/assets/images/community_pressed.png
     - lib/assets/images/community.png
+    - lib/assets/images/profile_pic.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

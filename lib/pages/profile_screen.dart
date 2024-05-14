@@ -12,12 +12,34 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late String username;
+  late String email;
+  late String description;
 
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser!;
+
+    Future<void> refreshProfileData() async {
+      final currentUser = FirebaseAuth.instance.currentUser!;
+      final userData = await getUserData(currentUser.uid);
+
+      setState(() {
+        username = userData["username"] ?? "Unknown";
+        description = userData["description"] == ""
+            ? "Empty~~ Add one today!"
+            : userData["description"]!;
+        email = userData['email'] ?? "Unknown";
+      });
+    }
 
     ButtonStyle buttonStyle = ButtonStyle(
       textStyle: MaterialStateProperty.all<TextStyle>(
@@ -41,209 +63,221 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
 
-    ButtonStyle logOutStyle = ButtonStyle(
-      textStyle: MaterialStateProperty.all<TextStyle>(
-        const TextStyle(
-          fontSize: 12,
-          fontFamily: 'Merriweather Sans',
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-      foregroundColor: MaterialStateProperty.all<Color>(
-          const Color.fromRGBO(247, 243, 237, 1)),
-      backgroundColor: MaterialStateProperty.all<Color>(
-        Theme.of(context).scaffoldBackgroundColor,
-      ),
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          side:
-              const BorderSide(color: Color.fromRGBO(194, 0, 0, 1), width: 1.5),
-        ),
-      ),
-    );
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
+    return RefreshIndicator(
+      onRefresh: refreshProfileData,
+      child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Image.asset(
-            "lib/assets/images/logo_noBg.png",
-            width: 130,
-            height: 50,
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: ElevatedButton(
-              onPressed: () {
-                FirebaseAuth.instance.signOut();
-
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const WelcomeScreen()),
-                  (route) => false,
-                );
-              },
-              style: logOutStyle,
-              child: const Text('Log out'),
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Image.asset(
+              "lib/assets/images/logo_noBg.png",
+              width: 130,
+              height: 50,
             ),
           ),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: FutureBuilder(
-              future: getUserData(currentUser.uid),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CustomLoadingAnimation();
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                  Map<String, String> userData =
-                      snapshot.data as Map<String, String>;
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ProfilePicture(
-                              userId: currentUser.uid,
-                              photoURL: currentUser.photoURL ?? "Unknown",
-                              radius: 40,
-                            ),
-                            ListTile(
-                              title: Text(
-                                userData["username"] ?? "Unknown",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              subtitle: Text(
-                                userData["description"] == ""
-                                    ? "Empty~~ Add one today!"
-                                    : userData["description"]!,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              trailing: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    SlidingNav(
-                                      builder: (context) => EditProfileScreen(
-                                        username: userData['username']!,
-                                        email: userData['email']!,
-                                        description:
-                                            userData["description"] == ""
-                                                ? "Empty~~ Add one today!"
-                                                : userData["description"]!,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                style: buttonStyle,
-                                child: const Text('Edit Profile'),
-                              ),
-                            ),
-                          ],
+          actions: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 16, 0),
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: IconButton(
+                  highlightColor: const Color.fromRGBO(194, 0, 0, 1),
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                        side: const BorderSide(
+                          color: Color.fromRGBO(194, 0, 0, 1),
+                          width: 1.5,
                         ),
                       ),
-                      const Divider(
-                        color: Colors.red,
-                        thickness: 4,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+                    ),
+                  ),
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const WelcomeScreen()),
+                      (route) => false,
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    size: 20,
+                    color: Color.fromRGBO(247, 243, 237, 1),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: FutureBuilder(
+                future: getUserData(currentUser.uid),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CustomLoadingAnimation();
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    Map<String, String> userData =
+                        snapshot.data as Map<String, String>;
+                    username = userData["username"] ?? "Unknown";
+                    description = userData["description"] == ""
+                        ? "Empty~~ Add one today!"
+                        : userData["description"]!;
+                    email = userData['email'] ?? "Unknown";
+
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ProfilePicture(
+                                userId: currentUser.uid,
+                                photoURL: currentUser.photoURL ?? "Unknown",
+                                radius: 40,
+                                onTap: () {},
+                              ),
+                              ListTile(
+                                title: Text(
+                                  username,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                subtitle: Text(
+                                  description,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                                trailing: ElevatedButton(
+                                  onPressed: () async {
+                                    final result =
+                                        await Navigator.of(context).push(
+                                      SlidingNav(
+                                        builder: (context) => EditProfileScreen(
+                                          username: username,
+                                          email: email,
+                                          description: description,
+                                        ),
+                                      ),
+                                    );
+                                    if (result != null) {
+                                      setState(() {
+                                        username = result['username'];
+                                        email = result['email'];
+                                        description = result['description'];
+                                      });
+                                    }
+                                  },
+                                  style: buttonStyle,
+                                  child: const Text('Edit Profile'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(
+                          color: Colors.red,
+                          thickness: 4,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    );
+                  }
+                },
+              ),
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: getPostsForCurrentUser(currentUser.uid),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SliverFillRemaining(
+                    child: Center(
+                      child: CustomLoadingAnimation(),
+                    ),
                   );
+                } else if (snapshot.hasError) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    ),
+                  );
+                } else {
+                  List postList = snapshot.data!.docs;
+                  return postList.isNotEmpty
+                      ? SliverMasonryGrid.count(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 0,
+                          crossAxisSpacing: 0,
+                          itemBuilder: (BuildContext context, int index) {
+                            DocumentSnapshot doc = postList[index];
+                            Map<String, dynamic> data =
+                                doc.data() as Map<String, dynamic>;
+                            String postId = data['postId'];
+                            String title = data['title'];
+                            List<String> imageURLs =
+                                List<String>.from(data['imageURLs']);
+                            List<String> likes =
+                                List<String>.from(data['likes']);
+                            String userId = data['userId'];
+                            Timestamp timestamp = data['timestamp'];
+                            String description = data['description'];
+                            String location = data['location'];
+
+                            return FutureBuilder<List<ImageWithDimension>>(
+                              future: getPostImg(imageURLs),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const CustomLoadingAnimation();
+                                } else if (snapshot.hasError) {
+                                  return const Center(
+                                    child: Text(
+                                      "An unexpected error occurred. Try again later...",
+                                    ),
+                                  );
+                                } else {
+                                  List<ImageWithDimension> images =
+                                      snapshot.data!;
+                                  return ProfileMediaCard(
+                                    index: index,
+                                    postId: postId,
+                                    images: images,
+                                    title: title,
+                                    userId: userId,
+                                    likes: likes,
+                                    timestamp: timestamp,
+                                    description: description,
+                                    location: location,
+                                  );
+                                }
+                              },
+                            );
+                          },
+                          childCount: postList.length,
+                        )
+                      : const SliverToBoxAdapter(
+                          child: Center(
+                            child: Text(
+                              "No posts yet... Make one today!",
+                            ),
+                          ),
+                        );
                 }
               },
             ),
-          ),
-          StreamBuilder<QuerySnapshot>(
-            stream: getPostsForCurrentUser(currentUser.uid),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverFillRemaining(
-                  child: Center(
-                    child: CustomLoadingAnimation(),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return SliverToBoxAdapter(
-                  child: Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  ),
-                );
-              } else {
-                List postList = snapshot.data!.docs;
-                return postList.isNotEmpty
-                    ? SliverMasonryGrid.count(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 0,
-                        crossAxisSpacing: 0,
-                        itemBuilder: (BuildContext context, int index) {
-                          DocumentSnapshot doc = postList[index];
-                          Map<String, dynamic> data =
-                              doc.data() as Map<String, dynamic>;
-                          String postId = data['postId'];
-                          String title = data['title'];
-                          List<String> imageURLs =
-                              List<String>.from(data['imageURLs']);
-                          List<String> likes = List<String>.from(data['likes']);
-                          String userId = data['userId'];
-                          Timestamp timestamp = data['timestamp'];
-                          String description = data['description'];
-                          String location = data['location'];
-
-                          return FutureBuilder<List<ImageWithDimension>>(
-                            future: getPostImg(imageURLs),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CustomLoadingAnimation();
-                              } else if (snapshot.hasError) {
-                                return const Center(
-                                  child: Text(
-                                    "An unexpected error occurred. Try again later...",
-                                  ),
-                                );
-                              } else {
-                                List<ImageWithDimension> images =
-                                    snapshot.data!;
-                                return ProfileMediaCard(
-                                  index: index,
-                                  postId: postId,
-                                  images: images,
-                                  title: title,
-                                  userId: userId,
-                                  likes: likes,
-                                  timestamp: timestamp,
-                                  description: description,
-                                  location: location,
-                                );
-                              }
-                            },
-                          );
-                        },
-                        childCount: postList.length,
-                      )
-                    : const SliverToBoxAdapter(
-                        child: Center(
-                          child: Text(
-                            "No posts yet... Make one today!",
-                          ),
-                        ),
-                      );
-              }
-            },
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
+        ),
       ),
     );
   }

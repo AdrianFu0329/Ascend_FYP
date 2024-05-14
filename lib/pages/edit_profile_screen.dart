@@ -1,9 +1,10 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/change_prof_pic.dart';
 import 'package:ascend_fyp/pages/change_pwd_screen.dart';
 import 'package:ascend_fyp/pages/profile_details_screen.dart';
 import 'package:flutter/material.dart';
 
-class EditProfileScreen extends StatelessWidget {
+class EditProfileScreen extends StatefulWidget {
   final String username;
   final String email;
   final String description;
@@ -13,6 +14,43 @@ class EditProfileScreen extends StatelessWidget {
     required this.email,
     required this.description,
   });
+
+  @override
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  late String username;
+  late String email;
+  late String description;
+
+  @override
+  void initState() {
+    super.initState();
+    username = widget.username;
+    email = widget.email;
+    description = widget.description;
+  }
+
+  Future<void> navigateAndUpdate(BuildContext context) async {
+    final result = await Navigator.of(context).push(
+      SlidingNav(
+        builder: (context) => ProfileDetailsScreen(
+          username: username,
+          email: email,
+          description: description,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        username = result['username'];
+        email = result['email'];
+        description = result['description'];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +94,11 @@ class EditProfileScreen extends StatelessWidget {
             color: Color.fromRGBO(247, 243, 237, 1),
           ),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.of(context).pop({
+              'username': username,
+              'email': email,
+              'description': description,
+            });
           },
         ),
       ),
@@ -67,15 +109,7 @@ class EditProfileScreen extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    SlidingNav(
-                      builder: (context) => ProfileDetailsScreen(
-                        username: username,
-                        email: email,
-                        description: description,
-                      ),
-                    ),
-                  );
+                  navigateAndUpdate(context);
                 },
                 style: buttonStyle,
                 child: Row(
@@ -93,8 +127,11 @@ class EditProfileScreen extends StatelessWidget {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push(SlidingNav(
-                      builder: (context) => const ChangePwdScreen()));
+                  Navigator.of(context).push(
+                    SlidingNav(
+                      builder: (context) => const ChangePwdScreen(),
+                    ),
+                  );
                 },
                 style: buttonStyle,
                 child: Row(
@@ -109,6 +146,33 @@ class EditProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         const Text('Change Password'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    SlidingNav(
+                      builder: (context) => const ChangeProfPic(),
+                    ),
+                  );
+                },
+                style: buttonStyle,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Image.asset(
+                          "lib/assets/images/profile_pic.png",
+                          width: 30,
+                          height: 30,
+                        ),
+                        const SizedBox(width: 16),
+                        const Text('Change Profile Picture'),
                       ],
                     ),
                   ],

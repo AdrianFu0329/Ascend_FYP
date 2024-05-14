@@ -283,6 +283,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                     userId: widget.userId,
                     photoURL: photoUrl,
                     radius: 15,
+                    onTap: () {},
                   ),
                   const SizedBox(width: 12),
                   Text(

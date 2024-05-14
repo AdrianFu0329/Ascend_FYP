@@ -115,6 +115,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                         userId: widget.userId,
                         photoURL: photoUrl,
                         radius: 12,
+                        onTap: () {},
                       ),
                       const SizedBox(width: 8),
                       Text(

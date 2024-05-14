@@ -123,6 +123,7 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
                           userId: widget.userId,
                           photoURL: photoUrl,
                           radius: 12,
+                          onTap: () {},
                         ),
                         const SizedBox(width: 8),
                         Text(

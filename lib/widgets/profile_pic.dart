@@ -7,12 +7,14 @@ class ProfilePicture extends StatelessWidget {
   final String userId;
   final String photoURL;
   final double radius;
+  final VoidCallback onTap;
 
   const ProfilePicture({
     super.key,
     required this.userId,
     required this.photoURL,
     required this.radius,
+    required this.onTap,
   });
 
   @override
@@ -26,16 +28,22 @@ class ProfilePicture extends StatelessWidget {
           return Text('Error: ${snapshot.error}');
         } else {
           if (photoURL != "Unknown") {
-            return CircleAvatar(
-              radius: radius,
-              backgroundColor: Colors.transparent,
-              backgroundImage: NetworkImage(photoURL),
+            return GestureDetector(
+              onTap: onTap,
+              child: CircleAvatar(
+                radius: radius,
+                backgroundColor: Colors.transparent,
+                backgroundImage: NetworkImage(photoURL),
+              ),
             );
           } else {
-            return CircleAvatar(
-              radius: radius,
-              backgroundImage: const AssetImage(
-                'lib/assets/images/default_profile_image.png',
+            return GestureDetector(
+              onTap: onTap,
+              child: CircleAvatar(
+                radius: radius,
+                backgroundImage: const AssetImage(
+                  'lib/assets/images/default_profile_image.png',
+                ),
               ),
             );
           }

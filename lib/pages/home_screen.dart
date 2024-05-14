@@ -15,93 +15,110 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late Stream<QuerySnapshot> postsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    postsStream = getPostsFromDatabase();
+  }
+
+  Future<void> refreshPosts() async {
+    setState(() {
+      postsStream = getPostsFromDatabase();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            title: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 36, 0, 36),
-              child: Image.asset(
-                "lib/assets/images/logo_noBg.png",
-                width: 130,
-                height: 50,
+    return RefreshIndicator(
+      onRefresh: refreshPosts,
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              title: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 36, 0, 36),
+                child: Image.asset(
+                  "lib/assets/images/logo_noBg.png",
+                  width: 130,
+                  height: 50,
+                ),
               ),
             ),
-          ),
-          StreamBuilder<QuerySnapshot>(
-            stream: getPostsFromDatabase(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverFillRemaining(
-                  child: Center(
-                    child: CustomLoadingAnimation(),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return SliverToBoxAdapter(
-                  child: Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  ),
-                );
-              } else {
-                List postList = snapshot.data!.docs;
-                return SliverMasonryGrid.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 0,
-                  crossAxisSpacing: 0,
-                  itemBuilder: (BuildContext context, int index) {
-                    DocumentSnapshot doc = postList[index];
-                    Map<String, dynamic> data =
-                        doc.data() as Map<String, dynamic>;
-                    String postId = data['postId'];
-                    String title = data['title'];
-                    List<String> imageURLs =
-                        List<String>.from(data['imageURLs']);
-                    List<String> likes = List<String>.from(data['likes']);
-                    String userId = data['userId'];
-                    Timestamp timestamp = data['timestamp'];
-                    String description = data['description'];
-                    String location = data['location'];
+            StreamBuilder<QuerySnapshot>(
+              stream: postsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SliverFillRemaining(
+                    child: Center(
+                      child: CustomLoadingAnimation(),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    ),
+                  );
+                } else {
+                  List postList = snapshot.data!.docs;
+                  return SliverMasonryGrid.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 0,
+                    crossAxisSpacing: 0,
+                    itemBuilder: (BuildContext context, int index) {
+                      DocumentSnapshot doc = postList[index];
+                      Map<String, dynamic> data =
+                          doc.data() as Map<String, dynamic>;
+                      String postId = data['postId'];
+                      String title = data['title'];
+                      List<String> imageURLs =
+                          List<String>.from(data['imageURLs']);
+                      List<String> likes = List<String>.from(data['likes']);
+                      String userId = data['userId'];
+                      Timestamp timestamp = data['timestamp'];
+                      String description = data['description'];
+                      String location = data['location'];
 
-                    return FutureBuilder<List<ImageWithDimension>>(
-                      future: getPostImg(imageURLs),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CustomLoadingAnimation();
-                        } else if (snapshot.hasError) {
-                          return const Center(
-                            child: Text(
-                              "An unexpected error occurred. Try again later...",
-                            ),
-                          );
-                        } else {
-                          List<ImageWithDimension> images = snapshot.data!;
-                          return SocialMediaCard(
-                            index: index,
-                            postId: postId,
-                            images: images,
-                            title: title,
-                            userId: userId,
-                            likes: likes,
-                            timestamp: timestamp,
-                            description: description,
-                            location: location,
-                          );
-                        }
-                      },
-                    );
-                  },
-                  childCount: postList.length,
-                );
-              }
-            },
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
+                      return FutureBuilder<List<ImageWithDimension>>(
+                        future: getPostImg(imageURLs),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CustomLoadingAnimation();
+                          } else if (snapshot.hasError) {
+                            return const Center(
+                              child: Text(
+                                "An unexpected error occurred. Try again later...",
+                              ),
+                            );
+                          } else {
+                            List<ImageWithDimension> images = snapshot.data!;
+                            return SocialMediaCard(
+                              index: index,
+                              postId: postId,
+                              images: images,
+                              title: title,
+                              userId: userId,
+                              likes: likes,
+                              timestamp: timestamp,
+                              description: description,
+                              location: location,
+                            );
+                          }
+                        },
+                      );
+                    },
+                    childCount: postList.length,
+                  );
+                }
+              },
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
+        ),
       ),
     );
   }
