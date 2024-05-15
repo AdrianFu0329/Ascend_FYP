@@ -203,19 +203,19 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     );
 
     ButtonStyle buttonStyle = ButtonStyle(
-      textStyle: MaterialStateProperty.all<TextStyle>(
+      textStyle: WidgetStateProperty.all<TextStyle>(
         const TextStyle(
           fontSize: 12,
           fontFamily: 'Merriweather Sans',
           fontWeight: FontWeight.normal,
         ),
       ),
-      foregroundColor: MaterialStateProperty.all<Color>(
+      foregroundColor: WidgetStateProperty.all<Color>(
           const Color.fromRGBO(247, 243, 237, 1)),
-      backgroundColor: MaterialStateProperty.all<Color>(
+      backgroundColor: WidgetStateProperty.all<Color>(
         Theme.of(context).scaffoldBackgroundColor,
       ),
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0),
           side:
@@ -225,19 +225,19 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     );
 
     ButtonStyle locationButtonStyle = ButtonStyle(
-      textStyle: MaterialStateProperty.all<TextStyle>(
+      textStyle: WidgetStateProperty.all<TextStyle>(
         const TextStyle(
           fontSize: 14,
           fontFamily: 'Merriweather Sans',
           fontWeight: FontWeight.normal,
         ),
       ),
-      foregroundColor: MaterialStateProperty.all<Color>(
+      foregroundColor: WidgetStateProperty.all<Color>(
           const Color.fromRGBO(247, 243, 237, 1)),
-      backgroundColor: MaterialStateProperty.all<Color>(
+      backgroundColor: WidgetStateProperty.all<Color>(
         Theme.of(context).scaffoldBackgroundColor,
       ),
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0),
           side: const BorderSide(

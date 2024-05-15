@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -11,7 +12,8 @@ class AuthService {
           email: email, password: password);
       if (newUser.user != null) {
         await newUser.user!.updateDisplayName(username);
-        final User? user = newUser.user;
+        await newUser.user!.reload();
+        final User? user = auth.currentUser;
 
         if (user != null) {
           await FirebaseFirestore.instance
@@ -23,6 +25,8 @@ class AuthService {
               'email': user.email,
               'photoURL': user.photoURL,
               'description': "",
+              'followers': [],
+              'following': [],
             },
           );
         }
@@ -59,6 +63,8 @@ class AuthService {
                 'email': user.email,
                 'photoURL': user.photoURL,
                 'description': "",
+                'followers': [],
+                'following': [],
               },
             );
           }
@@ -105,6 +111,8 @@ class AuthService {
                 'email': user.email,
                 'photoURL': user.photoURL,
                 'description': "",
+                'followers': [],
+                'following': [],
               },
             );
           }

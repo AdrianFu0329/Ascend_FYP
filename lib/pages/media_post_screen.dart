@@ -1,5 +1,7 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/user_profile_screen.dart';
 import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/comment_card.dart';
 import 'package:ascend_fyp/widgets/image_page_view.dart';
@@ -250,7 +252,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   Widget build(BuildContext context) {
     String formatted = fromDateToString(widget.timestamp);
 
-    return FutureBuilder<Map<String, String>>(
+    return FutureBuilder<Map<String, dynamic>>(
       future: getUserData(widget.userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -283,12 +285,29 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                     userId: widget.userId,
                     photoURL: photoUrl,
                     radius: 15,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        SlidingNav(
+                          builder: (context) =>
+                              UserProfileScreen(userId: widget.userId),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    username,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        SlidingNav(
+                          builder: (context) =>
+                              UserProfileScreen(userId: widget.userId),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      username,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ),
                 ],
               ),

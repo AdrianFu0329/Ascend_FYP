@@ -166,7 +166,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                         highlightColor: Colors.greenAccent,
                         style: ButtonStyle(
                           shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                              WidgetStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20.0),
                               side: BorderSide(

@@ -1,5 +1,5 @@
+import 'package:ascend_fyp/pages/community_screen.dart';
 import 'package:ascend_fyp/pages/create_post_screen.dart';
-import 'package:ascend_fyp/pages/event_screen.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
 import 'package:ascend_fyp/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -69,7 +69,7 @@ class _NavScreenState extends State<NavScreen> {
       const HomeScreen(),
       Container(),
       const CreatePostScreen(),
-      const EventScreen(),
+      const CommunityScreen(),
       const ProfileScreen(),
     ];
     return Scaffold(

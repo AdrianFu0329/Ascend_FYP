@@ -1,9 +1,6 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/edit_profile_screen.dart';
-import 'package:ascend_fyp/pages/welcome_screen.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_media_card.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
@@ -12,38 +9,74 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class UserProfileScreen extends StatefulWidget {
+  final String userId;
+
+  const UserProfileScreen({
+    super.key,
+    required this.userId,
+  });
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<UserProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<UserProfileScreen> {
+  late bool followed;
+  final currentUser = FirebaseAuth.instance.currentUser!;
   late String username;
   late String email;
+  late String photoURL;
   late String description;
+  late List<dynamic> currentFollowing;
   late List<dynamic> following;
   late List<dynamic> followers;
 
   @override
-  Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser!;
+  void initState() {
+    refreshProfileData();
+    checkIfFollowed();
+    super.initState();
+  }
 
-    Future<void> refreshProfileData() async {
-      final currentUser = FirebaseAuth.instance.currentUser!;
-      final userData = await getUserData(currentUser.uid);
+  Future<void> onFollowPressed() async {
+    Map<String, dynamic> userData = await getUserData(widget.userId);
+    List<dynamic> userFollowers = userData['followers'] ?? [];
 
-      setState(() {
-        username = userData["username"] ?? "Unknown";
-        description = userData["description"] == ""
-            ? "Empty~~ Add one today!"
-            : userData["description"]!;
-        email = userData['email'] ?? "Unknown";
-      });
+    if (!followed) {
+      // Add current user email to user's follower list
+      followers.add(currentUser.email!);
+      // Add user's email to current user following list
+      currentFollowing.add(userData['email']);
+      // Add current user to user's followers list
+      userFollowers.add(currentUser.email!);
+    } else {
+      // Remove current user email from user's follower list
+      followers.remove(currentUser.email!);
+      // Remove user's email from current user following list
+      currentFollowing.remove(userData['email']);
+      // Remove current user from user's followers list
+      userFollowers.remove(currentUser.email!);
     }
 
-    ButtonStyle buttonStyle = ButtonStyle(
+    // Update current user following list
+    DocumentReference currentUserRef =
+        FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+    await currentUserRef.update({'following': currentFollowing});
+
+    // Update user's follower list
+    DocumentReference userFollowersRef =
+        FirebaseFirestore.instance.collection('users').doc(widget.userId);
+    await userFollowersRef.update({'followers': userFollowers});
+
+    setState(() {
+      followed = !followed;
+      followers = userFollowers;
+    });
+  }
+
+  ButtonStyle getFollowButtonStyle() {
+    return ButtonStyle(
       textStyle: WidgetStateProperty.all<TextStyle>(
         const TextStyle(
           fontSize: 12,
@@ -54,75 +87,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
       foregroundColor: WidgetStateProperty.all<Color>(
           const Color.fromRGBO(247, 243, 237, 1)),
       backgroundColor: WidgetStateProperty.all<Color>(
-        Theme.of(context).scaffoldBackgroundColor,
+        followed ? Colors.red : Theme.of(context).scaffoldBackgroundColor,
       ),
       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0),
-          side: const BorderSide(
-              color: Color.fromRGBO(247, 243, 237, 1), width: 1.5),
+          side: const BorderSide(color: Colors.red, width: 1.5),
         ),
       ),
     );
+  }
 
+  Future<void> refreshProfileData() async {
+    final userData = await getUserData(widget.userId);
+
+    setState(() {
+      username = userData["username"] ?? "Unknown";
+      description = userData["description"] == ""
+          ? "Empty~~ Add one today!"
+          : userData["description"];
+      email = userData['email'] ?? "Unknown";
+      photoURL = userData["photoURL"] ?? "";
+      following = userData['following'] ?? [];
+      followers = userData['followers'] ?? [];
+      checkIfFollowed();
+    });
+  }
+
+  Future<void> checkIfFollowed() async {
+    final userData = await getUserData(widget.userId);
+    final currentUserData = await getUserData(currentUser.uid);
+    setState(() {
+      followed = currentUserData['following'].contains(userData['email']);
+      currentFollowing = currentUserData['following'];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: refreshProfileData,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Image.asset(
-              "lib/assets/images/logo_noBg.png",
-              width: 130,
-              height: 50,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Color.fromRGBO(247, 243, 237, 1),
             ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 16, 0),
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: IconButton(
-                  highlightColor: const Color.fromRGBO(194, 0, 0, 1),
-                  style: ButtonStyle(
-                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                        side: const BorderSide(
-                          color: Color.fromRGBO(194, 0, 0, 1),
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut();
-
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const WelcomeScreen()),
-                      (route) => false,
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.logout_rounded,
-                    size: 20,
-                    color: Color.fromRGBO(247, 243, 237, 1),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: FutureBuilder(
-                future: getUserData(currentUser.uid),
+                future: getUserData(widget.userId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CustomLoadingAnimation();
@@ -134,10 +157,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     username = userData["username"] ?? "Unknown";
                     description = userData["description"] == ""
                         ? "Empty~~ Add one today!"
-                        : userData["description"]!;
+                        : userData["description"];
                     email = userData['email'] ?? "Unknown";
-                    following = userData['following'] ?? [];
+                    photoURL = userData['photoURL'] ?? "";
                     followers = userData['followers'] ?? [];
+                    following = userData['following'] ?? [];
 
                     return Column(
                       children: [
@@ -153,9 +177,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     ProfilePicture(
-                                      userId: currentUser.uid,
-                                      photoURL:
-                                          currentUser.photoURL ?? "Unknown",
+                                      userId: widget.userId,
+                                      photoURL: photoURL,
                                       radius: 40,
                                       onTap: () {},
                                     ),
@@ -204,33 +227,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   username,
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
-                                subtitle: Text(
-                                  description,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
-                                ),
                                 trailing: ElevatedButton(
-                                  onPressed: () async {
-                                    final result =
-                                        await Navigator.of(context).push(
-                                      SlidingNav(
-                                        builder: (context) => EditProfileScreen(
-                                          username: username,
-                                          email: email,
-                                          description: description,
-                                        ),
-                                      ),
-                                    );
-                                    if (result != null) {
-                                      setState(() {
-                                        username = result['username'];
-                                        email = result['email'];
-                                        description = result['description'];
-                                      });
-                                    }
-                                  },
-                                  style: buttonStyle,
-                                  child: const Text('Edit Profile'),
+                                  onPressed: onFollowPressed,
+                                  style: getFollowButtonStyle(),
+                                  child: Text(
+                                    followed ? "Unfollow" : "Follow",
+                                  ),
                                 ),
                               ),
                             ],
@@ -248,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             StreamBuilder<QuerySnapshot>(
-              stream: getPostsForCurrentUser(currentUser.uid),
+              stream: getPostsForCurrentUser(widget.userId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SliverFillRemaining(
@@ -319,7 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       : const SliverToBoxAdapter(
                           child: Center(
                             child: Text(
-                              "No posts yet... Make one today!",
+                              "No posts from this user yet...",
                             ),
                           ),
                         );

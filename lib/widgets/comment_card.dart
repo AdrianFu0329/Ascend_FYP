@@ -19,7 +19,7 @@ class CommentPost extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: FutureBuilder<Map<String, String>>(
+      child: FutureBuilder<Map<String, dynamic>>(
         future: getUserData(userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

@@ -187,8 +187,7 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
                     child: IconButton(
                       highlightColor: Colors.greenAccent,
                       style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                             side: BorderSide(

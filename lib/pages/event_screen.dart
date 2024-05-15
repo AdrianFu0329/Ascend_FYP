@@ -43,31 +43,11 @@ class EventScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            title: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 36, 0, 36),
-              child: Image.asset(
-                "lib/assets/images/logo_noBg.png",
-                width: 130,
-                height: 50,
-              ),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  // Handle add event button press
-                },
-                icon: const Icon(Icons.add),
-                color: Colors.white,
-                iconSize: 24,
-              ),
-            ],
-          ),
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 24),
                 SizedBox(
                   height: 70,
                   child: Padding(
@@ -88,15 +68,28 @@ class EventScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Text(
-                    'Filter Options',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Filter Options',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          // Handle add event button press
+                        },
+                        icon: const Icon(Icons.add),
+                        color: Colors.white,
+                        iconSize: 24,
+                      ),
+                    ],
                   ),
                 ),
               ],

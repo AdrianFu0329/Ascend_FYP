@@ -88,7 +88,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
 
     ButtonStyle buttonStyle = ButtonStyle(
-      backgroundColor: MaterialStateProperty.all<Color>(
+      backgroundColor: WidgetStateProperty.all<Color>(
         const Color.fromRGBO(247, 243, 237, 1),
       ),
     );
@@ -177,7 +177,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           height: 60,
                           child: IconButton(
                             style: ButtonStyle(
-                              shape: MaterialStateProperty.all<
+                              shape: WidgetStateProperty.all<
                                   RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20.0),
