@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/pages/create_events_screen.dart';
 import 'package:flutter/material.dart';
 
 class EventCard extends StatelessWidget {
@@ -13,8 +14,22 @@ class EventCard extends StatelessWidget {
   }
 }
 
-class EventScreen extends StatelessWidget {
+class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
+
+  @override
+  State<EventScreen> createState() => _EventScreenState();
+}
+
+class _EventScreenState extends State<EventScreen> {
+  void _createEventPressed() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      isScrollControlled: true,
+      builder: (context) => const CreateEventsScreen(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +97,9 @@ class EventScreen extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        onPressed: () {
-                          // Handle add event button press
-                        },
+                        onPressed: _createEventPressed,
                         icon: const Icon(Icons.add),
-                        color: Colors.white,
+                        color: Colors.red,
                         iconSize: 24,
                       ),
                     ],
