@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SportsList extends StatefulWidget {
-  const SportsList({super.key});
+  final Function(Map<String, bool>) onSelectionChanged; // Add this line
+
+  const SportsList({super.key, required this.onSelectionChanged});
 
   @override
   _SportsListState createState() => _SportsListState();
@@ -50,6 +52,8 @@ class _SportsListState extends State<SportsList> {
                 onChanged: (value) {
                   setState(() {
                     selectedSports[sports[index]] = value!;
+                    widget.onSelectionChanged(
+                        selectedSports); // Update the parent widget
                   });
                 },
               );

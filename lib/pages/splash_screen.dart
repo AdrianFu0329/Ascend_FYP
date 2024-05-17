@@ -3,7 +3,6 @@ import 'package:ascend_fyp/navigation/wrapper_nav.dart';
 import 'package:ascend_fyp/pages/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});

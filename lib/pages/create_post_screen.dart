@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:ascend_fyp/pages/set_location_screen.dart';
 import 'package:ascend_fyp/widgets/custom_text_field.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
@@ -9,7 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreatePostScreen extends StatefulWidget {
@@ -105,7 +103,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
 
     Future<void> createPost() async {
-      if (validatePost() && _locationData != null) {
+      if (validatePost()) {
         final currentUser = FirebaseAuth.instance.currentUser!;
         String location = _locationData['location'] ?? "Unknown";
 

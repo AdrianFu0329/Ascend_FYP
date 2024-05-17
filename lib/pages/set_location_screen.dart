@@ -5,7 +5,6 @@ import 'package:ascend_fyp/models/place_autocomplete_response.dart';
 import 'package:ascend_fyp/network/network_utils.dart';
 import 'package:ascend_fyp/widgets/location_list_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class SetLocationScreen extends StatefulWidget {
