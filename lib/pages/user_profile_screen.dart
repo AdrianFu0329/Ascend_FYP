@@ -1,6 +1,7 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_media_card.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
@@ -22,7 +23,8 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<UserProfileScreen> {
-  late bool followed;
+  bool followed = false;
+  int followerCount = 0;
   final currentUser = FirebaseAuth.instance.currentUser!;
   late String username;
   late String email;
@@ -42,7 +44,6 @@ class _ProfileScreenState extends State<UserProfileScreen> {
   Future<void> onFollowPressed() async {
     Map<String, dynamic> userData = await getUserData(widget.userId);
     List<dynamic> userFollowers = userData['followers'] ?? [];
-
     if (!followed) {
       // Add current user email to user's follower list
       followers.add(currentUser.email!);

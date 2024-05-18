@@ -22,9 +22,18 @@ Stream<QuerySnapshot> getPostsFromDatabase() {
   final CollectionReference posts =
       FirebaseFirestore.instance.collection("posts");
 
-  final postsStream = posts.orderBy('timestamp', descending: true).snapshots();
+  final postsStream = posts.orderBy('timestamp', descending: false).snapshots();
 
   return postsStream;
+}
+
+Stream<QuerySnapshot> getEventsFromDatabase() {
+  final CollectionReference events =
+      FirebaseFirestore.instance.collection("events");
+
+  final eventsStream = events.orderBy('date', descending: false).snapshots();
+
+  return eventsStream;
 }
 
 Stream<QuerySnapshot> getPostsForCurrentUser(String currentUserUid) {
@@ -117,6 +126,36 @@ Future<ImageWithDimension> getProfilePic(String userId) async {
       height: 0,
       width: 0,
       aspectRatio: 0,
+    );
+  }
+}
+
+Future<Image> getEventPoster(String posterURL) async {
+  try {
+    Image imageWidget = Image.network(
+      posterURL,
+      fit: BoxFit.cover,
+    );
+
+    Completer<ImageInfo> completer = Completer<ImageInfo>();
+    imageWidget.image.resolve(const ImageConfiguration()).addListener(
+      ImageStreamListener(
+        (ImageInfo info, bool _) {
+          completer.complete(info);
+        },
+      ),
+    );
+
+    await completer.future; // Wait for the image to be loaded.
+
+    return imageWidget;
+  } catch (e) {
+    return Image.network(
+      '', // Return an empty Image.network in case of error
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Center(child: Text('Error getting image: $e'));
+      },
     );
   }
 }

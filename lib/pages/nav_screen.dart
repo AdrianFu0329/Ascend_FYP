@@ -23,11 +23,11 @@ class _NavScreenState extends State<NavScreen> {
   final double iconSize = 24;
 
   final Map<String, double> _iconSizes = {
-    'home': 24,
-    'messages': 24,
+    'home': 32,
+    'messages': 32,
     'add': 55,
     'community': 32,
-    'profile': 24,
+    'profile': 32,
   };
 
   final List<Map<String, dynamic>> _navigationItems = [

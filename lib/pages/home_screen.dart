@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Stream<QuerySnapshot> postsStream;
+  Stream<QuerySnapshot>? postsStream;
 
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text('Error: ${snapshot.error}'),
                     ),
                   );
-                } else {
+                } else if (snapshot.hasData) {
                   List postList = snapshot.data!.docs;
                   return SliverMasonryGrid.count(
                     crossAxisCount: 2,
@@ -112,6 +112,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     childCount: postList.length,
+                  );
+                } else {
+                  return const SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        SizedBox(height: 16),
+                        Center(
+                          child: Text('No posts at the moment!'),
+                        ),
+                      ],
+                    ),
                   );
                 }
               },

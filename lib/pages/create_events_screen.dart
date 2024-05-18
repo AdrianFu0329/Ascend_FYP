@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/pages/set_location_screen.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/location_list_tile.dart';
@@ -17,6 +18,7 @@ class CreateEventsScreen extends StatefulWidget {
 class _CreateEventsScreenState extends State<CreateEventsScreen> {
   TextEditingController titleController = TextEditingController();
   TextEditingController participantsController = TextEditingController();
+  TextEditingController feesController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   TextEditingController startTimeController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
@@ -91,6 +93,11 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
 
       if (participantsController.text.trim().isEmpty) {
         _showMessage('Please enter a participant count.');
+        return false;
+      }
+
+      if (feesController.text.trim().isEmpty) {
+        _showMessage('Please enter a fee amount for each participant.');
         return false;
       }
 
@@ -180,6 +187,31 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       }
     }
 
+    String getPosterURL(List<String> sportList) {
+      String posterURL = "";
+      switch (sportList[0]) {
+        case "Football":
+          posterURL = football;
+        case "Basketball":
+          posterURL = basketball;
+        case "Badminton":
+          posterURL = badminton;
+        case "Futsal":
+          posterURL = futsal;
+        case "Jogging":
+          posterURL = jogging;
+        case "Gym":
+          posterURL = gym;
+        case "Tennis":
+          posterURL = tennis;
+        case "Hiking":
+          posterURL = hiking;
+        case "Cycling":
+          posterURL = cycling;
+      }
+      return posterURL;
+    }
+
     Future<void> createEvent() async {
       if (validateEvent()) {
         final currentUser = FirebaseAuth.instance.currentUser!;
@@ -204,14 +236,18 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
             final Map<String, dynamic> eventData = {
               'eventId': eventId,
               'title': titleController.text.trim(),
-              'participants':
-                  participantsController.text.trim(), // Fixed typo here
+              'participants': participantsController.text.trim(),
+              'fees': feesController.text.trim(),
               'userId': FirebaseAuth.instance.currentUser!.uid,
               'date': dateController.text.trim(),
               'startTime': startTimeController.text.trim(),
               'endTime': endTimeController.text.trim(),
               'location': location,
               'sports': sports,
+              'timestamp': Timestamp.now(),
+              'posterURL': getPosterURL(sports),
+              'requestList': [],
+              'acceptedList': [],
             };
 
             // Add the post document to Firestore
@@ -231,6 +267,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
 
             titleController.clear();
             participantsController.clear();
+            feesController.clear();
             _locationData.clear();
             dateController.clear();
             startTimeController.clear();
@@ -304,6 +341,11 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                     CustomTextField(
                       hintText: "No. of Participants (eg: 10)",
                       controller: participantsController,
+                    ),
+                    const SizedBox(height: 24),
+                    CustomTextField(
+                      hintText: "Fees (eg: RM 10 per pax, Free)",
+                      controller: feesController,
                     ),
                     const SizedBox(height: 24),
                     SizedBox(

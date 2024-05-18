@@ -19,6 +19,7 @@ class _SportsListState extends State<SportsList> {
     'Gym',
     'Tennis',
     'Hiking',
+    'Cycling',
   ];
 
   final Map<String, bool> selectedSports = {};
