@@ -1,6 +1,7 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/profile_screen.dart';
 import 'package:ascend_fyp/pages/user_profile_screen.dart';
 import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/comment_card.dart';
@@ -37,7 +38,7 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
   void initState() {
     super.initState();
     likeCount = widget.likes.length;
-    isLiked = widget.likes.contains(currentUser.email);
+    isLiked = widget.likes.contains(currentUser.uid);
   }
 
   void onLikePressed() {
@@ -45,10 +46,10 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
       isLiked = !isLiked;
       if (isLiked == true) {
         likeCount++;
-        widget.likes.add(currentUser.email!);
+        widget.likes.add(currentUser.uid);
       } else {
         likeCount--;
-        widget.likes.remove(currentUser.email);
+        widget.likes.remove(currentUser.uid);
       }
     });
 
@@ -230,10 +231,10 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       isLiked = !isLiked;
       if (isLiked) {
         likeCount++;
-        widget.likes.add(currentUser.email!);
+        widget.likes.add(currentUser.uid);
       } else {
         likeCount--;
-        widget.likes.remove(currentUser.email);
+        widget.likes.remove(currentUser.uid);
       }
     });
 
@@ -286,12 +287,20 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                     photoURL: photoUrl,
                     radius: 15,
                     onTap: () {
-                      Navigator.of(context).push(
-                        SlidingNav(
-                          builder: (context) =>
-                              UserProfileScreen(userId: widget.userId),
-                        ),
-                      );
+                      if (widget.userId == currentUser.uid) {
+                        Navigator.of(context).push(
+                          SlidingNav(
+                            builder: (context) => const ProfileScreen(),
+                          ),
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          SlidingNav(
+                            builder: (context) =>
+                                UserProfileScreen(userId: widget.userId),
+                          ),
+                        );
+                      }
                     },
                   ),
                   const SizedBox(width: 12),

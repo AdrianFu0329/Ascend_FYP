@@ -22,7 +22,7 @@ Stream<QuerySnapshot> getPostsFromDatabase() {
   final CollectionReference posts =
       FirebaseFirestore.instance.collection("posts");
 
-  final postsStream = posts.orderBy('timestamp', descending: false).snapshots();
+  final postsStream = posts.orderBy('timestamp', descending: true).snapshots();
 
   return postsStream;
 }
@@ -146,12 +146,12 @@ Future<Image> getEventPoster(String posterURL) async {
       ),
     );
 
-    await completer.future; // Wait for the image to be loaded.
+    await completer.future;
 
     return imageWidget;
   } catch (e) {
     return Image.network(
-      '', // Return an empty Image.network in case of error
+      '',
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
         return Center(child: Text('Error getting image: $e'));

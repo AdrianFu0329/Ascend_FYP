@@ -1,7 +1,6 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
-import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_media_card.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
@@ -23,7 +22,7 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<UserProfileScreen> {
-  bool followed = false;
+  late bool followed;
   int followerCount = 0;
   final currentUser = FirebaseAuth.instance.currentUser!;
   late String username;
@@ -41,23 +40,45 @@ class _ProfileScreenState extends State<UserProfileScreen> {
     super.initState();
   }
 
+  void _showMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'OK',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> onFollowPressed() async {
     Map<String, dynamic> userData = await getUserData(widget.userId);
     List<dynamic> userFollowers = userData['followers'] ?? [];
     if (!followed) {
-      // Add current user email to user's follower list
-      followers.add(currentUser.email!);
       // Add user's email to current user following list
-      currentFollowing.add(userData['email']);
+      currentFollowing.add(widget.userId);
       // Add current user to user's followers list
-      userFollowers.add(currentUser.email!);
+      userFollowers.add(currentUser.uid);
     } else {
-      // Remove current user email from user's follower list
-      followers.remove(currentUser.email!);
       // Remove user's email from current user following list
-      currentFollowing.remove(userData['email']);
+      currentFollowing.remove(widget.userId);
       // Remove current user from user's followers list
-      userFollowers.remove(currentUser.email!);
+      userFollowers.remove(currentUser.uid);
     }
 
     // Update current user following list
@@ -116,10 +137,9 @@ class _ProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> checkIfFollowed() async {
-    final userData = await getUserData(widget.userId);
     final currentUserData = await getUserData(currentUser.uid);
     setState(() {
-      followed = currentUserData['following'].contains(userData['email']);
+      followed = currentUserData['following'].contains(widget.userId);
       currentFollowing = currentUserData['following'];
     });
   }
