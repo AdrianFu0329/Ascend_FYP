@@ -22,6 +22,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
   TextEditingController dateController = TextEditingController();
   TextEditingController startTimeController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
+  TextEditingController otherController = TextEditingController();
   Map<String, dynamic> _locationData = {};
   String? location;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -101,7 +102,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
         return false;
       }
 
-      if (sports.isEmpty) {
+      if (sports.isEmpty && otherController.text.trim().isEmpty) {
         _showMessage('Please choose a sport for your event.');
         return false;
       }
@@ -174,7 +175,9 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       final Map<String, dynamic> locationData = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const SetLocationScreen(),
+          builder: (context) => const SetLocationScreen(
+            enableCurrentLocation: false,
+          ),
         ),
       );
       String? city = locationData['location'];
@@ -192,22 +195,34 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       switch (sportList[0]) {
         case "Football":
           posterURL = football;
+          break;
         case "Basketball":
           posterURL = basketball;
+          break;
         case "Badminton":
           posterURL = badminton;
+          break;
         case "Futsal":
           posterURL = futsal;
+          break;
         case "Jogging":
           posterURL = jogging;
+          break;
         case "Gym":
           posterURL = gym;
+          break;
         case "Tennis":
           posterURL = tennis;
+          break;
         case "Hiking":
           posterURL = hiking;
+          break;
         case "Cycling":
           posterURL = cycling;
+          break;
+        default:
+          posterURL = general;
+          break;
       }
       return posterURL;
     }
@@ -220,7 +235,11 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
 
         selectedSports.forEach((sport, isSelected) {
           if (isSelected) {
-            sports.add(sport);
+            if (sport == "Other") {
+              sports.add(otherController.text);
+            } else {
+              sports.add(sport);
+            }
           }
         });
 
@@ -272,6 +291,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
             dateController.clear();
             startTimeController.clear();
             endTimeController.clear();
+            otherController.clear();
             setState(() {
               isCreating = false;
               selectedSports.updateAll((sport, isSelected) => false);
@@ -297,7 +317,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
 
     return makeDismissible(
       child: DraggableScrollableSheet(
-        initialChildSize: 0.5,
+        initialChildSize: 0.6,
         maxChildSize: 0.9,
         minChildSize: 0.25,
         expand: false,
@@ -349,7 +369,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
-                      height: 230,
+                      height: 300, // Adjusted height
                       child: SportsList(
                         onSelectionChanged: (selected) {
                           setState(() {
@@ -358,6 +378,13 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                         },
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    if (selectedSports['Other'] ==
+                        true) // Conditionally display the text field
+                      CustomTextField(
+                        controller: otherController,
+                        hintText: "Other (please specify)",
+                      ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
@@ -514,7 +541,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                         ),
                         onPressed: () {
                           if (validateEvent()) {
-                            createEvent(); // Corrected here to call the function
+                            createEvent();
                           }
                         },
                         child: Text(

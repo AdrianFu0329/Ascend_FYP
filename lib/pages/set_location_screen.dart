@@ -8,7 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 class SetLocationScreen extends StatefulWidget {
-  const SetLocationScreen({super.key});
+  final bool enableCurrentLocation;
+  const SetLocationScreen({
+    super.key,
+    required this.enableCurrentLocation,
+  });
 
   @override
   State<SetLocationScreen> createState() => _SetLocationScreenState();
@@ -161,21 +165,23 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  await getCurrentPosition();
-                },
-                style: currentLocationStyle,
-                icon: Image.asset(
-                  "lib/assets/images/location_icon.png",
-                  width: 18,
-                  height: 18,
-                ),
-                label: const Text("Use My Current Location"),
-              ),
-            ),
+            widget.enableCurrentLocation
+                ? SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await getCurrentPosition();
+                      },
+                      style: currentLocationStyle,
+                      icon: Image.asset(
+                        "lib/assets/images/location_icon.png",
+                        width: 18,
+                        height: 18,
+                      ),
+                      label: const Text("Use My Current Location"),
+                    ),
+                  )
+                : Container(),
             const SizedBox(height: 24),
             Expanded(
               child: ListView.builder(

@@ -180,7 +180,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       final Map<String, dynamic> locationData = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const SetLocationScreen(),
+          builder: (context) => const SetLocationScreen(
+            enableCurrentLocation: true,
+          ),
         ),
       );
       String? city = locationData['location'];

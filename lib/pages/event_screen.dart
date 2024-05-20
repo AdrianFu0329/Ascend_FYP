@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/pages/create_events_screen.dart';
+import 'package:ascend_fyp/pages/filter_options_screen.dart';
 import 'package:ascend_fyp/widgets/event_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,19 +15,7 @@ class EventScreen extends StatefulWidget {
 
 class _EventScreenState extends State<EventScreen> {
   Stream<QuerySnapshot>? eventsStream;
-  late String eventId;
-  late String userId;
-  late String eventTitle;
-  late String eventDate;
-  late List<String> eventSport;
-  late String eventStartTime;
-  late String eventEndTime;
-  late String eventLocation;
-  late String eventFees;
-  late String eventParticipants;
-  late List<dynamic> requestList;
-  late List<dynamic> acceptedList;
-  late String posterURL;
+  Map<String, bool> filterOptions = {};
 
   @override
   void initState() {
@@ -40,38 +29,50 @@ class _EventScreenState extends State<EventScreen> {
     });
   }
 
-  void _createEventPressed() {
+  void modalBottomSheet(Widget screen) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       isScrollControlled: true,
-      builder: (context) => const CreateEventsScreen(),
+      builder: (context) => screen,
     );
+  }
+
+  void filterEvents() async {
+    final selectedFilters = await showModalBottomSheet<Map<String, bool>>(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      isScrollControlled: true,
+      builder: (context) => const FilterOptionsScreen(),
+    );
+
+    if (selectedFilters != null) {
+      setState(() {
+        filterOptions = selectedFilters;
+        eventsStream = getFilteredEventsFromDatabase(filterOptions);
+      });
+    }
+  }
+
+  Stream<QuerySnapshot> getFilteredEventsFromDatabase(
+      Map<String, bool> filters) {
+    List<String> selectedSports = filters.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+
+    if (selectedSports.isEmpty) {
+      return getEventsFromDatabase();
+    }
+
+    return FirebaseFirestore.instance
+        .collection('events')
+        .where('sports', arrayContainsAny: selectedSports)
+        .snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
-    TextStyle textBoxStyle = const TextStyle(
-      color: Color.fromRGBO(192, 192, 192, 1),
-      fontSize: 14,
-    );
-
-    OutlineInputBorder normalBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(30),
-      borderSide: const BorderSide(
-        color: Color.fromRGBO(192, 192, 192, 1),
-        width: 2,
-      ),
-    );
-
-    OutlineInputBorder focusedBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(30),
-      borderSide: const BorderSide(
-        color: Color.fromRGBO(192, 192, 192, 1),
-        width: 2.5,
-      ),
-    );
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
@@ -81,38 +82,31 @@ class _EventScreenState extends State<EventScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                SizedBox(
-                  height: 70,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    child: TextField(
-                      style: textBoxStyle,
-                      decoration: InputDecoration(
-                        hintText: 'Search',
-                        hintStyle: textBoxStyle,
-                        prefixIcon: const Icon(Icons.search,
-                            color: Color.fromRGBO(192, 192, 192, 1)),
-                        filled: true,
-                        fillColor: const Color.fromRGBO(20, 23, 26, 1),
-                        border: normalBorder,
-                        focusedBorder: focusedBorder,
-                      ),
-                    ),
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Filter Options',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      IconButton(
+                        onPressed: filterEvents,
+                        icon: Row(
+                          children: [
+                            Text(
+                              'Filter Options',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const Icon(
+                              Icons.filter_alt_rounded,
+                              color: Color.fromRGBO(247, 243, 237, 1),
+                            ),
+                          ],
+                        ),
                       ),
                       IconButton(
-                        onPressed: _createEventPressed,
+                        onPressed: () {
+                          modalBottomSheet(const CreateEventsScreen());
+                        },
                         icon: const Icon(Icons.add),
                         color: Colors.red,
                         iconSize: 24,
@@ -152,34 +146,22 @@ class _EventScreenState extends State<EventScreen> {
                       DocumentSnapshot doc = eventsList[index];
                       Map<String, dynamic> data =
                           doc.data() as Map<String, dynamic>;
-                      eventId = data['eventId'];
-                      userId = data['userId'];
-                      eventTitle = data['title'];
-                      requestList = List<String>.from(data['requestList']);
-                      acceptedList = List<String>.from(data['acceptedList']);
-                      eventDate = data['date'];
-                      eventStartTime = data['startTime'];
-                      eventEndTime = data['endTime'];
-                      eventFees = data["fees"];
-                      eventSport = List<String>.from(data['sports']);
-                      eventLocation = data['location'];
-                      posterURL = data['posterURL'];
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: EventCard(
-                          eventId: eventId,
-                          userId: userId,
-                          eventTitle: eventTitle,
-                          requestList: requestList,
-                          acceptedList: acceptedList,
-                          eventDate: eventDate,
-                          eventStartTime: eventStartTime,
-                          eventEndTime: eventEndTime,
-                          eventFees: eventFees,
-                          eventLocation: eventLocation,
-                          eventSport: eventSport,
-                          posterURL: posterURL,
+                          eventId: data['eventId'],
+                          userId: data['userId'],
+                          eventTitle: data['title'],
+                          requestList: List<String>.from(data['requestList']),
+                          acceptedList: List<String>.from(data['acceptedList']),
+                          eventDate: data['date'],
+                          eventStartTime: data['startTime'],
+                          eventEndTime: data['endTime'],
+                          eventFees: data['fees'],
+                          eventLocation: data['location'],
+                          eventSport: List<String>.from(data['sports']),
+                          posterURL: data['posterURL'],
                         ),
                       );
                     },
