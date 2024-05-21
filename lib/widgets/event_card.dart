@@ -1,3 +1,5 @@
+import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/event_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
@@ -15,6 +17,7 @@ class EventCard extends StatelessWidget {
   final List<dynamic> eventSport;
   final String eventLocation;
   final String posterURL;
+  final String participants;
 
   const EventCard({
     super.key,
@@ -30,11 +33,34 @@ class EventCard extends StatelessWidget {
     required this.eventSport,
     required this.eventLocation,
     required this.posterURL,
+    required this.participants,
   });
 
   @override
   Widget build(BuildContext context) {
     String sportsString = eventSport.join(', ');
+
+    void _navigateToEventDetailsScreen() {
+      Navigator.of(context).push(
+        SlidingNav(
+          builder: (context) => EventDetailsScreen(
+            eventId: eventId,
+            userId: userId,
+            eventTitle: eventTitle,
+            requestList: requestList,
+            acceptedList: acceptedList,
+            eventDate: eventDate,
+            eventStartTime: eventStartTime,
+            eventEndTime: eventEndTime,
+            eventFees: eventFees,
+            eventSport: eventSport,
+            eventLocation: eventLocation,
+            posterURL: posterURL,
+            participants: participants,
+          ),
+        ),
+      );
+    }
 
     Widget buildCard() {
       return SizedBox(
@@ -76,7 +102,7 @@ class EventCard extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withOpacity(0.5),
                 ),
               ),
               Padding(
@@ -85,21 +111,27 @@ class EventCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      eventTitle,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                    Flexible(
+                      child: Text(
+                        eventTitle,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          sportsString,
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Flexible(
+                          child: Text(
+                            sportsString,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                         ),
-                        Text(
-                          "Date: $eventDate",
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Flexible(
+                          child: Text(
+                            "Date: $eventDate",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                         ),
                       ],
                     ),
@@ -113,7 +145,7 @@ class EventCard extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () {},
+      onTap: _navigateToEventDetailsScreen,
       child: buildCard(),
     );
   }

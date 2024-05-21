@@ -162,6 +162,7 @@ class _EventScreenState extends State<EventScreen> {
                           eventLocation: data['location'],
                           eventSport: List<String>.from(data['sports']),
                           posterURL: data['posterURL'],
+                          participants: data['participants'],
                         ),
                       );
                     },
