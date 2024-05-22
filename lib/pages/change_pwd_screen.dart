@@ -15,7 +15,6 @@ class _ChangePwdScreenState extends State<ChangePwdScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   final currentUser = FirebaseAuth.instance.currentUser!;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _showMessage(String message) {
     showDialog(

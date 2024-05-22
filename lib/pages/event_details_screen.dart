@@ -62,6 +62,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     DocumentReference postRef =
         FirebaseFirestore.instance.collection('events').doc(widget.eventId);
     postRef.update({'requestList': widget.requestList});
+
+    DocumentReference userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('events')
+        .doc(widget.eventId);
+    userRef.update({'requestList': widget.requestList});
   }
 
   @override

@@ -241,6 +241,13 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     DocumentReference postRef =
         FirebaseFirestore.instance.collection('posts').doc(widget.postId);
     postRef.update({'likes': widget.likes});
+
+    DocumentReference userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('posts')
+        .doc(widget.postId);
+    userRef.update({'likes': widget.likes});
   }
 
   String fromDateToString(Timestamp timestamp) {

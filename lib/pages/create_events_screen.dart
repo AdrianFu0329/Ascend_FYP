@@ -232,11 +232,13 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
         final currentUser = FirebaseAuth.instance.currentUser!;
         String location = _locationData['location'] ?? "Unknown";
         List<String> sports = [];
+        bool isOther = false;
 
         selectedSports.forEach((sport, isSelected) {
           if (isSelected) {
             if (sport == "Other") {
               sports.add(otherController.text);
+              isOther = true;
             } else {
               sports.add(sport);
             }
@@ -267,6 +269,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
               'posterURL': getPosterURL(sports),
               'requestList': [],
               'acceptedList': [],
+              'isOther': isOther,
             };
 
             // Add the post document to Firestore

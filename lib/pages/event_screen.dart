@@ -61,14 +61,37 @@ class _EventScreenState extends State<EventScreen> {
         .map((entry) => entry.key)
         .toList();
 
+    List<String> excludedSports = [
+      'Football',
+      'Basketball',
+      'Tennis',
+      'Gym',
+      'Jogging',
+      'Hiking',
+      'Futsal',
+      'Badminton',
+      'Cycling'
+    ];
+
     if (selectedSports.isEmpty) {
       return getEventsFromDatabase();
+    } else if (selectedSports.contains('Other') && selectedSports.length > 1) {
+      excludedSports.removeWhere((sport) => selectedSports.contains(sport));
+      return FirebaseFirestore.instance
+          .collection('events')
+          .where('sports', isNotEqualTo: excludedSports)
+          .snapshots();
+    } else if (selectedSports.contains('Other') && selectedSports.length == 1) {
+      return FirebaseFirestore.instance
+          .collection('events')
+          .where('isOther', isEqualTo: true)
+          .snapshots();
+    } else {
+      return FirebaseFirestore.instance
+          .collection('events')
+          .where('sports', arrayContainsAny: selectedSports)
+          .snapshots();
     }
-
-    return FirebaseFirestore.instance
-        .collection('events')
-        .where('sports', arrayContainsAny: selectedSports)
-        .snapshots();
   }
 
   @override
@@ -103,13 +126,26 @@ class _EventScreenState extends State<EventScreen> {
                           ],
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          modalBottomSheet(const CreateEventsScreen());
-                        },
-                        icon: const Icon(Icons.add),
-                        color: Colors.red,
-                        iconSize: 24,
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              modalBottomSheet(const CreateEventsScreen());
+                            },
+                            icon: const Icon(Icons.add),
+                            color: Colors.red,
+                            iconSize: 24,
+                          ),
+                          const SizedBox(width: 24),
+                          IconButton(
+                            onPressed: () {
+                              //modalBottomSheet();
+                            },
+                            icon: const Icon(Icons.notifications),
+                            color: Colors.white,
+                            iconSize: 24,
+                          ),
+                        ],
                       ),
                     ],
                   ),

@@ -1,4 +1,3 @@
-import 'package:ascend_fyp/widgets/custom_text_field.dart';
 import 'package:ascend_fyp/widgets/sport_list.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +10,6 @@ class FilterOptionsScreen extends StatefulWidget {
 
 class _FilterOptionsScreenState extends State<FilterOptionsScreen> {
   Map<String, bool> selectedSports = {};
-  TextEditingController otherController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -49,6 +47,11 @@ class _FilterOptionsScreenState extends State<FilterOptionsScreen> {
           sports.add(sport);
         }
       });
+      // If "Other" is selected, add it as is
+      if (selectedSports['Other'] == true) {
+        sports.add('Other');
+      }
+      // Return true to indicate filters were added
       return true;
     }
 
@@ -107,20 +110,14 @@ class _FilterOptionsScreenState extends State<FilterOptionsScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 8),
-                if (selectedSports['Other'] == true)
-                  CustomTextField(
-                    controller: otherController,
-                    hintText: "Other (please specify)",
-                  ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all<Color>(
+                      backgroundColor: MaterialStateProperty.all<Color>(
                           const Color.fromRGBO(194, 0, 0, 1)),
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.0),
                           side: const BorderSide(
