@@ -48,6 +48,18 @@ Stream<QuerySnapshot> getPostsForCurrentUser(String currentUserUid) {
   return postsStream;
 }
 
+Stream<QuerySnapshot> getEventsForCurrentUser(String currentUserUid) {
+  final DocumentReference events =
+      FirebaseFirestore.instance.collection("users").doc(currentUserUid);
+
+  final eventsStream = events
+      .collection('events')
+      .orderBy('date', descending: false)
+      .snapshots();
+
+  return eventsStream;
+}
+
 Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
   List<ImageWithDimension> images = [];
 
