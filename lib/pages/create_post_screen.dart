@@ -419,12 +419,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
             ),
             if (_isCreatingPost)
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black.withOpacity(1),
-                  child: const Center(
-                    child: ContainerLoadingAnimation(),
-                  ),
+              const Positioned.fill(
+                child: Center(
+                  child: ContainerLoadingAnimation(),
                 ),
               ),
           ],
