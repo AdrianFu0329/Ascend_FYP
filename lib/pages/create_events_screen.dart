@@ -1,12 +1,12 @@
 import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/pages/set_location_screen.dart';
+import 'package:ascend_fyp/widgets/creation_sport_list.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/location_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/widgets/custom_text_field.dart';
-import 'package:ascend_fyp/widgets/sport_list.dart';
 
 class CreateEventsScreen extends StatefulWidget {
   const CreateEventsScreen({super.key});
@@ -26,8 +26,10 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
   Map<String, dynamic> _locationData = {};
   String? location;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  Map<String, bool> selectedSports = {};
+  String? selectedSports;
   bool isCreating = false;
+  bool ownerParticipation = false;
+  final ValueNotifier<bool> resetNotifier = ValueNotifier(false);
 
   @override
   Widget build(BuildContext context) {
@@ -80,13 +82,6 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
     }
 
     bool validateEvent() {
-      List<String> sports = [];
-      selectedSports.forEach((sport, isSelected) {
-        if (isSelected) {
-          sports.add(sport);
-        }
-      });
-
       if (titleController.text.trim().isEmpty) {
         _showMessage('Please enter a title.');
         return false;
@@ -102,7 +97,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
         return false;
       }
 
-      if (sports.isEmpty && otherController.text.trim().isEmpty) {
+      if (selectedSports == null && otherController.text.trim().isEmpty) {
         _showMessage('Please choose a sport for your event.');
         return false;
       }
@@ -190,9 +185,9 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       }
     }
 
-    String getPosterURL(List<String> sportList) {
+    String getPosterURL(String selectedSport) {
       String posterURL = "";
-      switch (sportList[0]) {
+      switch (selectedSport) {
         case "Football":
           posterURL = football;
           break;
@@ -231,28 +226,26 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       if (validateEvent()) {
         final currentUser = FirebaseAuth.instance.currentUser!;
         String location = _locationData['location'] ?? "Unknown";
-        List<String> sports = [];
         bool isOther = false;
-
-        selectedSports.forEach((sport, isSelected) {
-          if (isSelected) {
-            if (sport == "Other") {
-              sports.add(otherController.text);
-              isOther = true;
-            } else {
-              sports.add(sport);
-            }
-          }
-        });
 
         if (_formKey.currentState!.validate()) {
           setState(() {
             isCreating = true;
+            if (otherController.text.isNotEmpty) {
+              isOther = true;
+              selectedSports = otherController.text.trim();
+            }
           });
 
           try {
             final String eventId =
                 FirebaseFirestore.instance.collection('events').doc().id;
+            List<String> acceptedList = [];
+            if (ownerParticipation == false) {
+              acceptedList = [];
+            } else {
+              acceptedList.add(currentUser.uid);
+            }
 
             final Map<String, dynamic> eventData = {
               'eventId': eventId,
@@ -264,15 +257,15 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
               'startTime': startTimeController.text.trim(),
               'endTime': endTimeController.text.trim(),
               'location': location,
-              'sports': sports,
+              'sports': selectedSports,
               'timestamp': Timestamp.now(),
-              'posterURL': getPosterURL(sports),
+              'posterURL': getPosterURL(selectedSports!),
               'requestList': [],
-              'acceptedList': [],
+              'acceptedList': acceptedList,
               'isOther': isOther,
             };
 
-            // Add the post document to Firestore
+            // Add the event document to Firestore
             await FirebaseFirestore.instance
                 .collection('events')
                 .doc(eventId)
@@ -297,8 +290,9 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
             otherController.clear();
             setState(() {
               isCreating = false;
-              selectedSports.updateAll((sport, isSelected) => false);
+              selectedSports = null;
             });
+            resetNotifier.value = !resetNotifier.value;
           } catch (error) {
             _showMessage('Error creating post: $error');
             setState(() {
@@ -373,21 +367,37 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                     const SizedBox(height: 24),
                     SizedBox(
                       height: 300, // Adjusted height
-                      child: SportsList(
+                      child: CreationSportsList(
                         onSelectionChanged: (selected) {
                           setState(() {
                             selectedSports = selected;
                           });
                         },
+                        resetNotifier: resetNotifier,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    if (selectedSports['Other'] ==
-                        true) // Conditionally display the text field
+                    if (selectedSports ==
+                        'Other') // Conditionally display the text field
                       CustomTextField(
                         controller: otherController,
                         hintText: "Other (please specify)",
                       ),
+                    const SizedBox(height: 24),
+                    CheckboxListTile(
+                      title: Text(
+                        "I am participating in this event",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      value: ownerParticipation,
+                      onChanged: (bool? value) {
+                        setState(
+                          () {
+                            ownerParticipation = value ?? false;
+                          },
+                        );
+                      },
+                    ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,

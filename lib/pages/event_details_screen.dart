@@ -14,7 +14,7 @@ class EventDetailsScreen extends StatefulWidget {
   final String eventStartTime;
   final String eventEndTime;
   final String eventFees;
-  final List<dynamic> eventSport;
+  final String eventSport;
   final String eventLocation;
   final String posterURL;
   final String participants;
@@ -42,6 +42,7 @@ class EventDetailsScreen extends StatefulWidget {
 
 class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool requestedToJoin = false;
+  bool joined = false;
   final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
@@ -49,6 +50,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     super.initState();
     if (widget.requestList.contains(currentUser.uid)) {
       requestedToJoin = true;
+    }
+
+    if (widget.acceptedList.contains(currentUser.uid)) {
+      joined = true;
     }
   }
 
@@ -58,6 +63,37 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     });
 
     widget.requestList.add(currentUser.uid);
+
+    final String notificationId = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('event-notification')
+        .doc()
+        .id;
+
+    final Map<String, dynamic> notificationData = {
+      'notificationId': notificationId,
+      'eventId': widget.eventId,
+      'message':
+          "${currentUser.displayName} has requested to join your sports event '${widget.eventTitle}'. You may approve or deny his request below.",
+      'participants': widget.participants,
+      'fees': widget.eventFees,
+      'requestUserId': FirebaseAuth.instance.currentUser!.uid,
+      'date': widget.eventDate,
+      'startTime': widget.eventStartTime,
+      'endTime': widget.eventEndTime,
+      'location': widget.eventLocation,
+      'timestamp': Timestamp.now(),
+      'acceptedList': widget.acceptedList,
+    };
+
+    // Add the notification document to Firestore
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('event-notification')
+        .doc(notificationId)
+        .set(notificationData);
 
     DocumentReference postRef =
         FirebaseFirestore.instance.collection('events').doc(widget.eventId);
@@ -151,7 +187,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             const SizedBox(width: 12),
                             Flexible(
                               child: Text(
-                                "Sports Involved: ${widget.eventSport.join(', ')}",
+                                "Sports Involved: ${widget.eventSport}",
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ),
@@ -272,32 +308,44 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 return ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all<Color>(
-                      requestedToJoin
+                      joined
                           ? Colors.greenAccent
-                          : const Color.fromRGBO(194, 0, 0, 1),
+                          : (requestedToJoin
+                              ? Colors.greenAccent
+                              : const Color.fromRGBO(194, 0, 0, 1)),
                     ),
                     shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
                         side: BorderSide(
-                          color: requestedToJoin
+                          color: joined
                               ? Colors.greenAccent
-                              : const Color.fromRGBO(194, 0, 0, 1),
+                              : (requestedToJoin
+                                  ? Colors.greenAccent
+                                  : const Color.fromRGBO(194, 0, 0, 1)),
                           width: 1.5,
                         ),
                       ),
                     ),
                   ),
-                  onPressed: requestedToJoin ? null : onRequestPressed,
+                  onPressed: joined
+                      ? null
+                      : (requestedToJoin ? null : onRequestPressed),
                   child: Text(
-                    requestedToJoin ? 'Already Requested' : 'Request to Join',
+                    joined
+                        ? "Joined Event"
+                        : (requestedToJoin
+                            ? 'Already Requested'
+                            : 'Request to Join'),
                     style: TextStyle(
                       fontSize: 14,
                       fontFamily: 'Merriweather Sans',
                       fontWeight: FontWeight.bold,
-                      color: requestedToJoin
+                      color: joined
                           ? Theme.of(context).scaffoldBackgroundColor
-                          : const Color.fromRGBO(247, 243, 237, 1),
+                          : (requestedToJoin
+                              ? Theme.of(context).scaffoldBackgroundColor
+                              : const Color.fromRGBO(247, 243, 237, 1)),
                     ),
                   ),
                 );

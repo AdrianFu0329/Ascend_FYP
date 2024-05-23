@@ -14,7 +14,7 @@ class EventCard extends StatelessWidget {
   final String eventStartTime;
   final String eventEndTime;
   final String eventFees;
-  final List<dynamic> eventSport;
+  final String eventSport;
   final String eventLocation;
   final String posterURL;
   final String participants;
@@ -38,8 +38,6 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String sportsString = eventSport.join(', ');
-
     void _navigateToEventDetailsScreen() {
       Navigator.of(context).push(
         SlidingNav(
@@ -123,7 +121,7 @@ class EventCard extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            sportsString,
+                            eventSport,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),

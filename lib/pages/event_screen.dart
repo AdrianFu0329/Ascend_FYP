@@ -197,7 +197,7 @@ class _EventScreenState extends State<EventScreen> {
                           eventEndTime: data['endTime'],
                           eventFees: data['fees'],
                           eventLocation: data['location'],
-                          eventSport: List<String>.from(data['sports']),
+                          eventSport: data['sports'],
                           posterURL: data['posterURL'],
                           participants: data['participants'],
                         ),

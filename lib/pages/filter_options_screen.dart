@@ -1,4 +1,4 @@
-import 'package:ascend_fyp/widgets/sport_list.dart';
+import 'package:ascend_fyp/widgets/checkBox_sport_list.dart';
 import 'package:flutter/material.dart';
 
 class FilterOptionsScreen extends StatefulWidget {
