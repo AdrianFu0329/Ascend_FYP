@@ -29,7 +29,8 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
   String? selectedSports;
   bool isCreating = false;
   bool ownerParticipation = false;
-  final ValueNotifier<bool> resetNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> resetNotifierSportList = ValueNotifier(false);
+  final ValueNotifier<bool> resetNotifierParticipation = ValueNotifier(false);
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +293,9 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
               isCreating = false;
               selectedSports = null;
             });
-            resetNotifier.value = !resetNotifier.value;
+            resetNotifierSportList.value = !resetNotifierSportList.value;
+            resetNotifierParticipation.value =
+                !resetNotifierParticipation.value;
           } catch (error) {
             _showMessage('Error creating post: $error');
             setState(() {
@@ -373,7 +376,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                             selectedSports = selected;
                           });
                         },
-                        resetNotifier: resetNotifier,
+                        resetNotifier: resetNotifierSportList,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -384,16 +387,22 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                         hintText: "Other (please specify)",
                       ),
                     const SizedBox(height: 24),
-                    CheckboxListTile(
-                      title: Text(
-                        "I am participating in this event",
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      value: ownerParticipation,
-                      onChanged: (bool? value) {
-                        setState(
-                          () {
-                            ownerParticipation = value ?? false;
+                    ValueListenableBuilder<bool>(
+                      valueListenable: resetNotifierParticipation,
+                      builder: (context, reset, child) {
+                        if (reset) {
+                          ownerParticipation = false;
+                        }
+                        return CheckboxListTile(
+                          title: Text(
+                            "I am participating in this event",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          value: ownerParticipation,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              ownerParticipation = value ?? false;
+                            });
                           },
                         );
                       },
