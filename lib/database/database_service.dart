@@ -48,6 +48,12 @@ Stream<QuerySnapshot> getPostsForCurrentUser(String currentUserUid) {
   return postsStream;
 }
 
+Future<Map<String, dynamic>> getEventData(String eventId) async {
+  DocumentSnapshot eventSnapshot =
+      await FirebaseFirestore.instance.collection('events').doc(eventId).get();
+  return eventSnapshot.data() as Map<String, dynamic>;
+}
+
 Stream<QuerySnapshot> getEventsForCurrentUser(String currentUserUid) {
   final DocumentReference events =
       FirebaseFirestore.instance.collection("users").doc(currentUserUid);
@@ -55,6 +61,18 @@ Stream<QuerySnapshot> getEventsForCurrentUser(String currentUserUid) {
   final eventsStream = events
       .collection('events')
       .orderBy('date', descending: false)
+      .snapshots();
+
+  return eventsStream;
+}
+
+Stream<QuerySnapshot> getNotiForCurrentUser(String currentUserUid) {
+  final DocumentReference events =
+      FirebaseFirestore.instance.collection("users").doc(currentUserUid);
+
+  final eventsStream = events
+      .collection('notification')
+      .orderBy('timestamp', descending: false)
       .snapshots();
 
   return eventsStream;
@@ -142,7 +160,7 @@ Future<ImageWithDimension> getProfilePic(String userId) async {
   }
 }
 
-Future<Image> getEventPoster(String posterURL) async {
+Future<Image> getPoster(String posterURL) async {
   try {
     Image imageWidget = Image.network(
       posterURL,

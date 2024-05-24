@@ -1,0 +1,515 @@
+import 'package:ascend_fyp/database/database_service.dart';
+import 'package:ascend_fyp/models/constants.dart';
+import 'package:ascend_fyp/widgets/loading.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+class NotificationDetailsScreen extends StatefulWidget {
+  final String notificationId;
+  final String eventId;
+  final String ownerUserId;
+  final String requestUserId;
+  final Timestamp timestamp;
+  final String title;
+  final String message;
+  final String type;
+
+  const NotificationDetailsScreen({
+    super.key,
+    required this.notificationId,
+    required this.eventId,
+    required this.ownerUserId,
+    required this.requestUserId,
+    required this.timestamp,
+    required this.title,
+    required this.message,
+    required this.type,
+  });
+
+  @override
+  State<NotificationDetailsScreen> createState() =>
+      _NotificationDetailsScreenState();
+}
+
+class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
+  String eventTitle = "";
+  String eventSport = "";
+  String eventDate = "";
+  String eventLocation = "";
+  String participants = "";
+  List<dynamic> requestList = [];
+  List<dynamic> acceptedList = [];
+  final currentUser = FirebaseAuth.instance.currentUser!;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEventData();
+  }
+
+  Future<void> _fetchEventData() async {
+    final eventData = await getEventData(widget.eventId);
+    setState(() {
+      eventTitle = eventData['title'];
+      eventSport = eventData['sports'];
+      eventDate = eventData['date'];
+      eventLocation = eventData['location'];
+      participants = eventData['participants'];
+      requestList = List<dynamic>.from(eventData['requestList']);
+      acceptedList = List<dynamic>.from(eventData['acceptedList']);
+    });
+  }
+
+  void _showMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'OK',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String getPosterURL(String notificationType) {
+    String posterURL = "";
+    switch (notificationType) {
+      case "Events":
+        posterURL = eventsNotification;
+        break;
+
+      default:
+        posterURL = generalNotification;
+        break;
+    }
+    return posterURL;
+  }
+
+  Future<void> deleteNotification() async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('notification')
+        .doc(widget.notificationId)
+        .delete();
+  }
+
+  void onDenyPressed() async {
+    try {
+      setState(() {
+        requestList.remove(widget.requestUserId);
+      });
+
+      DocumentReference postRef =
+          FirebaseFirestore.instance.collection('events').doc(widget.eventId);
+      postRef.update({'requestList': requestList});
+
+      DocumentReference userRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.ownerUserId)
+          .collection('events')
+          .doc(widget.eventId);
+      userRef.update({'requestList': requestList});
+      _showMessage("Your response has been recorded!");
+
+      // Delete Notification
+      deleteNotification();
+
+      // Notification for user that made the request
+      final String notificationId = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.requestUserId)
+          .collection('notification')
+          .doc()
+          .id;
+
+      final Map<String, dynamic> notificationData = {
+        'notificationId': notificationId,
+        'eventId': widget.eventId,
+        'ownerUserId': currentUser.uid,
+        'title': "Request to join sport event rejected.",
+        'message':
+            "Your request to join ${currentUser.displayName}'s Sport Event '$eventTitle' has been rejected...",
+        'requestUserId': widget.ownerUserId,
+        'timestamp': Timestamp.now(),
+        'type': "General",
+      };
+
+      // Add the notification document to Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.requestUserId)
+          .collection('notification')
+          .doc(notificationId)
+          .set(notificationData);
+    } catch (e) {
+      _showMessage(
+          "There was an unexpected error while recording your response. Try again later!");
+    }
+  }
+
+  void onApprovePressed() async {
+    try {
+      setState(() {
+        acceptedList.add(widget.requestUserId);
+        requestList.remove(widget.requestUserId);
+      });
+
+      DocumentReference postRef =
+          FirebaseFirestore.instance.collection('events').doc(widget.eventId);
+      postRef.update({'requestList': requestList});
+      postRef.update({'acceptedList': acceptedList});
+
+      DocumentReference userRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.ownerUserId)
+          .collection('events')
+          .doc(widget.eventId);
+      userRef.update({'requestList': requestList});
+      userRef.update({'acceptedList': acceptedList});
+      _showMessage("Your response has been recorded!");
+
+      // Delete Notification
+      deleteNotification();
+
+      // Notification for user that made the request
+      final String notificationId = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.requestUserId)
+          .collection('notification')
+          .doc()
+          .id;
+
+      final Map<String, dynamic> notificationData = {
+        'notificationId': notificationId,
+        'eventId': widget.eventId,
+        'ownerUserId': currentUser.uid,
+        'title': "Request to join sport event approved!",
+        'message':
+            "Your request to join ${currentUser.displayName}'s Sport Event '$eventTitle' has been approved! Please be on time!",
+        'requestUserId': widget.ownerUserId,
+        'timestamp': Timestamp.now(),
+        'type': "Events",
+      };
+
+      // Add the notification document to Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.requestUserId)
+          .collection('notification')
+          .doc(notificationId)
+          .set(notificationData);
+    } catch (e) {
+      _showMessage(
+          "There was an unexpected error while recording your response. Try again later!");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color.fromRGBO(247, 243, 237, 1),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 250,
+            child: FutureBuilder<Image>(
+              future: getPoster(getPosterURL(widget.type)),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CustomLoadingAnimation(),
+                  );
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text(
+                      "An unexpected error occurred. Try again later...",
+                    ),
+                  );
+                } else {
+                  return Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: snapshot.data!.image,
+                            fit: BoxFit.cover,
+                            alignment: Alignment.center,
+                          ),
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 145,
+                        left: 16,
+                        right: 16,
+                        child: Text(
+                          widget.title,
+                          style:
+                              Theme.of(context).textTheme.titleLarge!.copyWith(
+                            shadows: [
+                              Shadow(
+                                offset: const Offset(0, 1),
+                                blurRadius: 4,
+                                color: Colors.black.withOpacity(0.75),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+          ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.message,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all<Color>(
+                            Colors.greenAccent,
+                          ),
+                          shape:
+                              WidgetStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              side: const BorderSide(
+                                color: Colors.greenAccent,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {},
+                        child: Text(
+                          'Contact User',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Merriweather Sans',
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(
+                      color: Colors.red,
+                      thickness: 4,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            eventTitle,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.fitness_center,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            "Sports Involved: $eventSport",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_month_rounded,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          eventDate,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            eventLocation,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.groups_2_rounded,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          "${acceptedList.length} / $participants",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        color: Theme.of(context).cardColor,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              SizedBox(
+                width: 150,
+                child: Builder(
+                  builder: (context) {
+                    return ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all<Color>(
+                          Colors.greenAccent,
+                        ),
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            side: const BorderSide(
+                              color: Colors.greenAccent,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      onPressed: onApprovePressed,
+                      child: Text(
+                        'Approve',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Merriweather Sans',
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 24),
+              SizedBox(
+                width: 150,
+                child: Builder(
+                  builder: (context) {
+                    return ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all<Color>(
+                          const Color.fromRGBO(194, 0, 0, 1),
+                        ),
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            side: const BorderSide(
+                              color: Color.fromRGBO(194, 0, 0, 1),
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      onPressed: onDenyPressed,
+                      child: const Text(
+                        'Deny',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Merriweather Sans',
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

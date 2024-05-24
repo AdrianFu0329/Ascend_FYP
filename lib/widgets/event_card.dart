@@ -73,7 +73,7 @@ class EventCard extends StatelessWidget {
           child: Stack(
             children: [
               FutureBuilder<Image>(
-                future: getEventPoster(posterURL),
+                future: getPoster(posterURL),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CustomLoadingAnimation();

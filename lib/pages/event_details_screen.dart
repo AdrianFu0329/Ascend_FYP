@@ -67,31 +67,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     final String notificationId = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
-        .collection('event-notification')
+        .collection('notification')
         .doc()
         .id;
 
     final Map<String, dynamic> notificationData = {
       'notificationId': notificationId,
       'eventId': widget.eventId,
+      'ownerUserId': widget.userId,
+      'title': "A request has been made to join your sports event!",
       'message':
-          "${currentUser.displayName} has requested to join your sports event '${widget.eventTitle}'. You may approve or deny his request below.",
-      'participants': widget.participants,
-      'fees': widget.eventFees,
+          "${currentUser.displayName} has requested to join your sports event '${widget.eventTitle}'. You may contact the user and approve or deny his request below.",
       'requestUserId': FirebaseAuth.instance.currentUser!.uid,
-      'date': widget.eventDate,
-      'startTime': widget.eventStartTime,
-      'endTime': widget.eventEndTime,
-      'location': widget.eventLocation,
       'timestamp': Timestamp.now(),
-      'acceptedList': widget.acceptedList,
+      'type': "Events",
     };
 
     // Add the notification document to Firestore
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(currentUser.uid)
-        .collection('event-notification')
+        .doc(widget.userId)
+        .collection('notification')
         .doc(notificationId)
         .set(notificationData);
 
@@ -127,7 +123,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           SizedBox(
             height: 250,
             child: FutureBuilder<Image>(
-              future: getEventPoster(widget.posterURL),
+              future: getPoster(widget.posterURL),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(

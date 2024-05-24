@@ -5,8 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class EventsNotification extends StatelessWidget {
-  const EventsNotification({super.key});
+class NotificationModal extends StatelessWidget {
+  const NotificationModal({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class EventsNotification extends StatelessWidget {
               const SizedBox(height: 24),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: getEventsForCurrentUser(currentUser.uid),
+                  stream: getNotiForCurrentUser(currentUser.uid),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -67,14 +67,9 @@ class EventsNotification extends StatelessWidget {
                         child: Text('Error: ${snapshot.error}'),
                       );
                     } else if (snapshot.hasData) {
-                      List<DocumentSnapshot> eventsList =
-                          snapshot.data!.docs.where((doc) {
-                        Map<String, dynamic> data =
-                            doc.data() as Map<String, dynamic>;
-                        return data['requestList'] != null;
-                      }).toList();
+                      List<DocumentSnapshot> notiList = snapshot.data!.docs;
 
-                      if (eventsList.isEmpty) {
+                      if (notiList.isEmpty) {
                         return const Center(
                           child: Text('No notifications at the moment!'),
                         );
@@ -82,38 +77,21 @@ class EventsNotification extends StatelessWidget {
 
                       return ListView.builder(
                         controller: controller,
-                        itemCount: eventsList.length,
+                        itemCount: notiList.length,
                         itemBuilder: (BuildContext context, int index) {
-                          DocumentSnapshot doc = eventsList[index];
+                          DocumentSnapshot doc = notiList[index];
                           Map<String, dynamic> data =
                               doc.data() as Map<String, dynamic>;
-                          List<String> requestList =
-                              List<String>.from(data['requestList']);
 
-                          return Column(
-                            children: requestList
-                                .map((userId) => Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 8.0),
-                                      child: EventNotificationCard(
-                                        eventId: data['eventId'],
-                                        userId: userId,
-                                        eventTitle: data['title'],
-                                        requestUserId: userId,
-                                        acceptedList: List<String>.from(
-                                            data['acceptedList']),
-                                        eventDate: data['date'],
-                                        eventStartTime: data['startTime'],
-                                        eventEndTime: data['endTime'],
-                                        eventFees: data['fees'],
-                                        eventLocation: data['location'],
-                                        eventSport:
-                                            List<String>.from(data['sports']),
-                                        posterURL: data['posterURL'],
-                                        participants: data['participants'],
-                                      ),
-                                    ))
-                                .toList(),
+                          return NotificationCard(
+                            notificationId: data['notificationId'],
+                            eventId: data['eventId'],
+                            ownerUserId: data['ownerUserId'],
+                            requestUserId: data['requestUserId'],
+                            timestamp: data['timestamp'],
+                            title: data['title'],
+                            message: data['message'],
+                            type: data['type'],
                           );
                         },
                       );

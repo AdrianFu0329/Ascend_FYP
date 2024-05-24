@@ -1,47 +1,57 @@
-import 'package:ascend_fyp/getters/user_data.dart';
-import 'package:ascend_fyp/widgets/loading.dart';
+import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/event_notification_details_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class EventNotificationCard extends StatelessWidget {
+class NotificationCard extends StatelessWidget {
+  final String notificationId;
   final String eventId;
-  final String userId;
-  final String eventTitle;
+  final String ownerUserId;
   final String requestUserId;
-  final List<dynamic> acceptedList;
-  final String eventDate;
-  final String eventStartTime;
-  final String eventEndTime;
-  final String eventFees;
-  final String eventLocation;
-  final List<dynamic> eventSport;
-  final String posterURL;
-  final String participants;
+  final Timestamp timestamp;
+  final String title;
+  final String message;
+  final String type;
 
-  const EventNotificationCard({
+  const NotificationCard({
     super.key,
+    required this.notificationId,
+    required this.ownerUserId,
+    required this.timestamp,
+    required this.title,
+    required this.message,
     required this.eventId,
-    required this.userId,
-    required this.eventTitle,
     required this.requestUserId,
-    required this.acceptedList,
-    required this.eventDate,
-    required this.eventStartTime,
-    required this.eventEndTime,
-    required this.eventFees,
-    required this.eventLocation,
-    required this.eventSport,
-    required this.posterURL,
-    required this.participants,
+    required this.type,
   });
 
   @override
   Widget build(BuildContext context) {
     TextStyle notificationTextStyle = TextStyle(
-      fontSize: 14,
+      fontSize: 12,
       fontFamily: 'Merriweather Sans',
       fontWeight: FontWeight.normal,
       color: Theme.of(context).scaffoldBackgroundColor,
     );
+
+    Icon getNotiIcon(String type) {
+      Icon icon = Icon(
+        Icons.circle_notifications_sharp,
+        color: Theme.of(context).scaffoldBackgroundColor,
+        size: 24,
+      );
+      switch (type) {
+        case "Events":
+          icon = Icon(
+            Icons.calendar_today,
+            color: Theme.of(context).scaffoldBackgroundColor,
+            size: 24,
+          );
+        // Other different types of notification icons here
+      }
+
+      return icon;
+    }
 
     Widget buildCard() {
       return SizedBox(
@@ -59,38 +69,21 @@ class EventNotificationCard extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 8.0),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: FutureBuilder<Map<String, dynamic>>(
-              future: getUserData(requestUserId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CustomLoadingAnimation();
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                  final userData = snapshot.data!;
-                  final username = userData["username"] ?? "Unknown";
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Icon(
-                            Icons.event,
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            size: 24,
-                          ),
-                          Flexible(
-                            child: Text(
-                              "Your Sports Event has a Request!",
-                              style: notificationTextStyle,
-                            ),
-                          ),
-                        ],
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    getNotiIcon(type),
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: notificationTextStyle,
                       ),
-                    ],
-                  );
-                }
-              },
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -98,7 +91,22 @@ class EventNotificationCard extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).push(
+          SlidingNav(
+            builder: (context) => NotificationDetailsScreen(
+              notificationId: notificationId,
+              eventId: eventId,
+              ownerUserId: ownerUserId,
+              requestUserId: requestUserId,
+              timestamp: timestamp,
+              title: title,
+              message: message,
+              type: type,
+            ),
+          ),
+        );
+      },
       child: buildCard(),
     );
   }

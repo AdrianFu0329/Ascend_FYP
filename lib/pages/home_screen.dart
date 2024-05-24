@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:ascend_fyp/pages/notification_modal.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/social_media_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,6 +32,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    void modalBottomSheet(Widget screen) {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        isScrollControlled: true,
+        builder: (context) => screen,
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: refreshPosts,
       child: Scaffold(
@@ -46,6 +56,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 50,
                 ),
               ),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    modalBottomSheet(const NotificationModal());
+                  },
+                  icon: const Icon(Icons.notifications),
+                  color: Colors.white,
+                  iconSize: 24,
+                ),
+              ],
             ),
             StreamBuilder<QuerySnapshot>(
               stream: postsStream,

@@ -1,6 +1,5 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/pages/create_events_screen.dart';
-import 'package:ascend_fyp/pages/events_notification.dart';
 import 'package:ascend_fyp/pages/filter_options_screen.dart';
 import 'package:ascend_fyp/widgets/event_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
@@ -127,26 +126,13 @@ class _EventScreenState extends State<EventScreen> {
                           ],
                         ),
                       ),
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              modalBottomSheet(const CreateEventsScreen());
-                            },
-                            icon: const Icon(Icons.add),
-                            color: Colors.red,
-                            iconSize: 24,
-                          ),
-                          const SizedBox(width: 24),
-                          IconButton(
-                            onPressed: () {
-                              modalBottomSheet(const EventsNotification());
-                            },
-                            icon: const Icon(Icons.notifications),
-                            color: Colors.white,
-                            iconSize: 24,
-                          ),
-                        ],
+                      IconButton(
+                        onPressed: () {
+                          modalBottomSheet(const CreateEventsScreen());
+                        },
+                        icon: const Icon(Icons.add),
+                        color: Colors.red,
+                        iconSize: 24,
                       ),
                     ],
                   ),
