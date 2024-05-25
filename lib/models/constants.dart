@@ -12,7 +12,7 @@ const String football =
 const String futsal =
     "https://firebasestorage.googleapis.com/v0/b/ascend-app-6e800.appspot.com/o/events%2Ffutsal.jpg?alt=media&token=fc5aa372-a646-4b32-b159-70af5701a3b5";
 const String general =
-    "https://firebasestorage.googleapis.com/v0/b/ascend-app-6e800.appspot.com/o/events%2Fgeneral.jpg?alt=media&token=5b91add6-3e37-46ba-bb17-97008cd10c67";
+    "https://firebasestorage.googleapis.com/v0/b/ascend-app-6e800.appspot.com/o/events%2Fgeneral.jpg?alt=media&token=7e1dd1fe-6e69-40f7-bcc2-c384d5631fee";
 const String gym =
     "https://firebasestorage.googleapis.com/v0/b/ascend-app-6e800.appspot.com/o/events%2Fgym.jpg?alt=media&token=9a5ef244-dde2-496e-a2d9-1f13a610cafa";
 const String hiking =
@@ -24,4 +24,4 @@ const String tennis =
 const String eventsNotification =
     "https://firebasestorage.googleapis.com/v0/b/ascend-app-6e800.appspot.com/o/notification_posters%2Fsports_events.jpg?alt=media&token=687bc2df-bda1-46bc-bc02-50045b9ffd11";
 const String generalNotification =
-    "https://firebasestorage.googleapis.com/v0/b/ascend-app-6e800.appspot.com/o/notification_posters%2Fgeneral_notification.jpg?alt=media&token=b62e7c8c-964e-42fd-aada-3cd6054ec203";
+    "https://firebasestorage.googleapis.com/v0/b/ascend-app-6e800.appspot.com/o/notification_posters%2Fgeneral_notification.jpg?alt=media&token=843277ff-414a-45ab-8ac9-0b56d5eb7bce";

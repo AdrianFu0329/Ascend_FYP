@@ -72,7 +72,7 @@ Stream<QuerySnapshot> getNotiForCurrentUser(String currentUserUid) {
 
   final eventsStream = events
       .collection('notification')
-      .orderBy('timestamp', descending: false)
+      .orderBy('timestamp', descending: true)
       .snapshots();
 
   return eventsStream;

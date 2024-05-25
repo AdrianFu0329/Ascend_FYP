@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/event_notification_details_screen.dart';
+import 'package:ascend_fyp/pages/general_notification_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -92,20 +93,37 @@ class NotificationCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          SlidingNav(
-            builder: (context) => NotificationDetailsScreen(
-              notificationId: notificationId,
-              eventId: eventId,
-              ownerUserId: ownerUserId,
-              requestUserId: requestUserId,
-              timestamp: timestamp,
-              title: title,
-              message: message,
-              type: type,
-            ),
-          ),
-        );
+        switch (type) {
+          case "Events":
+            {
+              Navigator.of(context).push(
+                SlidingNav(
+                  builder: (context) => EventNotificationDetailsScreen(
+                    notificationId: notificationId,
+                    eventId: eventId,
+                    ownerUserId: ownerUserId,
+                    requestUserId: requestUserId,
+                    timestamp: timestamp,
+                    title: title,
+                    message: message,
+                    type: type,
+                  ),
+                ),
+              );
+            }
+          case "General":
+            {
+              Navigator.of(context).push(
+                SlidingNav(
+                  builder: (context) => GeneralNotificationDetailsScreen(
+                    notificationId: notificationId,
+                    title: title,
+                    message: message,
+                  ),
+                ),
+              );
+            }
+        }
       },
       child: buildCard(),
     );

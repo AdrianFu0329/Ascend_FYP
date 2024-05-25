@@ -51,28 +51,13 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: getUserData(widget.userId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CustomLoadingAnimation());
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          final userData = snapshot.data!;
-          final username = userData["username"] ?? "Unknown";
-          final photoUrl = userData["photoURL"] ?? "Unknown";
-
-          return GestureDetector(
-            onTap: () => _navigateToMediaPostScreen(),
-            child: _buildCard(username, photoUrl),
-          );
-        }
-      },
+    return GestureDetector(
+      onTap: () => _navigateToMediaPostScreen(),
+      child: _buildCard(),
     );
   }
 
-  Widget _buildCard(String username, String photoUrl) {
+  Widget _buildCard() {
     double imageHeight = firstImage.height > 250 ? 250 : firstImage.height;
 
     return SizedBox(
@@ -103,44 +88,59 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      ProfilePicture(
-                        userId: widget.userId,
-                        photoURL: photoUrl,
-                        radius: 12,
-                        onTap: () {},
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        username,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        likeCount.toString(),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(width: 2),
-                      const Icon(
-                        Icons.favorite,
-                        color: Color.fromRGBO(247, 243, 237, 1),
-                        size: 15,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            FutureBuilder<Map<String, dynamic>>(
+              future: getUserData(widget.userId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: ContainerLoadingAnimation());
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  final userData = snapshot.data!;
+                  final username = userData["username"] ?? "Unknown";
+                  final photoUrl = userData["photoURL"] ?? "Unknown";
+
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            ProfilePicture(
+                              userId: widget.userId,
+                              photoURL: photoUrl,
+                              radius: 12,
+                              onTap: () {},
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              username,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              likeCount.toString(),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(width: 2),
+                            const Icon(
+                              Icons.favorite,
+                              color: Color.fromRGBO(247, 243, 237, 1),
+                              size: 15,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
             ),
             const SizedBox(height: 4),
           ],

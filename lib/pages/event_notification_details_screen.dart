@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class NotificationDetailsScreen extends StatefulWidget {
+class EventNotificationDetailsScreen extends StatefulWidget {
   final String notificationId;
   final String eventId;
   final String ownerUserId;
@@ -15,7 +15,7 @@ class NotificationDetailsScreen extends StatefulWidget {
   final String message;
   final String type;
 
-  const NotificationDetailsScreen({
+  const EventNotificationDetailsScreen({
     super.key,
     required this.notificationId,
     required this.eventId,
@@ -28,11 +28,12 @@ class NotificationDetailsScreen extends StatefulWidget {
   });
 
   @override
-  State<NotificationDetailsScreen> createState() =>
-      _NotificationDetailsScreenState();
+  State<EventNotificationDetailsScreen> createState() =>
+      _EventNotificationDetailsScreenState();
 }
 
-class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
+class _EventNotificationDetailsScreenState
+    extends State<EventNotificationDetailsScreen> {
   String eventTitle = "";
   String eventSport = "";
   String eventDate = "";
@@ -61,7 +62,7 @@ class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
     });
   }
 
-  void _showMessage(String message) {
+  void _showMessage(String message, {VoidCallback? onOkPressed}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -75,6 +76,9 @@ class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                if (onOkPressed != null) {
+                  onOkPressed();
+                }
               },
               child: Text(
                 'OK',
@@ -85,20 +89,6 @@ class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
         );
       },
     );
-  }
-
-  String getPosterURL(String notificationType) {
-    String posterURL = "";
-    switch (notificationType) {
-      case "Events":
-        posterURL = eventsNotification;
-        break;
-
-      default:
-        posterURL = generalNotification;
-        break;
-    }
-    return posterURL;
   }
 
   Future<void> deleteNotification() async {
@@ -118,18 +108,17 @@ class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
 
       DocumentReference postRef =
           FirebaseFirestore.instance.collection('events').doc(widget.eventId);
-      postRef.update({'requestList': requestList});
+      await postRef.update({'requestList': requestList});
 
       DocumentReference userRef = FirebaseFirestore.instance
           .collection('users')
           .doc(widget.ownerUserId)
           .collection('events')
           .doc(widget.eventId);
-      userRef.update({'requestList': requestList});
-      _showMessage("Your response has been recorded!");
+      await userRef.update({'requestList': requestList});
 
       // Delete Notification
-      deleteNotification();
+      await deleteNotification();
 
       // Notification for user that made the request
       final String notificationId = FirebaseFirestore.instance
@@ -158,6 +147,10 @@ class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
           .collection('notification')
           .doc(notificationId)
           .set(notificationData);
+
+      _showMessage("Your response has been recorded!", onOkPressed: () {
+        Navigator.pop(context);
+      });
     } catch (e) {
       _showMessage(
           "There was an unexpected error while recording your response. Try again later!");
@@ -173,20 +166,19 @@ class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
 
       DocumentReference postRef =
           FirebaseFirestore.instance.collection('events').doc(widget.eventId);
-      postRef.update({'requestList': requestList});
-      postRef.update({'acceptedList': acceptedList});
+      await postRef.update({'requestList': requestList});
+      await postRef.update({'acceptedList': acceptedList});
 
       DocumentReference userRef = FirebaseFirestore.instance
           .collection('users')
           .doc(widget.ownerUserId)
           .collection('events')
           .doc(widget.eventId);
-      userRef.update({'requestList': requestList});
-      userRef.update({'acceptedList': acceptedList});
-      _showMessage("Your response has been recorded!");
+      await userRef.update({'requestList': requestList});
+      await userRef.update({'acceptedList': acceptedList});
 
       // Delete Notification
-      deleteNotification();
+      await deleteNotification();
 
       // Notification for user that made the request
       final String notificationId = FirebaseFirestore.instance
@@ -215,6 +207,10 @@ class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
           .collection('notification')
           .doc(notificationId)
           .set(notificationData);
+
+      _showMessage("Your response has been recorded!", onOkPressed: () {
+        Navigator.pop(context);
+      });
     } catch (e) {
       _showMessage(
           "There was an unexpected error while recording your response. Try again later!");
@@ -241,7 +237,7 @@ class _NotificationDetailsScreenState extends State<NotificationDetailsScreen> {
           SizedBox(
             height: 250,
             child: FutureBuilder<Image>(
-              future: getPoster(getPosterURL(widget.type)),
+              future: getPoster(eventsNotification),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(

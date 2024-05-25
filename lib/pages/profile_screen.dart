@@ -1,16 +1,14 @@
-import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
-import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/current_user_joined_events.dart';
+import 'package:ascend_fyp/pages/current_user_posts.dart';
 import 'package:ascend_fyp/pages/edit_profile_screen.dart';
 import 'package:ascend_fyp/pages/welcome_screen.dart';
+import 'package:ascend_fyp/widgets/circle_tab_indicator.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
-import 'package:ascend_fyp/widgets/profile_media_card.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,7 +17,9 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen>
+    with TickerProviderStateMixin {
+  late TabController _tabController;
   late String username;
   late String email;
   late String description;
@@ -27,21 +27,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late List<dynamic> followers;
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    refreshProfileData();
+  }
+
+  Future<void> refreshProfileData() async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    final userData = await getUserData(currentUser.uid);
+
+    setState(() {
+      username = userData["username"] ?? "Unknown";
+      description = userData["description"] == ""
+          ? "Empty~~ Add one today!"
+          : userData["description"]!;
+      email = userData['email'] ?? "Unknown";
+      following = userData['following'] ?? [];
+      followers = userData['followers'] ?? [];
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser!;
-
-    Future<void> refreshProfileData() async {
-      final currentUser = FirebaseAuth.instance.currentUser!;
-      final userData = await getUserData(currentUser.uid);
-
-      setState(() {
-        username = userData["username"] ?? "Unknown";
-        description = userData["description"] == ""
-            ? "Empty~~ Add one today!"
-            : userData["description"]!;
-        email = userData['email'] ?? "Unknown";
-      });
-    }
 
     ButtonStyle buttonStyle = ButtonStyle(
       textStyle: WidgetStateProperty.all<TextStyle>(
@@ -60,9 +75,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0),
           side: const BorderSide(
-              color: Color.fromRGBO(247, 243, 237, 1), width: 1.5),
+            color: Color.fromRGBO(247, 243, 237, 1),
+            width: 1.5,
+          ),
         ),
       ),
+    );
+
+    TextStyle selectedTabBarStyle = const TextStyle(
+      fontSize: 14,
+      fontFamily: 'Merriweather Sans',
+      fontWeight: FontWeight.normal,
+      color: Color.fromRGBO(247, 243, 237, 1),
+    );
+
+    TextStyle unselectedTabBarStyle = const TextStyle(
+      fontSize: 14,
+      fontFamily: 'Merriweather Sans',
+      fontWeight: FontWeight.normal,
+      color: Color.fromRGBO(247, 243, 237, 1),
     );
 
     return RefreshIndicator(
@@ -100,7 +131,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   onPressed: () {
                     FirebaseAuth.instance.signOut();
-
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
@@ -236,95 +266,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                         ),
-                        const Divider(
-                          color: Colors.red,
-                          thickness: 4,
-                        ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 12),
                       ],
                     );
                   }
                 },
               ),
             ),
-            StreamBuilder<QuerySnapshot>(
-              stream: getPostsForCurrentUser(currentUser.uid),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SliverFillRemaining(
-                    child: Center(
-                      child: CustomLoadingAnimation(),
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    labelStyle: selectedTabBarStyle,
+                    unselectedLabelStyle: unselectedTabBarStyle,
+                    indicator: CircleTabIndicator(
+                      color: Colors.red,
+                      radius: 4,
                     ),
-                  );
-                } else if (snapshot.hasError) {
-                  return SliverToBoxAdapter(
-                    child: Center(
-                      child: Text('Error: ${snapshot.error}'),
+                    tabs: const [
+                      Tab(text: 'Posts'),
+                      Tab(text: 'Joined Events'),
+                    ],
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: const [
+                        CurrentUserPosts(),
+                        CurrentUserJoinedEvents(),
+                      ],
                     ),
-                  );
-                } else {
-                  List postList = snapshot.data!.docs;
-                  return postList.isNotEmpty
-                      ? SliverMasonryGrid.count(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 0,
-                          crossAxisSpacing: 0,
-                          itemBuilder: (BuildContext context, int index) {
-                            DocumentSnapshot doc = postList[index];
-                            Map<String, dynamic> data =
-                                doc.data() as Map<String, dynamic>;
-                            String postId = data['postId'];
-                            String title = data['title'];
-                            List<String> imageURLs =
-                                List<String>.from(data['imageURLs']);
-                            List<String> likes =
-                                List<String>.from(data['likes']);
-                            String userId = data['userId'];
-                            Timestamp timestamp = data['timestamp'];
-                            String description = data['description'];
-                            String location = data['location'];
-
-                            return FutureBuilder<List<ImageWithDimension>>(
-                              future: getPostImg(imageURLs),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const CustomLoadingAnimation();
-                                } else if (snapshot.hasError) {
-                                  return const Center(
-                                    child: Text(
-                                      "An unexpected error occurred. Try again later...",
-                                    ),
-                                  );
-                                } else {
-                                  List<ImageWithDimension> images =
-                                      snapshot.data!;
-                                  return ProfileMediaCard(
-                                    index: index,
-                                    postId: postId,
-                                    images: images,
-                                    title: title,
-                                    userId: userId,
-                                    likes: likes,
-                                    timestamp: timestamp,
-                                    description: description,
-                                    location: location,
-                                  );
-                                }
-                              },
-                            );
-                          },
-                          childCount: postList.length,
-                        )
-                      : const SliverToBoxAdapter(
-                          child: Center(
-                            child: Text(
-                              "No posts yet... Make one today!",
-                            ),
-                          ),
-                        );
-                }
-              },
+                  ),
+                ],
+              ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
