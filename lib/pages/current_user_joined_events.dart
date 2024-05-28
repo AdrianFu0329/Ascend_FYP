@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class CurrentUserJoinedEvents extends StatefulWidget {
-  const CurrentUserJoinedEvents({Key? key}) : super(key: key);
+  const CurrentUserJoinedEvents({super.key});
 
   @override
   State<CurrentUserJoinedEvents> createState() =>

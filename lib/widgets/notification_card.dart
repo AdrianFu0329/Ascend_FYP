@@ -13,6 +13,7 @@ class NotificationCard extends StatelessWidget {
   final String title;
   final String message;
   final String type;
+  final String requestUserLocation;
 
   const NotificationCard({
     super.key,
@@ -24,6 +25,7 @@ class NotificationCard extends StatelessWidget {
     required this.eventId,
     required this.requestUserId,
     required this.type,
+    required this.requestUserLocation,
   });
 
   @override
@@ -107,6 +109,7 @@ class NotificationCard extends StatelessWidget {
                     title: title,
                     message: message,
                     type: type,
+                    requestUserLocation: requestUserLocation,
                   ),
                 ),
               );

@@ -1,7 +1,6 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/profile_screen.dart';
 import 'package:ascend_fyp/pages/user_profile_screen.dart';
 import 'package:ascend_fyp/widgets/button.dart';
 import 'package:ascend_fyp/widgets/comment_card.dart';
@@ -259,6 +258,8 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   @override
   Widget build(BuildContext context) {
     String formatted = fromDateToString(widget.timestamp);
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    bool isCurrentUser = currentUser.uid == widget.userId;
 
     return FutureBuilder<Map<String, dynamic>>(
       future: getUserData(widget.userId),
@@ -294,20 +295,13 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                     photoURL: photoUrl,
                     radius: 15,
                     onTap: () {
-                      if (widget.userId == currentUser.uid) {
-                        Navigator.of(context).push(
-                          SlidingNav(
-                            builder: (context) => const ProfileScreen(),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          SlidingNav(
-                            builder: (context) =>
-                                UserProfileScreen(userId: widget.userId),
-                          ),
-                        );
-                      }
+                      Navigator.of(context).push(
+                        SlidingNav(
+                          builder: (context) => UserProfileScreen(
+                              userId: widget.userId,
+                              isCurrentUser: isCurrentUser),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(width: 12),
@@ -315,8 +309,9 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                     onTap: () {
                       Navigator.of(context).push(
                         SlidingNav(
-                          builder: (context) =>
-                              UserProfileScreen(userId: widget.userId),
+                          builder: (context) => UserProfileScreen(
+                              userId: widget.userId,
+                              isCurrentUser: isCurrentUser),
                         ),
                       );
                     },

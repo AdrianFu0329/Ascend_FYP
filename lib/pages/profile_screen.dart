@@ -59,19 +59,19 @@ class _ProfileScreenState extends State<ProfileScreen>
     final currentUser = FirebaseAuth.instance.currentUser!;
 
     ButtonStyle buttonStyle = ButtonStyle(
-      textStyle: WidgetStateProperty.all<TextStyle>(
+      textStyle: MaterialStateProperty.all<TextStyle>(
         const TextStyle(
           fontSize: 12,
           fontFamily: 'Merriweather Sans',
           fontWeight: FontWeight.normal,
         ),
       ),
-      foregroundColor: WidgetStateProperty.all<Color>(
+      foregroundColor: MaterialStateProperty.all<Color>(
           const Color.fromRGBO(247, 243, 237, 1)),
-      backgroundColor: WidgetStateProperty.all<Color>(
+      backgroundColor: MaterialStateProperty.all<Color>(
         Theme.of(context).scaffoldBackgroundColor,
       ),
-      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0),
           side: const BorderSide(
@@ -119,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 child: IconButton(
                   highlightColor: const Color.fromRGBO(194, 0, 0, 1),
                   style: ButtonStyle(
-                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
                         side: const BorderSide(
@@ -148,137 +148,139 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
           ],
         ),
-        body: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: FutureBuilder(
-                future: getUserData(currentUser.uid),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CustomLoadingAnimation();
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    Map<String, dynamic> userData =
-                        snapshot.data as Map<String, dynamic>;
-                    username = userData["username"] ?? "Unknown";
-                    description = userData["description"] == ""
-                        ? "Empty~~ Add one today!"
-                        : userData["description"]!;
-                    email = userData['email'] ?? "Unknown";
-                    following = userData['following'] ?? [];
-                    followers = userData['followers'] ?? [];
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverToBoxAdapter(
+                child: FutureBuilder(
+                  future: getUserData(currentUser.uid),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CustomLoadingAnimation();
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      Map<String, dynamic> userData =
+                          snapshot.data as Map<String, dynamic>;
+                      username = userData["username"] ?? "Unknown";
+                      description = userData["description"] == ""
+                          ? "Empty~~ Add one today!"
+                          : userData["description"]!;
+                      email = userData['email'] ?? "Unknown";
+                      following = userData['following'] ?? [];
+                      followers = userData['followers'] ?? [];
 
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ProfilePicture(
-                                      userId: currentUser.uid,
-                                      photoURL:
-                                          currentUser.photoURL ?? "Unknown",
-                                      radius: 40,
-                                      onTap: () {},
-                                    ),
-                                    Row(
-                                      children: [
-                                        Column(
-                                          children: [
-                                            Text(
-                                              followers.length.toString(),
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium,
-                                            ),
-                                            Text(
-                                              "Followers",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium,
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(width: 28),
-                                        Column(
-                                          children: [
-                                            Text(
-                                              following.length.toString(),
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium,
-                                            ),
-                                            Text(
-                                              "Following",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                              ListTile(
-                                title: Text(
-                                  username,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                subtitle: Text(
-                                  description,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
-                                ),
-                                trailing: ElevatedButton(
-                                  onPressed: () async {
-                                    final result =
-                                        await Navigator.of(context).push(
-                                      SlidingNav(
-                                        builder: (context) => EditProfileScreen(
-                                          username: username,
-                                          email: email,
-                                          description: description,
-                                        ),
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      ProfilePicture(
+                                        userId: currentUser.uid,
+                                        photoURL:
+                                            currentUser.photoURL ?? "Unknown",
+                                        radius: 40,
+                                        onTap: () {},
                                       ),
-                                    );
-                                    if (result != null) {
-                                      setState(() {
-                                        username = result['username'];
-                                        email = result['email'];
-                                        description = result['description'];
-                                      });
-                                    }
-                                  },
-                                  style: buttonStyle,
-                                  child: const Text('Edit Profile'),
+                                      Row(
+                                        children: [
+                                          Column(
+                                            children: [
+                                              Text(
+                                                followers.length.toString(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium,
+                                              ),
+                                              Text(
+                                                "Followers",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium,
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(width: 28),
+                                          Column(
+                                            children: [
+                                              Text(
+                                                following.length.toString(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium,
+                                              ),
+                                              Text(
+                                                "Following",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                ListTile(
+                                  title: Text(
+                                    username,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                  subtitle: Text(
+                                    description,
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                  trailing: ElevatedButton(
+                                    onPressed: () async {
+                                      final result =
+                                          await Navigator.of(context).push(
+                                        SlidingNav(
+                                          builder: (context) =>
+                                              EditProfileScreen(
+                                            username: username,
+                                            email: email,
+                                            description: description,
+                                          ),
+                                        ),
+                                      );
+                                      if (result != null) {
+                                        setState(() {
+                                          username = result['username'];
+                                          email = result['email'];
+                                          description = result['description'];
+                                        });
+                                      }
+                                    },
+                                    style: buttonStyle,
+                                    child: const Text('Edit Profile'),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                    );
-                  }
-                },
+                          const SizedBox(height: 12),
+                        ],
+                      );
+                    }
+                  },
+                ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
+              SliverPersistentHeader(
+                delegate: _SliverAppBarDelegate(
                   TabBar(
                     controller: _tabController,
-                    isScrollable: true,
                     labelStyle: selectedTabBarStyle,
                     unselectedLabelStyle: unselectedTabBarStyle,
                     indicator: CircleTabIndicator(
@@ -290,23 +292,46 @@ class _ProfileScreenState extends State<ProfileScreen>
                       Tab(text: 'Joined Events'),
                     ],
                   ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: const [
-                        CurrentUserPosts(),
-                        CurrentUserJoinedEvents(),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
+                pinned: true,
               ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          ],
+            ];
+          },
+          body: TabBarView(
+            controller: _tabController,
+            children: const [
+              CurrentUserPosts(),
+              CurrentUserJoinedEvents(),
+            ],
+          ),
         ),
       ),
     );
+  }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
   }
 }

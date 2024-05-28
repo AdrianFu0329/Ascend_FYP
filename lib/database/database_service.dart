@@ -36,6 +36,16 @@ Stream<QuerySnapshot> getEventsFromDatabase() {
   return eventsStream;
 }
 
+Stream<QuerySnapshot> getGroupsFromDatabase() {
+  final CollectionReference events =
+      FirebaseFirestore.instance.collection("groups");
+
+  final eventsStream =
+      events.orderBy('timestamp', descending: false).snapshots();
+
+  return eventsStream;
+}
+
 Stream<QuerySnapshot> getPostsForCurrentUser(String currentUserUid) {
   final DocumentReference userRef =
       FirebaseFirestore.instance.collection("users").doc(currentUserUid);

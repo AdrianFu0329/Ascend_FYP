@@ -92,6 +92,8 @@ class NotificationModal extends StatelessWidget {
                             title: data['title'],
                             message: data['message'],
                             type: data['type'],
+                            requestUserLocation:
+                                data['requestUserLocation'] ?? "Unknown",
                           );
                         },
                       );

@@ -11,10 +11,12 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
+  final bool isCurrentUser;
 
   const UserProfileScreen({
     super.key,
     required this.userId,
+    required this.isCurrentUser,
   });
 
   @override
@@ -248,13 +250,15 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                   username,
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
-                                trailing: ElevatedButton(
-                                  onPressed: onFollowPressed,
-                                  style: getFollowButtonStyle(),
-                                  child: Text(
-                                    followed ? "Unfollow" : "Follow",
-                                  ),
-                                ),
+                                trailing: widget.isCurrentUser
+                                    ? const SizedBox(height: 12)
+                                    : ElevatedButton(
+                                        onPressed: onFollowPressed,
+                                        style: getFollowButtonStyle(),
+                                        child: Text(
+                                          followed ? "Unfollow" : "Follow",
+                                        ),
+                                      ),
                               ),
                             ],
                           ),

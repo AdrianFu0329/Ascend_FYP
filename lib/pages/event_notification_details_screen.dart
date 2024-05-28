@@ -14,6 +14,7 @@ class EventNotificationDetailsScreen extends StatefulWidget {
   final String title;
   final String message;
   final String type;
+  final String requestUserLocation;
 
   const EventNotificationDetailsScreen({
     super.key,
@@ -25,6 +26,7 @@ class EventNotificationDetailsScreen extends StatefulWidget {
     required this.title,
     required this.message,
     required this.type,
+    required this.requestUserLocation,
   });
 
   @override
@@ -197,7 +199,7 @@ class _EventNotificationDetailsScreenState
             "Your request to join ${currentUser.displayName}'s Sport Event '$eventTitle' has been approved! Please be on time!",
         'requestUserId': widget.ownerUserId,
         'timestamp': Timestamp.now(),
-        'type': "Events",
+        'type': "General",
       };
 
       // Add the notification document to Firestore
@@ -307,6 +309,27 @@ class _EventNotificationDetailsScreenState
                     Text(
                       widget.message,
                       style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "User Location: ",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            widget.requestUserLocation,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     SizedBox(

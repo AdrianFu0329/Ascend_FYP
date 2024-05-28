@@ -1,31 +1,31 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/pages/create_events_screen.dart';
+import 'package:ascend_fyp/pages/create_groups_screen.dart';
 import 'package:ascend_fyp/pages/filter_options_screen.dart';
 import 'package:ascend_fyp/widgets/event_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class EventScreen extends StatefulWidget {
-  const EventScreen({super.key});
+class CommunityGroupsScreen extends StatefulWidget {
+  const CommunityGroupsScreen({super.key});
 
   @override
-  State<EventScreen> createState() => _EventScreenState();
+  State<CommunityGroupsScreen> createState() => _CommunityGroupsScreenState();
 }
 
-class _EventScreenState extends State<EventScreen> {
-  Stream<QuerySnapshot>? eventsStream;
+class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
+  Stream<QuerySnapshot>? groupsStream;
   Map<String, bool> filterOptions = {};
 
   @override
   void initState() {
-    eventsStream = getEventsFromDatabase();
+    groupsStream = getGroupsFromDatabase();
     super.initState();
   }
 
   Future<void> refreshPosts() async {
     setState(() {
-      eventsStream = getEventsFromDatabase();
+      groupsStream = getGroupsFromDatabase();
     });
   }
 
@@ -38,7 +38,7 @@ class _EventScreenState extends State<EventScreen> {
     );
   }
 
-  void filterEvents() async {
+  void filterGroups() async {
     final selectedFilters = await showModalBottomSheet<Map<String, bool>>(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -49,12 +49,12 @@ class _EventScreenState extends State<EventScreen> {
     if (selectedFilters != null) {
       setState(() {
         filterOptions = selectedFilters;
-        eventsStream = getFilteredEventsFromDatabase(filterOptions);
+        groupsStream = getFilteredGroupsFromDatabase(filterOptions);
       });
     }
   }
 
-  Stream<QuerySnapshot> getFilteredEventsFromDatabase(
+  Stream<QuerySnapshot> getFilteredGroupsFromDatabase(
       Map<String, bool> filters) {
     List<String> selectedSports = filters.entries
         .where((entry) => entry.value)
@@ -74,21 +74,21 @@ class _EventScreenState extends State<EventScreen> {
     ];
 
     if (selectedSports.isEmpty) {
-      return getEventsFromDatabase();
+      return getGroupsFromDatabase(); //Change Function
     } else if (selectedSports.contains('Other') && selectedSports.length > 1) {
       excludedSports.removeWhere((sport) => selectedSports.contains(sport));
       return FirebaseFirestore.instance
-          .collection('events')
+          .collection('groups')
           .where('sports', isNotEqualTo: excludedSports)
           .snapshots();
     } else if (selectedSports.contains('Other') && selectedSports.length == 1) {
       return FirebaseFirestore.instance
-          .collection('events')
+          .collection('groups')
           .where('isOther', isEqualTo: true)
           .snapshots();
     } else {
       return FirebaseFirestore.instance
-          .collection('events')
+          .collection('groups')
           .where('sports', arrayContainsAny: selectedSports)
           .snapshots();
     }
@@ -112,7 +112,7 @@ class _EventScreenState extends State<EventScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        onPressed: filterEvents,
+                        onPressed: filterGroups,
                         icon: Row(
                           children: [
                             Text(
@@ -128,7 +128,7 @@ class _EventScreenState extends State<EventScreen> {
                       ),
                       IconButton(
                         onPressed: () {
-                          modalBottomSheet(const CreateEventsScreen());
+                          modalBottomSheet(const CreateGroupsScreen());
                         },
                         icon: const Icon(Icons.add),
                         color: Colors.red,
@@ -141,7 +141,7 @@ class _EventScreenState extends State<EventScreen> {
             ),
           ),
           StreamBuilder<QuerySnapshot>(
-            stream: eventsStream,
+            stream: groupsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SliverFillRemaining(
@@ -158,21 +158,22 @@ class _EventScreenState extends State<EventScreen> {
               } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Center(
-                    child: Text('No Events Found.'),
+                    child: Text('No Groups Found.'),
                   ),
                 );
               } else if (snapshot.hasData) {
-                List<DocumentSnapshot> eventsList = snapshot.data!.docs;
+                List<DocumentSnapshot> groupsList = snapshot.data!.docs;
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      DocumentSnapshot doc = eventsList[index];
+                      DocumentSnapshot doc = groupsList[index];
                       Map<String, dynamic> data =
                           doc.data() as Map<String, dynamic>;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: EventCard(
+                          //Change to Group Card
                           eventId: data['eventId'],
                           userId: data['userId'],
                           eventTitle: data['title'],
@@ -189,7 +190,7 @@ class _EventScreenState extends State<EventScreen> {
                         ),
                       );
                     },
-                    childCount: eventsList.length,
+                    childCount: groupsList.length,
                   ),
                 );
               } else {
@@ -198,7 +199,7 @@ class _EventScreenState extends State<EventScreen> {
                     children: [
                       SizedBox(height: 16),
                       Center(
-                        child: Text('No events at the moment!'),
+                        child: Text('No groups at the moment!'),
                       ),
                     ],
                   ),

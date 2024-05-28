@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/pages/community_groups_screen.dart';
 import 'package:ascend_fyp/pages/event_screen.dart';
 import 'package:ascend_fyp/widgets/circle_tab_indicator.dart';
 import 'package:flutter/material.dart';
@@ -78,9 +79,9 @@ class _CommunityScreenState extends State<CommunityScreen>
           Expanded(
             child: TabBarView(
               controller: tabController,
-              children: [
-                const EventScreen(),
-                Container(),
+              children: const [
+                EventScreen(),
+                CommunityGroupsScreen(),
               ],
             ),
           ),

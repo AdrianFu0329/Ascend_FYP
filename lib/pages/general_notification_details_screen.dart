@@ -67,9 +67,7 @@ class _GeneralNotificationDetailsScreenState
     try {
       // Delete Notification
       await deleteNotification();
-      _showMessage("Your response has been recorded!", onOkPressed: () {
-        Navigator.pop(context);
-      });
+      Navigator.pop(context);
     } catch (e) {
       _showMessage(
           "There was an unexpected error while recording your response. Try again later!");
@@ -160,15 +158,18 @@ class _GeneralNotificationDetailsScreenState
                 ),
               ),
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.message,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.message,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
                 ),
               ),
             ),
