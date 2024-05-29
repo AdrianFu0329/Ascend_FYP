@@ -46,6 +46,18 @@ Stream<QuerySnapshot> getGroupsFromDatabase() {
   return eventsStream;
 }
 
+Stream<QuerySnapshot> getLeaderboardForCurrentGroup(String groupId) {
+  final DocumentReference grpRef =
+      FirebaseFirestore.instance.collection("groups").doc(groupId);
+
+  final grpStream = grpRef
+      .collection('leaderboard')
+      .orderBy('groupEventsJoined', descending: true)
+      .snapshots();
+
+  return grpStream;
+}
+
 Stream<QuerySnapshot> getPostsForCurrentUser(String currentUserUid) {
   final DocumentReference userRef =
       FirebaseFirestore.instance.collection("users").doc(currentUserUid);

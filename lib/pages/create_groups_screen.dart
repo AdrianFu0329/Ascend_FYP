@@ -1,8 +1,6 @@
 import 'package:ascend_fyp/models/constants.dart';
-import 'package:ascend_fyp/pages/set_location_screen.dart';
 import 'package:ascend_fyp/widgets/creation_sport_list.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
-import 'package:ascend_fyp/widgets/location_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +17,6 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
   TextEditingController nameController = TextEditingController();
   TextEditingController participantsController = TextEditingController();
   TextEditingController otherController = TextEditingController();
-  Map<String, dynamic> _locationData = {};
-  String? location;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? selectedSports;
   bool isCreating = false;
@@ -29,29 +25,7 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ButtonStyle locationButtonStyle = ButtonStyle(
-      textStyle: WidgetStateProperty.all<TextStyle>(
-        const TextStyle(
-          fontSize: 14,
-          fontFamily: 'Merriweather Sans',
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-      foregroundColor: WidgetStateProperty.all<Color>(
-          const Color.fromRGBO(247, 243, 237, 1)),
-      backgroundColor: WidgetStateProperty.all<Color>(
-        Theme.of(context).scaffoldBackgroundColor,
-      ),
-      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-          side: const BorderSide(
-              color: Color.fromRGBO(247, 243, 237, 1), width: 1.5),
-        ),
-      ),
-    );
-
-    void _showMessage(String message) {
+    void showMessage(String message) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -79,74 +53,55 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
 
     bool validateGroup() {
       if (nameController.text.trim().isEmpty) {
-        _showMessage('Please enter a group name.');
+        showMessage('Please enter a group name.');
         return false;
       }
 
       if (participantsController.text.trim().isEmpty) {
-        _showMessage('Please enter a desired group member count.');
+        showMessage('Please enter a desired group member count.');
         return false;
       }
 
       if (selectedSports == null && otherController.text.trim().isEmpty) {
-        _showMessage('Please choose a focus sport for your group.');
+        showMessage('Please choose a focus sport for your group.');
         return false;
       }
 
       return true;
     }
 
-    Future<void> getLocation() async {
-      final Map<String, dynamic> locationData = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const SetLocationScreen(
-            enableCurrentLocation: false,
-          ),
-        ),
-      );
-      String? city = locationData['location'];
-      if (locationData.isNotEmpty) {
-        _locationData = locationData;
-        location = city;
-        setState(() {});
-      } else {
-        debugPrint("No location data...");
-      }
-    }
-
     String getPosterURL(String selectedSport) {
       String posterURL = "";
       switch (selectedSport) {
         case "Football":
-          posterURL = football;
+          posterURL = groupFootball;
           break;
         case "Basketball":
-          posterURL = basketball;
+          posterURL = groupBasketball;
           break;
         case "Badminton":
-          posterURL = badminton;
+          posterURL = groupBadminton;
           break;
         case "Futsal":
-          posterURL = futsal;
+          posterURL = groupFutsal;
           break;
         case "Jogging":
-          posterURL = jogging;
+          posterURL = groupJogging;
           break;
         case "Gym":
-          posterURL = gym;
+          posterURL = groupGym;
           break;
         case "Tennis":
-          posterURL = tennis;
+          posterURL = groupTennis;
           break;
         case "Hiking":
-          posterURL = hiking;
+          posterURL = groupHiking;
           break;
         case "Cycling":
-          posterURL = cycling;
+          posterURL = groupCycling;
           break;
         default:
-          posterURL = general;
+          posterURL = groupGeneral;
           break;
       }
       return posterURL;
@@ -155,7 +110,6 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
     Future<void> createGroup() async {
       if (validateGroup()) {
         final currentUser = FirebaseAuth.instance.currentUser!;
-        String location = _locationData['location'] ?? "Unknown";
         bool isOther = false;
 
         if (_formKey.currentState!.validate()) {
@@ -178,14 +132,21 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
               'groupId': groupId,
               'name': nameController.text.trim(),
               'participants': participantsController.text.trim(),
-              'userId': FirebaseAuth.instance.currentUser!.uid,
-              'location': location,
+              'ownerUserId': FirebaseAuth.instance.currentUser!.uid,
               'sports': selectedSports,
               'timestamp': Timestamp.now(),
               'posterURL': getPosterURL(selectedSports!),
               'requestList': [],
-              'acceptedList': acceptedList,
+              'memberList': acceptedList,
               'isOther': isOther,
+            };
+
+            // Leaderboard data at creation
+            final Map<String, dynamic> userLeaderboardData = {
+              'userId': currentUser.uid,
+              'role': "Owner",
+              'dateJoined': Timestamp.now(),
+              'groupEventsJoined': 0,
             };
 
             // Add the group document to Firestore
@@ -197,15 +158,22 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
             await FirebaseFirestore.instance
                 .collection('users')
                 .doc(currentUser.uid)
-                .collection('events')
+                .collection('groups')
                 .doc(groupId)
                 .set(groupData);
 
-            _showMessage('Event created successfully');
+            // Leaderboard data
+            await FirebaseFirestore.instance
+                .collection('groups')
+                .doc(groupId)
+                .collection('leaderboard')
+                .doc(currentUser.uid)
+                .set(userLeaderboardData);
+
+            showMessage('Group created successfully');
 
             nameController.clear();
             participantsController.clear();
-            _locationData.clear();
             otherController.clear();
             setState(() {
               isCreating = false;
@@ -215,7 +183,7 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
             resetNotifierParticipation.value =
                 !resetNotifierParticipation.value;
           } catch (error) {
-            _showMessage('Error creating post: $error');
+            showMessage('Error creating group: $error');
             setState(() {
               isCreating = false;
             });
@@ -299,34 +267,6 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
                         controller: otherController,
                         hintText: "Other (please specify)",
                       ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: getLocation,
-                        style: locationButtonStyle,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 18,
-                            ),
-                            SizedBox(width: 4),
-                            Text("Set Group's Location"),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Center(
-                      child: LocationListTile(
-                        location: _locationData.isNotEmpty
-                            ? location!
-                            : "No Location Selected",
-                        onPress: null,
-                      ),
-                    ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,

@@ -190,34 +190,34 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       String posterURL = "";
       switch (selectedSport) {
         case "Football":
-          posterURL = football;
+          posterURL = eventFootball;
           break;
         case "Basketball":
-          posterURL = basketball;
+          posterURL = eventBasketball;
           break;
         case "Badminton":
-          posterURL = badminton;
+          posterURL = eventBadminton;
           break;
         case "Futsal":
-          posterURL = futsal;
+          posterURL = eventFutsal;
           break;
         case "Jogging":
-          posterURL = jogging;
+          posterURL = eventJogging;
           break;
         case "Gym":
-          posterURL = gym;
+          posterURL = eventGym;
           break;
         case "Tennis":
-          posterURL = tennis;
+          posterURL = eventTennis;
           break;
         case "Hiking":
-          posterURL = hiking;
+          posterURL = eventHiking;
           break;
         case "Cycling":
-          posterURL = cycling;
+          posterURL = eventCycling;
           break;
         default:
-          posterURL = general;
+          posterURL = eventGeneral;
           break;
       }
       return posterURL;
@@ -297,7 +297,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
             resetNotifierParticipation.value =
                 !resetNotifierParticipation.value;
           } catch (error) {
-            _showMessage('Error creating post: $error');
+            _showMessage('Error creating event: $error');
             setState(() {
               isCreating = false;
             });

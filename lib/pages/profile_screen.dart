@@ -7,6 +7,7 @@ import 'package:ascend_fyp/pages/welcome_screen.dart';
 import 'package:ascend_fyp/widgets/circle_tab_indicator.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
+import 'package:ascend_fyp/widgets/sliver_app_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -59,19 +60,19 @@ class _ProfileScreenState extends State<ProfileScreen>
     final currentUser = FirebaseAuth.instance.currentUser!;
 
     ButtonStyle buttonStyle = ButtonStyle(
-      textStyle: MaterialStateProperty.all<TextStyle>(
+      textStyle: WidgetStateProperty.all<TextStyle>(
         const TextStyle(
           fontSize: 12,
           fontFamily: 'Merriweather Sans',
           fontWeight: FontWeight.normal,
         ),
       ),
-      foregroundColor: MaterialStateProperty.all<Color>(
+      foregroundColor: WidgetStateProperty.all<Color>(
           const Color.fromRGBO(247, 243, 237, 1)),
-      backgroundColor: MaterialStateProperty.all<Color>(
+      backgroundColor: WidgetStateProperty.all<Color>(
         Theme.of(context).scaffoldBackgroundColor,
       ),
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0),
           side: const BorderSide(
@@ -119,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 child: IconButton(
                   highlightColor: const Color.fromRGBO(194, 0, 0, 1),
                   style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
                         side: const BorderSide(
@@ -278,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ),
               ),
               SliverPersistentHeader(
-                delegate: _SliverAppBarDelegate(
+                delegate: SliverAppBarDelegate(
                   TabBar(
                     controller: _tabController,
                     labelStyle: selectedTabBarStyle,
@@ -307,31 +308,5 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       ),
     );
-  }
-}
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
   }
 }

@@ -23,7 +23,7 @@ class ProfilePicture extends StatelessWidget {
       future: getProfilePic(userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CustomLoadingAnimation());
+          return const ContainerLoadingAnimation();
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {

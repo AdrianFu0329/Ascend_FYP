@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/pages/create_groups_screen.dart';
 import 'package:ascend_fyp/pages/filter_options_screen.dart';
-import 'package:ascend_fyp/widgets/event_card.dart';
+import 'package:ascend_fyp/widgets/group_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -172,19 +172,13 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: EventCard(
-                          //Change to Group Card
-                          eventId: data['eventId'],
-                          userId: data['userId'],
-                          eventTitle: data['title'],
-                          requestList: List<String>.from(data['requestList']),
-                          acceptedList: List<String>.from(data['acceptedList']),
-                          eventDate: data['date'],
-                          eventStartTime: data['startTime'],
-                          eventEndTime: data['endTime'],
-                          eventFees: data['fees'],
-                          eventLocation: data['location'],
-                          eventSport: data['sports'],
+                        child: GroupCard(
+                          groupId: data['groupId'],
+                          ownerUserId: data['ownerUserId'],
+                          groupTitle: data['name'],
+                          requestList: List<dynamic>.from(data['requestList']),
+                          memberList: List<dynamic>.from(data['memberList']),
+                          groupSport: data['sports'],
                           posterURL: data['posterURL'],
                           participants: data['participants'],
                         ),

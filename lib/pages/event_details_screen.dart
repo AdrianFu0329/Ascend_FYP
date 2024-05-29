@@ -171,50 +171,51 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           final photoUrl = userData["photoURL"] ?? "Unknown";
           return Scaffold(
             appBar: AppBar(
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                leading: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new,
-                    color: Color.fromRGBO(247, 243, 237, 1),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Color.fromRGBO(247, 243, 237, 1),
                 ),
-                title: Row(
-                  children: [
-                    ProfilePicture(
-                      userId: widget.userId,
-                      photoURL: photoUrl,
-                      radius: 15,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          SlidingNav(
-                            builder: (context) => UserProfileScreen(
-                                userId: widget.userId,
-                                isCurrentUser: isCurrentUser),
-                          ),
-                        );
-                      },
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              title: Row(
+                children: [
+                  ProfilePicture(
+                    userId: widget.userId,
+                    photoURL: photoUrl,
+                    radius: 15,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        SlidingNav(
+                          builder: (context) => UserProfileScreen(
+                              userId: widget.userId,
+                              isCurrentUser: isCurrentUser),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        SlidingNav(
+                          builder: (context) => UserProfileScreen(
+                              userId: widget.userId,
+                              isCurrentUser: isCurrentUser),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      username,
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    const SizedBox(width: 12),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          SlidingNav(
-                            builder: (context) => UserProfileScreen(
-                                userId: widget.userId,
-                                isCurrentUser: isCurrentUser),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        username,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                  ],
-                )),
+                  ),
+                ],
+              ),
+            ),
             body: Column(
               children: [
                 SizedBox(
