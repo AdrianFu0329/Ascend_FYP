@@ -1,9 +1,10 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:ascend_fyp/pages/group_details.dart';
+import 'package:ascend_fyp/pages/group_events_screen.dart';
+import 'package:ascend_fyp/pages/group_leaderboard.dart';
 import 'package:ascend_fyp/widgets/circle_tab_indicator.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
-import 'package:ascend_fyp/widgets/sliver_app_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     if (widget.requestList.contains(currentUser.uid)) {
       requestedToJoin = true;
     }
@@ -61,7 +62,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           content: Text(
-            "Only your current location will be shared with the event's owner. \nAre you alright with that?",
+            "Only your current location will be shared with the group's owner. \nAre you alright with that?",
             style: Theme.of(context).textTheme.titleSmall,
           ),
           actions: <Widget>[
@@ -117,9 +118,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
       'notificationId': notificationId,
       'groupId': widget.groupId,
       'ownerUserId': widget.ownerUserId,
-      'title': "A request has been made to join your sports event!",
+      'title': "A request has been made to join your community group!",
       'message':
-          "${currentUser.displayName} has requested to join your sports event '${widget.groupTitle}'. You may contact the user and approve or deny his request below.",
+          "${currentUser.displayName} has requested to join your community group '${widget.groupTitle}'. You may contact the user and approve or deny his request below.",
       'requestUserId': FirebaseAuth.instance.currentUser!.uid,
       'timestamp': Timestamp.now(),
       'type': "Groups",
@@ -148,13 +149,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
-    TextStyle grpMemberStyle = const TextStyle(
-      fontSize: 20,
-      fontFamily: 'Merriweather Sans',
-      fontWeight: FontWeight.bold,
-      color: Color.fromRGBO(247, 243, 237, 1),
-    );
-
     TextStyle selectedTabBarStyle = const TextStyle(
       fontSize: 14,
       fontFamily: 'Merriweather Sans',
@@ -182,59 +176,49 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
           },
         ),
       ),
-      bottomNavigationBar: Container(
-        color: Theme.of(context).cardColor,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(
-                  joined
-                      ? Colors.greenAccent
-                      : (requestedToJoin
-                          ? Colors.greenAccent
-                          : const Color.fromRGBO(194, 0, 0, 1)),
-                ),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                    side: BorderSide(
-                      color: joined
-                          ? Colors.greenAccent
-                          : (requestedToJoin
-                              ? Colors.greenAccent
-                              : const Color.fromRGBO(194, 0, 0, 1)),
-                      width: 1.5,
+      bottomNavigationBar: joined
+          ? null
+          : Container(
+              color: Theme.of(context).cardColor,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all<Color>(
+                        requestedToJoin
+                            ? Colors.greenAccent
+                            : const Color.fromRGBO(194, 0, 0, 1),
+                      ),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                          side: BorderSide(
+                            color: requestedToJoin
+                                ? Colors.greenAccent
+                                : const Color.fromRGBO(194, 0, 0, 1),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                    onPressed: requestedToJoin ? null : _showLocationMessage,
+                    child: Text(
+                      requestedToJoin ? 'Already Requested' : 'Request to Join',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Merriweather Sans',
+                        fontWeight: FontWeight.bold,
+                        color: requestedToJoin
+                            ? Theme.of(context).scaffoldBackgroundColor
+                            : const Color.fromRGBO(247, 243, 237, 1),
+                      ),
                     ),
                   ),
                 ),
               ),
-              onPressed: joined
-                  ? null
-                  : (requestedToJoin ? null : _showLocationMessage),
-              child: Text(
-                joined
-                    ? "Joined Group"
-                    : (requestedToJoin
-                        ? 'Already Requested'
-                        : 'Request to Join'),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'Merriweather Sans',
-                  fontWeight: FontWeight.bold,
-                  color: joined
-                      ? Theme.of(context).scaffoldBackgroundColor
-                      : (requestedToJoin
-                          ? Theme.of(context).scaffoldBackgroundColor
-                          : const Color.fromRGBO(247, 243, 237, 1)),
-                ),
-              ),
             ),
-          ),
-        ),
-      ),
       body: Column(
         children: [
           SizedBox(
@@ -337,6 +321,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                     tabs: const [
                       Tab(text: 'Details'),
                       Tab(text: 'Leaderboard'),
+                      Tab(text: 'Events'),
                     ],
                   ),
                   Expanded(
@@ -348,7 +333,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                           memberList: widget.memberList,
                           participants: widget.participants,
                         ),
-                        const Center(child: Text("Leaderboard")),
+                        GroupLeaderboard(groupId: widget.groupId),
+                        GroupEventsScreen(groupId: widget.groupId),
                       ],
                     ),
                   ),

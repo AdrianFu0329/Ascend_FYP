@@ -85,7 +85,10 @@ class NotificationModal extends StatelessWidget {
 
                           return NotificationCard(
                             notificationId: data['notificationId'],
-                            eventId: data['eventId'],
+                            eventId: data['type'] == "Events" ||
+                                    data['type'] == "General"
+                                ? data['eventId']
+                                : data['groupId'],
                             ownerUserId: data['ownerUserId'],
                             requestUserId: data['requestUserId'],
                             timestamp: data['timestamp'],

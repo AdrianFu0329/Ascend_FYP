@@ -1,6 +1,7 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/event_notification_details_screen.dart';
 import 'package:ascend_fyp/pages/general_notification_details_screen.dart';
+import 'package:ascend_fyp/pages/group_notification_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -50,7 +51,12 @@ class NotificationCard extends StatelessWidget {
             color: Theme.of(context).scaffoldBackgroundColor,
             size: 24,
           );
-        // Other different types of notification icons here
+        case "Groups":
+          icon = Icon(
+            Icons.groups_2_rounded,
+            color: Theme.of(context).scaffoldBackgroundColor,
+            size: 24,
+          );
       }
 
       return icon;
@@ -58,7 +64,7 @@ class NotificationCard extends StatelessWidget {
 
     Widget buildCard() {
       return SizedBox(
-        height: 75,
+        height: 85,
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
@@ -78,6 +84,7 @@ class NotificationCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     getNotiIcon(type),
+                    const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         title,
@@ -103,6 +110,24 @@ class NotificationCard extends StatelessWidget {
                   builder: (context) => EventNotificationDetailsScreen(
                     notificationId: notificationId,
                     eventId: eventId,
+                    ownerUserId: ownerUserId,
+                    requestUserId: requestUserId,
+                    timestamp: timestamp,
+                    title: title,
+                    message: message,
+                    type: type,
+                    requestUserLocation: requestUserLocation,
+                  ),
+                ),
+              );
+            }
+          case "Groups":
+            {
+              Navigator.of(context).push(
+                SlidingNav(
+                  builder: (context) => GroupNotificationDetailsScreen(
+                    notificationId: notificationId,
+                    groupId: eventId,
                     ownerUserId: ownerUserId,
                     requestUserId: requestUserId,
                     timestamp: timestamp,

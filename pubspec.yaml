@@ -104,6 +104,9 @@ flutter:
     - lib/assets/images/community_pressed.png
     - lib/assets/images/community.png
     - lib/assets/images/profile_pic.png
+    - lib/assets/images/crown.png
+    - lib/assets/images/second_place.png
+    - lib/assets/images/third_place.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

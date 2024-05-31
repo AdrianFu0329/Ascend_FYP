@@ -5,13 +5,13 @@ class GroupMemberTile extends StatefulWidget {
   final String userId;
   final String photoURL;
   final String username;
-  final String role;
+  final String trailing;
   const GroupMemberTile({
     super.key,
     required this.userId,
     required this.photoURL,
     required this.username,
-    required this.role,
+    required this.trailing,
   });
 
   @override
@@ -44,7 +44,7 @@ class _GroupMemberTileState extends State<GroupMemberTile> {
         style: Theme.of(context).textTheme.bodyMedium,
       ),
       trailing: Text(
-        widget.role,
+        widget.trailing,
         style: Theme.of(context).textTheme.bodyMedium,
       ),
     );

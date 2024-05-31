@@ -66,7 +66,7 @@ class _GroupDetailsState extends State<GroupDetails> {
                 ),
               ),
               child: StreamBuilder<QuerySnapshot>(
-                stream: getLeaderboardForCurrentGroup(widget.groupId),
+                stream: getMembersForCurrentGroup(widget.groupId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CustomLoadingAnimation();
@@ -83,8 +83,6 @@ class _GroupDetailsState extends State<GroupDetails> {
                               as Map<String, dynamic>;
                           final userId = leaderboardData['userId'];
                           final role = leaderboardData['role'];
-                          final participation =
-                              leaderboardData['groupEventsJoined'];
 
                           return FutureBuilder<Map<String, dynamic>>(
                             future: getUserData(userId),
@@ -102,7 +100,7 @@ class _GroupDetailsState extends State<GroupDetails> {
                                   userId: userId,
                                   username: userData['username'],
                                   photoURL: userData['photoURL'],
-                                  role: role,
+                                  trailing: role,
                                 );
                               }
                             },
