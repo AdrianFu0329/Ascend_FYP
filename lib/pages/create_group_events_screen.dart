@@ -34,6 +34,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isCreating = false;
   bool ownerParticipation = false;
+  bool isOther = false;
   final ValueNotifier<bool> resetNotifierParticipation = ValueNotifier(false);
 
   @override
@@ -217,6 +218,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
           break;
         default:
           posterURL = eventGeneral;
+          isOther = true;
           break;
       }
       return posterURL;
@@ -257,6 +259,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
               'posterURL': getPosterURL(widget.groupSport),
               'requestList': [],
               'acceptedList': acceptedList,
+              'isOther': isOther,
             };
 
             // Add the event document to Firestore

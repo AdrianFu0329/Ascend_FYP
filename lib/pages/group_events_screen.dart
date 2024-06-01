@@ -189,6 +189,7 @@ class _GroupEventsScreenState extends State<GroupEventsScreen> {
                           eventSport: data['sports'],
                           posterURL: data['posterURL'],
                           participants: data['participants'],
+                          isOther: data['isOther'],
                         ),
                       );
                     },

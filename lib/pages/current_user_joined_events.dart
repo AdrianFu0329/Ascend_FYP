@@ -71,6 +71,7 @@ class _CurrentUserJoinedEventsState extends State<CurrentUserJoinedEvents> {
                   eventSport: data['sports'],
                   posterURL: data['posterURL'],
                   participants: data['participants'],
+                  isOther: data['isOther'],
                 ),
               );
             },

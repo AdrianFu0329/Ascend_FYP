@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class CreationSportsList extends StatefulWidget {
   final Function(String?) onSelectionChanged;
   final ValueNotifier<bool> resetNotifier;
+  final String? initialSelectedSport; // Add this line
 
   const CreationSportsList({
     super.key,
     required this.onSelectionChanged,
     required this.resetNotifier,
+    this.initialSelectedSport,
   });
 
   @override
@@ -33,6 +35,7 @@ class _CreationSportsListState extends State<CreationSportsList> {
   @override
   void initState() {
     widget.resetNotifier.addListener(_resetSelection);
+    selectedSport = widget.initialSelectedSport;
     super.initState();
   }
 

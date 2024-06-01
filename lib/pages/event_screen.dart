@@ -250,6 +250,7 @@ class _EventScreenState extends State<EventScreen> {
                           eventSport: data['sports'],
                           posterURL: data['posterURL'],
                           participants: data['participants'],
+                          isOther: data['isOther'],
                         ),
                       );
                     },

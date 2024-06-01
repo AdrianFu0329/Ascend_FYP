@@ -2,6 +2,7 @@ import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/event_settings_screen.dart';
 import 'package:ascend_fyp/pages/user_profile_screen.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
@@ -24,6 +25,7 @@ class EventDetailsScreen extends StatefulWidget {
   final String eventLocation;
   final String posterURL;
   final String participants;
+  final bool isOther;
 
   const EventDetailsScreen({
     super.key,
@@ -40,6 +42,7 @@ class EventDetailsScreen extends StatefulWidget {
     required this.eventLocation,
     required this.posterURL,
     required this.participants,
+    required this.isOther,
   });
 
   @override
@@ -50,10 +53,30 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool requestedToJoin = false;
   bool joined = false;
   final currentUser = FirebaseAuth.instance.currentUser!;
+  late String eventDate;
+  late String eventEndTime;
+  late String eventFees;
+  late String eventLocation;
+  late String eventSport;
+  late String eventStartTime;
+  late String eventTitle;
+  late String participants;
+  late String posterURL;
+  late bool isOther;
 
   @override
   void initState() {
     super.initState();
+    eventDate = widget.eventDate;
+    eventEndTime = widget.eventEndTime;
+    eventFees = widget.eventFees;
+    eventLocation = widget.eventLocation;
+    eventSport = widget.eventSport;
+    eventStartTime = widget.eventStartTime;
+    eventTitle = widget.eventTitle;
+    participants = widget.participants;
+    posterURL = widget.posterURL;
+    isOther = widget.isOther;
     if (widget.requestList.contains(currentUser.uid)) {
       requestedToJoin = true;
     }
@@ -61,6 +84,30 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     if (widget.acceptedList.contains(currentUser.uid)) {
       joined = true;
     }
+  }
+
+  Future<void> reloadEventDetails() async {
+    // Fetch the updated event details from Firestore
+    DocumentSnapshot eventSnapshot = await FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.eventId)
+        .get();
+
+    // Update the state variables with the new values
+    setState(() {
+      eventDate = eventSnapshot['date'];
+      eventEndTime = eventSnapshot['endTime'];
+      eventFees = eventSnapshot['fees'];
+      eventLocation = eventSnapshot['location'];
+      eventSport = eventSnapshot['sport'];
+      eventStartTime = eventSnapshot['startTime'];
+      eventTitle = eventSnapshot['title'];
+      participants = eventSnapshot['participants'];
+      posterURL = eventSnapshot['posterURL'];
+      isOther = eventSnapshot['isOther'];
+      requestedToJoin = eventSnapshot['requestList'].contains(currentUser.uid);
+      joined = eventSnapshot['acceptedList'].contains(currentUser.uid);
+    });
   }
 
   void _showLocationMessage() {
@@ -169,145 +216,189 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           final userData = snapshot.data!;
           final username = userData["username"] ?? "Unknown";
           final photoUrl = userData["photoURL"] ?? "Unknown";
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Color.fromRGBO(247, 243, 237, 1),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-              title: Row(
-                children: [
-                  ProfilePicture(
-                    userId: widget.userId,
-                    photoURL: photoUrl,
-                    radius: 15,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        SlidingNav(
-                          builder: (context) => UserProfileScreen(
-                              userId: widget.userId,
-                              isCurrentUser: isCurrentUser),
-                        ),
-                      );
-                    },
+          return RefreshIndicator(
+            onRefresh: reloadEventDetails,
+            child: Scaffold(
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                leading: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Color.fromRGBO(247, 243, 237, 1),
                   ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                title: Row(
+                  children: [
+                    ProfilePicture(
+                      userId: widget.userId,
+                      photoURL: photoUrl,
+                      radius: 15,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          SlidingNav(
+                            builder: (context) => UserProfileScreen(
+                                userId: widget.userId,
+                                isCurrentUser: isCurrentUser),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          SlidingNav(
+                            builder: (context) => UserProfileScreen(
+                                userId: widget.userId,
+                                isCurrentUser: isCurrentUser),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        username,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  IconButton(
+                    onPressed: () async {
+                      final changeResult = await Navigator.of(context).push(
                         SlidingNav(
-                          builder: (context) => UserProfileScreen(
-                              userId: widget.userId,
-                              isCurrentUser: isCurrentUser),
+                          builder: (context) => EventSettingsScreen(
+                            eventId: widget.eventId,
+                            eventDate: widget.eventDate,
+                            eventEndTime: widget.eventEndTime,
+                            eventFees: widget.eventFees,
+                            eventLocation: widget.eventLocation,
+                            eventSport: widget.eventSport,
+                            eventStartTime: widget.eventStartTime,
+                            eventTitle: widget.eventTitle,
+                            participants: widget.participants,
+                            posterURL: widget.posterURL,
+                            isOther: widget.isOther,
+                          ),
                         ),
                       );
+
+                      if (changeResult != null) {
+                        setState(() {
+                          eventEndTime = changeResult['endTime'];
+                          eventFees = changeResult['fees'];
+                          eventLocation = changeResult['location'];
+                          eventSport = changeResult['sports'];
+                          eventStartTime = changeResult['startTime'];
+                          eventTitle = changeResult['title'];
+                          participants = changeResult['participants'];
+                          posterURL = changeResult['posterURL'];
+                          eventDate = changeResult['date'];
+                          isOther = changeResult['isOther'];
+                        });
+                      }
                     },
-                    child: Text(
-                      username,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    icon: const Icon(Icons.settings),
+                    color: const Color.fromRGBO(247, 243, 237, 1),
                   ),
                 ],
               ),
-            ),
-            body: Column(
-              children: [
-                SizedBox(
-                  height: 250,
-                  child: FutureBuilder<Image>(
-                    future: getPoster(widget.posterURL),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CustomLoadingAnimation(),
-                        );
-                      } else if (snapshot.hasError) {
-                        return const Center(
-                          child: Text(
-                            "An unexpected error occurred. Try again later...",
-                          ),
-                        );
-                      } else {
-                        return Stack(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: snapshot.data!.image,
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment.center,
-                                ),
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.7),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 145,
-                              left: 16,
-                              right: 16,
+              body: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 250,
+                      child: FutureBuilder<Image>(
+                        future: getPoster(posterURL),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CustomLoadingAnimation(),
+                            );
+                          } else if (snapshot.hasError) {
+                            return const Center(
                               child: Text(
-                                widget.eventTitle,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge!
-                                    .copyWith(
-                                  shadows: [
-                                    Shadow(
-                                      offset: const Offset(0, 1),
-                                      blurRadius: 4,
-                                      color: Colors.black.withOpacity(0.75),
+                                "An unexpected error occurred. Try again later...",
+                              ),
+                            );
+                          } else {
+                            return Stack(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: snapshot.data!.image,
+                                      fit: BoxFit.cover,
+                                      alignment: Alignment.center,
                                     ),
-                                  ],
+                                  ),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.7),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 190,
-                              left: 16,
-                              right: 16,
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.fitness_center,
-                                    color: Color.fromRGBO(247, 243, 237, 1),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Flexible(
-                                    child: Text(
-                                      "Sports Involved: ${widget.eventSport}",
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
+                                Positioned(
+                                  top: 145,
+                                  left: 16,
+                                  right: 16,
+                                  child: Text(
+                                    eventTitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .copyWith(
+                                      shadows: [
+                                        Shadow(
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 4,
+                                          color: Colors.black.withOpacity(0.75),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(20),
+                                ),
+                                Positioned(
+                                  top: 190,
+                                  left: 16,
+                                  right: 16,
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.fitness_center,
+                                        color: Color.fromRGBO(247, 243, 237, 1),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Flexible(
+                                        child: Text(
+                                          "Sports Involved: $eventSport",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        },
                       ),
                     ),
-                    child: SingleChildScrollView(
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -322,7 +413,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    widget.eventDate,
+                                    eventDate,
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                   ),
@@ -336,7 +427,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    "${widget.eventStartTime} - ${widget.eventEndTime}",
+                                    "$eventStartTime - $eventEndTime",
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                   ),
@@ -354,7 +445,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               const SizedBox(width: 12),
                               Flexible(
                                 child: Text(
-                                  widget.eventLocation,
+                                  eventLocation,
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ),
@@ -369,7 +460,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                widget.eventFees,
+                                eventFees,
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ],
@@ -383,7 +474,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                "${widget.acceptedList.length} / ${widget.participants}",
+                                "${widget.acceptedList.length} / $participants",
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ],
@@ -392,64 +483,65 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            bottomNavigationBar: Container(
-              color: Theme.of(context).cardColor,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Builder(
-                    builder: (context) {
-                      return ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all<Color>(
-                            joined
-                                ? Colors.greenAccent
-                                : (requestedToJoin
-                                    ? Colors.greenAccent
-                                    : const Color.fromRGBO(194, 0, 0, 1)),
-                          ),
-                          shape:
-                              WidgetStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              side: BorderSide(
-                                color: joined
-                                    ? Colors.greenAccent
-                                    : (requestedToJoin
-                                        ? Colors.greenAccent
-                                        : const Color.fromRGBO(194, 0, 0, 1)),
-                                width: 1.5,
+              ),
+              bottomNavigationBar: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Builder(
+                      builder: (context) {
+                        return ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all<Color>(
+                              joined
+                                  ? Colors.greenAccent
+                                  : (requestedToJoin
+                                      ? Colors.greenAccent
+                                      : const Color.fromRGBO(194, 0, 0, 1)),
+                            ),
+                            shape:
+                                WidgetStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15.0),
+                                side: BorderSide(
+                                  color: joined
+                                      ? Colors.greenAccent
+                                      : (requestedToJoin
+                                          ? Colors.greenAccent
+                                          : const Color.fromRGBO(194, 0, 0, 1)),
+                                  width: 1.5,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        onPressed: joined
-                            ? null
-                            : (requestedToJoin ? null : _showLocationMessage),
-                        child: Text(
-                          joined
-                              ? "Joined Event"
-                              : (requestedToJoin
-                                  ? 'Already Requested'
-                                  : 'Request to Join'),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'Merriweather Sans',
-                            fontWeight: FontWeight.bold,
-                            color: joined
-                                ? Theme.of(context).scaffoldBackgroundColor
+                          onPressed: joined
+                              ? null
+                              : (requestedToJoin ? null : _showLocationMessage),
+                          child: Text(
+                            joined
+                                ? "Joined Event"
                                 : (requestedToJoin
-                                    ? Theme.of(context).scaffoldBackgroundColor
-                                    : const Color.fromRGBO(247, 243, 237, 1)),
+                                    ? 'Already Requested'
+                                    : 'Request to Join'),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Merriweather Sans',
+                              fontWeight: FontWeight.bold,
+                              color: joined
+                                  ? Theme.of(context).scaffoldBackgroundColor
+                                  : (requestedToJoin
+                                      ? Theme.of(context)
+                                          .scaffoldBackgroundColor
+                                      : const Color.fromRGBO(247, 243, 237, 1)),
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

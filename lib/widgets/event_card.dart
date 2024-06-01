@@ -18,6 +18,7 @@ class EventCard extends StatelessWidget {
   final String eventLocation;
   final String posterURL;
   final String participants;
+  final bool isOther;
 
   const EventCard({
     super.key,
@@ -34,6 +35,7 @@ class EventCard extends StatelessWidget {
     required this.eventLocation,
     required this.posterURL,
     required this.participants,
+    required this.isOther,
   });
 
   @override
@@ -55,6 +57,7 @@ class EventCard extends StatelessWidget {
             eventLocation: eventLocation,
             posterURL: posterURL,
             participants: participants,
+            isOther: isOther,
           ),
         ),
       );
