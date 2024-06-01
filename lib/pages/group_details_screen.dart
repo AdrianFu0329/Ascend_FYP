@@ -334,7 +334,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                           participants: widget.participants,
                         ),
                         GroupLeaderboard(groupId: widget.groupId),
-                        GroupEventsScreen(groupId: widget.groupId),
+                        GroupEventsScreen(
+                          groupId: widget.groupId,
+                          groupSport: widget.groupSport,
+                        ),
                       ],
                     ),
                   ),
