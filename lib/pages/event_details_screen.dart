@@ -26,6 +26,7 @@ class EventDetailsScreen extends StatefulWidget {
   final String posterURL;
   final String participants;
   final bool isOther;
+  final bool isGroupEvent;
 
   const EventDetailsScreen({
     super.key,
@@ -43,6 +44,7 @@ class EventDetailsScreen extends StatefulWidget {
     required this.posterURL,
     required this.participants,
     required this.isOther,
+    required this.isGroupEvent,
   });
 
   @override
@@ -62,6 +64,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   late String eventTitle;
   late String participants;
   late String posterURL;
+  late List<dynamic> acceptedList;
   late bool isOther;
 
   @override
@@ -76,6 +79,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     eventTitle = widget.eventTitle;
     participants = widget.participants;
     posterURL = widget.posterURL;
+    acceptedList = widget.acceptedList;
     isOther = widget.isOther;
     if (widget.requestList.contains(currentUser.uid)) {
       requestedToJoin = true;
@@ -279,7 +283,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 eventTitle: widget.eventTitle,
                                 participants: widget.participants,
                                 posterURL: widget.posterURL,
+                                acceptedList: widget.acceptedList,
                                 isOther: widget.isOther,
+                                isGroupEvent: widget.isGroupEvent,
                               ),
                             ),
                           );
@@ -294,6 +300,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               eventTitle = changeResult['title'];
                               participants = changeResult['participants'];
                               posterURL = changeResult['posterURL'];
+                              acceptedList = changeResult['acceptedList'];
                               eventDate = changeResult['date'];
                               isOther = changeResult['isOther'];
                             });

@@ -72,6 +72,7 @@ class _CurrentUserJoinedEventsState extends State<CurrentUserJoinedEvents> {
                   posterURL: data['posterURL'],
                   participants: data['participants'],
                   isOther: data['isOther'],
+                  isGroupEvent: false,
                 ),
               );
             },

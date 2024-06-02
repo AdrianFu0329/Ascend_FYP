@@ -251,6 +251,7 @@ class _EventScreenState extends State<EventScreen> {
                           posterURL: data['posterURL'],
                           participants: data['participants'],
                           isOther: data['isOther'],
+                          isGroupEvent: false,
                         ),
                       );
                     },

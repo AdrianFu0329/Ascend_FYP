@@ -19,24 +19,25 @@ class EventCard extends StatelessWidget {
   final String posterURL;
   final String participants;
   final bool isOther;
+  final bool isGroupEvent;
 
-  const EventCard({
-    super.key,
-    required this.eventId,
-    required this.userId,
-    required this.eventTitle,
-    required this.requestList,
-    required this.acceptedList,
-    required this.eventDate,
-    required this.eventStartTime,
-    required this.eventEndTime,
-    required this.eventFees,
-    required this.eventSport,
-    required this.eventLocation,
-    required this.posterURL,
-    required this.participants,
-    required this.isOther,
-  });
+  const EventCard(
+      {super.key,
+      required this.eventId,
+      required this.userId,
+      required this.eventTitle,
+      required this.requestList,
+      required this.acceptedList,
+      required this.eventDate,
+      required this.eventStartTime,
+      required this.eventEndTime,
+      required this.eventFees,
+      required this.eventSport,
+      required this.eventLocation,
+      required this.posterURL,
+      required this.participants,
+      required this.isOther,
+      required this.isGroupEvent});
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +59,7 @@ class EventCard extends StatelessWidget {
             posterURL: posterURL,
             participants: participants,
             isOther: isOther,
+            isGroupEvent: isGroupEvent,
           ),
         ),
       );
