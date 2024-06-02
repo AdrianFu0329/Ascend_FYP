@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class EventDetailsSettingsScreen extends StatefulWidget {
+class EditEventDetailsScreen extends StatefulWidget {
   final String eventId;
   final String eventTitle;
   final String eventDate;
@@ -22,7 +22,7 @@ class EventDetailsSettingsScreen extends StatefulWidget {
   final bool isOther;
   final bool isGroupEvent;
 
-  const EventDetailsSettingsScreen({
+  const EditEventDetailsScreen({
     super.key,
     required this.eventId,
     required this.eventTitle,
@@ -39,12 +39,10 @@ class EventDetailsSettingsScreen extends StatefulWidget {
   });
 
   @override
-  _EventDetailsSettingsScreenState createState() =>
-      _EventDetailsSettingsScreenState();
+  _EditEventDetailsScreenState createState() => _EditEventDetailsScreenState();
 }
 
-class _EventDetailsSettingsScreenState
-    extends State<EventDetailsSettingsScreen> {
+class _EditEventDetailsScreenState extends State<EditEventDetailsScreen> {
   late TextEditingController eventTitleController;
   late TextEditingController eventFeesController;
   late TextEditingController eventSportController;

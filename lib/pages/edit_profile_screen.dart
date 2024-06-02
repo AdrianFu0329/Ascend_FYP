@@ -88,18 +88,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'Edit Profile',
           style: Theme.of(context).textTheme.titleLarge!,
         ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Color.fromRGBO(247, 243, 237, 1),
-          ),
-          onPressed: () {
+        leading: PopScope(
+          canPop: false,
+          onPopInvoked: ((didPop) {
+            if (didPop) {
+              return;
+            }
             Navigator.of(context).pop({
               'username': username,
               'email': email,
               'description': description,
             });
-          },
+          }),
+          child: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Color.fromRGBO(247, 243, 237, 1),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop({
+                'username': username,
+                'email': email,
+                'description': description,
+              });
+            },
+          ),
         ),
       ),
       body: Center(

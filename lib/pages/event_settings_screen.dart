@@ -1,5 +1,5 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/event_details_setting_screen.dart';
+import 'package:ascend_fyp/pages/edit_event_details_screen.dart';
 import 'package:flutter/material.dart';
 
 class EventSettingsScreen extends StatefulWidget {
@@ -103,12 +103,12 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
           'Event Settings',
           style: Theme.of(context).textTheme.titleLarge!,
         ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Color.fromRGBO(247, 243, 237, 1),
-          ),
-          onPressed: () {
+        leading: PopScope(
+          canPop: false,
+          onPopInvoked: ((didPop) {
+            if (didPop) {
+              return;
+            }
             Navigator.of(context).pop(
               {
                 'title': eventTitle,
@@ -124,7 +124,30 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
                 'acceptedList': acceptedList,
               },
             );
-          },
+          }),
+          child: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Color.fromRGBO(247, 243, 237, 1),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop(
+                {
+                  'title': eventTitle,
+                  'sports': eventSport,
+                  'fees': eventFees,
+                  'location': eventLocation,
+                  'participants': participants,
+                  'date': eventDate,
+                  'startTime': eventStartTime,
+                  'endTime': eventEndTime,
+                  'isOther': isOther,
+                  'posterURL': posterURL,
+                  'acceptedList': acceptedList,
+                },
+              );
+            },
+          ),
         ),
       ),
       body: Center(
@@ -136,7 +159,7 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
                 onPressed: () async {
                   final changeResult = await Navigator.of(context).push(
                     SlidingNav(
-                      builder: (context) => EventDetailsSettingsScreen(
+                      builder: (context) => EditEventDetailsScreen(
                         eventId: widget.eventId,
                         eventDate: widget.eventDate,
                         eventEndTime: widget.eventEndTime,
