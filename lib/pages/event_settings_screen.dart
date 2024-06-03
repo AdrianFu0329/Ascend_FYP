@@ -1,5 +1,7 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/edit_event_details_screen.dart';
+import 'package:ascend_fyp/pages/edit_event_participants_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EventSettingsScreen extends StatefulWidget {
@@ -67,6 +69,67 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
     isOther = widget.isOther;
   }
 
+  void _showMessage(String message, bool confirm,
+      {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (confirm) {
+                  if (onYesPressed != null) {
+                    onYesPressed();
+                  }
+                } else {
+                  if (onOKPressed != null) {
+                    onOKPressed();
+                  }
+                }
+              },
+              child: Text(
+                confirm ? 'Yes' : 'OK',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            confirm
+                ? TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'No',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  )
+                : Container(),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> deleteEvent() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(widget.eventId)
+          .delete();
+
+      return true;
+    } catch (error) {
+      _showMessage("Unable to delete event. Try again later...", false);
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ButtonStyle buttonStyle = ButtonStyle(
@@ -90,6 +153,34 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
           borderRadius: BorderRadius.circular(10),
           side: const BorderSide(
             color: Color.fromRGBO(247, 243, 237, 1),
+            width: 1.5,
+          ),
+        ),
+      ),
+    );
+
+    ButtonStyle deleteButtonStyle = ButtonStyle(
+      minimumSize: WidgetStateProperty.all<Size>(
+        const Size(double.infinity, 50),
+      ),
+      textStyle: WidgetStateProperty.all<TextStyle>(
+        const TextStyle(
+          fontSize: 12,
+          fontFamily: 'Merriweather Sans',
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+      foregroundColor: WidgetStateProperty.all<Color>(
+        Colors.red,
+      ),
+      backgroundColor: WidgetStateProperty.all<Color>(
+        Theme.of(context).scaffoldBackgroundColor,
+      ),
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: const BorderSide(
+            color: Colors.red,
             width: 1.5,
           ),
         ),
@@ -150,6 +241,47 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ElevatedButton(
+          onPressed: () {
+            _showMessage(
+              "Are you sure you would like to delete your sports event?",
+              true,
+              onYesPressed: () async {
+                bool isDeleted = await deleteEvent();
+                if (isDeleted) {
+                  _showMessage(
+                    "Event deleted successfully",
+                    false,
+                    onOKPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(true);
+                    },
+                  );
+                }
+              },
+            );
+          },
+          style: deleteButtonStyle,
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.delete_outline_outlined,
+                    size: 30,
+                    color: Colors.red,
+                  ),
+                  SizedBox(width: 8),
+                  Text('Delete Event'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -206,13 +338,21 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(
+                onPressed: () async {
+                  final changeResult = await Navigator.of(context).push(
                     SlidingNav(
-                      builder: (context) =>
-                          Container(), //Edit Participants Screen here
+                      builder: (context) => EditEventParticipantsScreen(
+                        eventId: widget.eventId,
+                        acceptedList: widget.acceptedList,
+                      ),
                     ),
                   );
+
+                  if (changeResult != null) {
+                    setState(() {
+                      acceptedList = changeResult['acceptedList'];
+                    });
+                  }
                 },
                 style: buttonStyle,
                 child: const Row(

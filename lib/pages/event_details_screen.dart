@@ -476,7 +476,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              "${widget.acceptedList.length} / $participants",
+                              "${acceptedList.length} / $participants",
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],

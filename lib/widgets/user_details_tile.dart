@@ -1,12 +1,12 @@
 import 'package:ascend_fyp/widgets/profile_pic.dart';
 import 'package:flutter/material.dart';
 
-class GroupMemberTile extends StatefulWidget {
+class UserDetailsTile extends StatefulWidget {
   final String userId;
   final String photoURL;
   final String username;
-  final String trailing;
-  const GroupMemberTile({
+  final Widget trailing;
+  const UserDetailsTile({
     super.key,
     required this.userId,
     required this.photoURL,
@@ -15,10 +15,10 @@ class GroupMemberTile extends StatefulWidget {
   });
 
   @override
-  State<GroupMemberTile> createState() => _GroupMemberTileState();
+  State<UserDetailsTile> createState() => _UserDetailsTileState();
 }
 
-class _GroupMemberTileState extends State<GroupMemberTile> {
+class _UserDetailsTileState extends State<UserDetailsTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -43,10 +43,7 @@ class _GroupMemberTileState extends State<GroupMemberTile> {
         widget.username,
         style: Theme.of(context).textTheme.bodyMedium,
       ),
-      trailing: Text(
-        widget.trailing,
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
+      trailing: widget.trailing,
     );
   }
 }

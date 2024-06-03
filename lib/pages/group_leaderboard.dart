@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
-import 'package:ascend_fyp/widgets/group_member_tile.dart';
+import 'package:ascend_fyp/widgets/user_details_tile.dart';
 import 'package:ascend_fyp/widgets/leaderboard_top_3.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,11 +80,16 @@ class GroupLeaderboard extends StatelessWidget {
                                     );
                                   } else {
                                     final userData = userSnapshot.data!;
-                                    return GroupMemberTile(
+                                    return UserDetailsTile(
                                       userId: userId,
                                       username: userData['username'],
                                       photoURL: userData['photoURL'],
-                                      trailing: participation.toString(),
+                                      trailing: Text(
+                                        participation.toString(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
                                     );
                                   }
                                 },

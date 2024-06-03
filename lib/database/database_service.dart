@@ -47,6 +47,13 @@ Stream<QuerySnapshot> getGroupEventsFromDatabase(String groupId) {
   return eventsStream;
 }
 
+Stream<DocumentSnapshot> getParticipantsForCurrentEvent(String eventId) {
+  return FirebaseFirestore.instance
+      .collection('events')
+      .doc(eventId)
+      .snapshots();
+}
+
 Stream<QuerySnapshot> getGroupsFromDatabase() {
   final CollectionReference events =
       FirebaseFirestore.instance.collection("groups");
