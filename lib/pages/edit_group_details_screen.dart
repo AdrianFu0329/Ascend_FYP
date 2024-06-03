@@ -145,15 +145,13 @@ class _EditGroupDetailsScreenState extends State<EditGroupDetailsScreen> {
         'isOther': isOtherGroup,
         'posterURL': getPosterURL(selectedSports!),
       });
-      setState(() {
-        isUpdating = false;
-      });
       _showMessage('Group details updated successfully!');
     } catch (error) {
+      _showMessage('Failed to update group details. Try again later...');
+    } finally {
       setState(() {
         isUpdating = false;
       });
-      _showMessage('An error occurred. Failed to update group details: $error');
     }
   }
 
@@ -259,7 +257,7 @@ class _EditGroupDetailsScreenState extends State<EditGroupDetailsScreen> {
                             updateFields();
                             Navigator.of(context).pop(
                               {
-                                'name': groupTitleController.text.trim(),
+                                'title': groupTitleController.text.trim(),
                                 'sports': selectedSports,
                                 'participants':
                                     groupParticipantsController.text.trim(),

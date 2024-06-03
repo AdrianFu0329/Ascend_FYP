@@ -285,7 +285,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                   if (changeResult != null) {
                     setState(() {
                       groupSport = changeResult['sports'];
-                      groupTitle = changeResult['name'];
+                      groupTitle = changeResult['title'];
                       participants = changeResult['participants'];
                       posterURL = changeResult['posterURL'];
                       isOther = changeResult['isOther'];

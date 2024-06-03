@@ -118,68 +118,82 @@ class _EditEventParticipantsScreenState
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: StreamBuilder<DocumentSnapshot>(
-          stream: getParticipantsForCurrentEvent(widget.eventId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CustomLoadingAnimation());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || !snapshot.data!.exists) {
-              return const Center(child: Text('No participants found.'));
-            }
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: getParticipantsForCurrentEvent(widget.eventId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CustomLoadingAnimation());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || !snapshot.data!.exists) {
+                  return const Center(child: Text('No participants found.'));
+                }
 
-            final List<dynamic> participantsList =
-                snapshot.data!['acceptedList'];
+                final List<dynamic> participantsList =
+                    snapshot.data!['acceptedList'];
 
-            if (participantsList.isEmpty) {
-              return const Center(child: Text('No participants found.'));
-            }
+                if (participantsList.isEmpty) {
+                  return const Center(child: Text('No participants found.'));
+                }
 
-            return ListView.builder(
-              itemCount: participantsList.length,
-              itemBuilder: (context, index) {
-                return FutureBuilder<Map<String, dynamic>>(
-                  future: getUserData(participantsList[index]),
-                  builder: (context, userSnapshot) {
-                    if (userSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return const CustomLoadingAnimation();
-                    } else if (userSnapshot.hasError) {
-                      return Center(
-                        child: Text('Error: ${userSnapshot.error}'),
-                      );
-                    } else if (!userSnapshot.hasData) {
-                      return const Center(child: Text('User data not found.'));
-                    }
-                    final userId = participantsList[index];
-                    final userData = userSnapshot.data!;
-                    return UserDetailsTile(
-                      userId: userId,
-                      username: userData['username'],
-                      photoURL: userData['photoURL'],
-                      trailing: IconButton(
-                        icon: const Icon(
-                          Icons.remove_circle_outline_rounded,
-                          color: Colors.red,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            participantsList.remove(userId);
-                            acceptedList = participantsList;
-                          });
-                          updateFields();
-                        },
-                      ),
+                return ListView.builder(
+                  itemCount: participantsList.length,
+                  itemBuilder: (context, index) {
+                    return FutureBuilder<Map<String, dynamic>>(
+                      future: getUserData(participantsList[index]),
+                      builder: (context, userSnapshot) {
+                        if (userSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CustomLoadingAnimation();
+                        } else if (userSnapshot.hasError) {
+                          return Center(
+                            child: Text('Error: ${userSnapshot.error}'),
+                          );
+                        } else if (!userSnapshot.hasData) {
+                          return const Center(
+                              child: Text('User data not found.'));
+                        }
+                        final userId = participantsList[index];
+                        final userData = userSnapshot.data!;
+                        return UserDetailsTile(
+                          userId: userId,
+                          username: userData['username'],
+                          photoURL: userData['photoURL'],
+                          trailing: IconButton(
+                            icon: const Icon(
+                              Icons.remove_circle_outline_rounded,
+                              color: Colors.red,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                participantsList.remove(userId);
+                                acceptedList = participantsList;
+                              });
+                              updateFields();
+                            },
+                          ),
+                        );
+                      },
                     );
                   },
                 );
               },
-            );
-          },
-        ),
+            ),
+          ),
+          if (isUpdating)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0),
+                child: const Center(
+                  child: ContainerLoadingAnimation(),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

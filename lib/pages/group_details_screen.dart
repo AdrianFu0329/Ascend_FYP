@@ -275,7 +275,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
           SizedBox(
             height: 250,
             child: FutureBuilder<Image>(
-              future: getPoster(widget.posterURL),
+              future: getPoster(posterURL),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -309,7 +309,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                         left: 16,
                         right: 16,
                         child: Text(
-                          widget.groupTitle,
+                          groupTitle,
                           style:
                               Theme.of(context).textTheme.titleLarge!.copyWith(
                             shadows: [
@@ -335,7 +335,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                             const SizedBox(width: 12),
                             Flexible(
                               child: Text(
-                                "Sports Involved: ${widget.groupSport}",
+                                "Sports Involved: $groupSport",
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ),
@@ -381,13 +381,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                       children: [
                         GroupDetails(
                           groupId: widget.groupId,
-                          memberList: widget.memberList,
-                          participants: widget.participants,
+                          memberList: memberList,
+                          participants: participants,
                         ),
                         GroupLeaderboard(groupId: widget.groupId),
                         GroupEventsScreen(
                           groupId: widget.groupId,
-                          groupSport: widget.groupSport,
+                          groupSport: groupSport,
                         ),
                       ],
                     ),
