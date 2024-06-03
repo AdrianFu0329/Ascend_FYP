@@ -100,7 +100,11 @@ class _GroupDetailsState extends State<GroupDetails> {
                                   userId: userId,
                                   username: userData['username'],
                                   photoURL: userData['photoURL'],
-                                  trailing: role,
+                                  trailing: Text(
+                                    role,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
                                 );
                               }
                             },

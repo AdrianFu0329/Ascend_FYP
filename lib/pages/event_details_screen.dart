@@ -13,6 +13,7 @@ import 'package:geolocator/geolocator.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   final String eventId;
+  final String? groupId;
   final String userId;
   final String eventTitle;
   final List<dynamic> requestList;
@@ -45,6 +46,7 @@ class EventDetailsScreen extends StatefulWidget {
     required this.participants,
     required this.isOther,
     required this.isGroupEvent,
+    this.groupId,
   });
 
   @override
@@ -274,6 +276,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             SlidingNav(
                               builder: (context) => EventSettingsScreen(
                                 eventId: widget.eventId,
+                                groupId: widget.groupId,
                                 eventDate: widget.eventDate,
                                 eventEndTime: widget.eventEndTime,
                                 eventFees: widget.eventFees,

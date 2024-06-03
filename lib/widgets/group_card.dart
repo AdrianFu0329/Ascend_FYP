@@ -13,6 +13,7 @@ class GroupCard extends StatelessWidget {
   final String groupSport;
   final String posterURL;
   final String participants;
+  final bool isOther;
 
   const GroupCard({
     super.key,
@@ -24,6 +25,7 @@ class GroupCard extends StatelessWidget {
     required this.groupSport,
     required this.posterURL,
     required this.participants,
+    required this.isOther,
   });
 
   @override
@@ -40,6 +42,7 @@ class GroupCard extends StatelessWidget {
             groupSport: groupSport,
             posterURL: posterURL,
             participants: participants,
+            isOther: isOther,
           ),
         ),
       );

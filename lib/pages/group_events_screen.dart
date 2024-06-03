@@ -177,6 +177,7 @@ class _GroupEventsScreenState extends State<GroupEventsScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: EventCard(
                           eventId: data['eventId'],
+                          groupId: widget.groupId,
                           userId: data['userId'],
                           eventTitle: data['title'],
                           requestList: List<String>.from(data['requestList']),

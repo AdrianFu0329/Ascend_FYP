@@ -37,10 +37,19 @@ class GroupLeaderboard extends StatelessWidget {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else {
                   final leaderboardDocs = snapshot.data!.docs;
+                  String top1UserId;
+                  String top2UserId;
+                  String top3UserId;
                   // Extract the first three user IDs
-                  final top1UserId = leaderboardDocs[0]['userId'];
-                  final top2UserId = leaderboardDocs[1]['userId'];
-                  final top3UserId = leaderboardDocs[2]['userId'];
+                  if (leaderboardDocs.length > 1) {
+                    top1UserId = leaderboardDocs[0]['userId'];
+                    top2UserId = leaderboardDocs[1]['userId'];
+                    top3UserId = leaderboardDocs[2]['userId'];
+                  } else {
+                    top1UserId = leaderboardDocs[0]['userId'];
+                    top2UserId = "";
+                    top3UserId = "";
+                  }
 
                   return SizedBox(
                     height: MediaQuery.of(context).size.height,

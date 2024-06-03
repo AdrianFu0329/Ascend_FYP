@@ -181,6 +181,7 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                           groupSport: data['sports'],
                           posterURL: data['posterURL'],
                           participants: data['participants'],
+                          isOther: data['isOther'],
                         ),
                       );
                     },

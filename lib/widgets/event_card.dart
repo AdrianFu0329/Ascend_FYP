@@ -6,6 +6,7 @@ import 'package:ascend_fyp/widgets/loading.dart';
 
 class EventCard extends StatelessWidget {
   final String eventId;
+  final String? groupId;
   final String userId;
   final String eventTitle;
   final List<dynamic> requestList;
@@ -21,23 +22,25 @@ class EventCard extends StatelessWidget {
   final bool isOther;
   final bool isGroupEvent;
 
-  const EventCard(
-      {super.key,
-      required this.eventId,
-      required this.userId,
-      required this.eventTitle,
-      required this.requestList,
-      required this.acceptedList,
-      required this.eventDate,
-      required this.eventStartTime,
-      required this.eventEndTime,
-      required this.eventFees,
-      required this.eventSport,
-      required this.eventLocation,
-      required this.posterURL,
-      required this.participants,
-      required this.isOther,
-      required this.isGroupEvent});
+  const EventCard({
+    super.key,
+    required this.eventId,
+    required this.userId,
+    required this.eventTitle,
+    required this.requestList,
+    required this.acceptedList,
+    required this.eventDate,
+    required this.eventStartTime,
+    required this.eventEndTime,
+    required this.eventFees,
+    required this.eventSport,
+    required this.eventLocation,
+    required this.posterURL,
+    required this.participants,
+    required this.isOther,
+    required this.isGroupEvent,
+    this.groupId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +49,7 @@ class EventCard extends StatelessWidget {
         SlidingNav(
           builder: (context) => EventDetailsScreen(
             eventId: eventId,
+            groupId: groupId,
             userId: userId,
             eventTitle: eventTitle,
             requestList: requestList,

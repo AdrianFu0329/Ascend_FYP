@@ -1,8 +1,10 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
+import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/group_details.dart';
 import 'package:ascend_fyp/pages/group_events_screen.dart';
 import 'package:ascend_fyp/pages/group_leaderboard.dart';
+import 'package:ascend_fyp/pages/group_settings_screen.dart';
 import 'package:ascend_fyp/widgets/circle_tab_indicator.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +21,7 @@ class GroupDetailsScreen extends StatefulWidget {
   final String groupSport;
   final String posterURL;
   final String participants;
+  final bool isOther;
 
   const GroupDetailsScreen({
     super.key,
@@ -30,6 +33,7 @@ class GroupDetailsScreen extends StatefulWidget {
     required this.groupSport,
     required this.posterURL,
     required this.participants,
+    required this.isOther,
   });
 
   @override
@@ -42,10 +46,23 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
   bool requestedToJoin = false;
   bool joined = false;
   final currentUser = FirebaseAuth.instance.currentUser!;
+  late String groupSport;
+  late String groupTitle;
+  late String participants;
+  late String posterURL;
+  late List<dynamic> memberList;
+  late bool isOther;
 
   @override
   void initState() {
     super.initState();
+    groupTitle = widget.groupTitle;
+    groupSport = widget.groupSport;
+    participants = widget.participants;
+    posterURL = widget.posterURL;
+    memberList = widget.memberList;
+    isOther = widget.isOther;
+
     _tabController = TabController(length: 3, vsync: this);
     if (widget.requestList.contains(currentUser.uid)) {
       requestedToJoin = true;
@@ -175,6 +192,40 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
             Navigator.pop(context);
           },
         ),
+        actions: [
+          currentUser.uid == widget.ownerUserId
+              ? IconButton(
+                  onPressed: () async {
+                    final changeResult = await Navigator.of(context).push(
+                      SlidingNav(
+                        builder: (context) => GroupSettingsScreen(
+                          groupId: widget.groupId,
+                          groupSport: widget.groupSport,
+                          groupTitle: widget.groupTitle,
+                          participants: widget.participants,
+                          posterURL: widget.posterURL,
+                          memberList: widget.memberList,
+                          isOther: widget.isOther,
+                        ),
+                      ),
+                    );
+
+                    if (changeResult != null) {
+                      setState(() {
+                        groupSport = changeResult['sports'];
+                        groupTitle = changeResult['title'];
+                        participants = changeResult['participants'];
+                        posterURL = changeResult['posterURL'];
+                        memberList = changeResult['memberList'];
+                        isOther = changeResult['isOther'];
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.settings),
+                  color: const Color.fromRGBO(247, 243, 237, 1),
+                )
+              : Container(),
+        ],
       ),
       bottomNavigationBar: joined
           ? null
