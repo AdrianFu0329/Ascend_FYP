@@ -31,7 +31,7 @@ class AuthService {
         }
         await user!.sendEmailVerification();
 
-        return "Registration Successful";
+        return "Registration Successful. Please check your email for a verification mail.";
       } else {
         return "Registration Failed";
       }
