@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,15 @@ String generateUniqueId() {
   }
 
   return buffer.toString();
+}
+
+Future<bool> sendPasswordResetLink(String email) async {
+  try {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 Stream<QuerySnapshot> getPostsFromDatabase() {

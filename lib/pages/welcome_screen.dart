@@ -2,6 +2,7 @@
 
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/navigation/wrapper_nav.dart';
+import 'package:ascend_fyp/pages/forgot_pwd_screen.dart';
 import 'package:ascend_fyp/pages/registration_screen.dart';
 import 'package:ascend_fyp/auth_service/AuthService.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
@@ -20,6 +21,53 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   TextEditingController passwordController = TextEditingController();
   bool _isLoggingIn = false;
 
+  void _showMessage(String message, bool confirm,
+      {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (confirm) {
+                  if (onYesPressed != null) {
+                    onYesPressed();
+                  }
+                } else {
+                  if (onOKPressed != null) {
+                    onOKPressed();
+                  }
+                }
+              },
+              child: Text(
+                confirm ? 'Yes' : 'OK',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            confirm
+                ? TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'No',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  )
+                : Container(),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> signInWithPwd() async {
     setState(() {
       _isLoggingIn = true;
@@ -37,6 +85,20 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           builder: (context) => const WrapperNav(),
         ),
       );
+    } else if (pwdLoginMsg ==
+        "Email not verified. Please check your email for verification.") {
+      _showMessage(
+        "$pwdLoginMsg\n\n Would you like us to send you another verification email?",
+        true,
+        onYesPressed: () async {
+          String resendMsg = await AuthService().resendVerificationEmail();
+          _showMessage(resendMsg, false);
+        },
+      );
+
+      setState(() {
+        _isLoggingIn = false;
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -69,7 +131,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Incorrect email or password!\nPlease try again!"),
+          content: Text("Login Error!\nPlease try again..."),
         ),
       );
       setState(() {
@@ -154,7 +216,26 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 50),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              SlidingNav(
+                                builder: (context) => const ForgotPwdScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Forgot Your Password?",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 25),
                     SizedBox(
                       height: 50,
                       child: ElevatedButton(

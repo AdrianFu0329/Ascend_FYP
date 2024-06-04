@@ -29,6 +29,8 @@ class AuthService {
             },
           );
         }
+        await user!.sendEmailVerification();
+
         return "Registration Successful";
       } else {
         return "Registration Failed";
@@ -47,6 +49,11 @@ class AuthService {
         final User? user = newUser.user;
 
         if (user != null) {
+          if (!user.emailVerified) {
+            await auth.signOut();
+            return "Email not verified. Please check your email for verification.";
+          }
+
           final DocumentSnapshot userDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
@@ -74,6 +81,21 @@ class AuthService {
       }
     } on FirebaseAuthException catch (e) {
       return "Firebase Auth Exception: ${e.message}";
+    }
+  }
+
+  Future<String> resendVerificationEmail() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+    try {
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        return "Verification email sent. Please check your email.";
+      } else {
+        return "User not found or already verified.";
+      }
+    } catch (e) {
+      return e.toString();
     }
   }
 
