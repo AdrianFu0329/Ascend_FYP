@@ -9,6 +9,7 @@ import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -38,6 +39,53 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
     super.initState();
     likeCount = widget.likes.length;
     isLiked = widget.likes.contains(currentUser.uid);
+  }
+
+  void _showMessage(String message, bool confirm,
+      {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (confirm) {
+                  if (onYesPressed != null) {
+                    onYesPressed();
+                  }
+                } else {
+                  if (onOKPressed != null) {
+                    onOKPressed();
+                  }
+                }
+              },
+              child: Text(
+                confirm ? 'Yes' : 'OK',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            confirm
+                ? TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'No',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  )
+                : Container(),
+          ],
+        );
+      },
+    );
   }
 
   void onLikePressed() {
@@ -74,32 +122,6 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
       "timestamp": Timestamp.now(),
       "userId": FirebaseAuth.instance.currentUser!.uid,
     });
-  }
-
-  void _showMessage(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          content: Text(
-            message,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'OK',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -152,6 +174,7 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
                       if (commentController.text.isEmpty) {
                         _showMessage(
                           "Please input a comment before sending...",
+                          false,
                         );
                       } else {
                         addComment(commentController.text);
@@ -224,6 +247,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   bool isLiked = false;
   int likeCount = 0;
   late int currentIndex = 0;
+  bool isDeletingPost = false;
 
   void onLikePressed() {
     setState(() {
@@ -255,11 +279,109 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     return formatted;
   }
 
+  Future<bool> onDeletePostPressed() async {
+    setState(() {
+      isDeletingPost = true;
+    });
+
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      FirebaseStorage storage = FirebaseStorage.instance;
+
+      // Firestore references
+      DocumentReference postDocRef =
+          firestore.collection('posts').doc(widget.postId);
+      DocumentReference userPostRef = firestore
+          .collection('users')
+          .doc(widget.userId)
+          .collection('posts')
+          .doc(widget.postId);
+      CollectionReference commentsCollectionRef =
+          postDocRef.collection('comments');
+
+      // Get all comments for the post
+      QuerySnapshot commentsSnapshot = await commentsCollectionRef.get();
+      WriteBatch batch = firestore.batch();
+
+      batch.delete(userPostRef);
+
+      for (DocumentSnapshot doc in commentsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+      await postDocRef.delete();
+
+      // Storage reference to the folder containing images
+      Reference imagesFolderRef = storage.ref().child('posts/${widget.postId}');
+
+      ListResult result = await imagesFolderRef.listAll();
+      for (Reference fileRef in result.items) {
+        await fileRef.delete();
+      }
+
+      return true;
+    } catch (error) {
+      return false;
+    } finally {
+      setState(() {
+        isDeletingPost = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     String formatted = fromDateToString(widget.timestamp);
     final currentUser = FirebaseAuth.instance.currentUser!;
     bool isCurrentUser = currentUser.uid == widget.userId;
+
+    void _showMessage(String message, bool confirm,
+        {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            content: Text(
+              message,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  if (confirm) {
+                    if (onYesPressed != null) {
+                      onYesPressed();
+                    }
+                  } else {
+                    if (onOKPressed != null) {
+                      onOKPressed();
+                    }
+                  }
+                },
+                child: Text(
+                  confirm ? 'Yes' : 'OK',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              confirm
+                  ? TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'No',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    )
+                  : Container(),
+            ],
+          );
+        },
+      );
+    }
 
     return FutureBuilder<Map<String, dynamic>>(
       future: getUserData(widget.userId),
@@ -322,85 +444,141 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                   ),
                 ],
               ),
+              actions: [
+                isCurrentUser
+                    ? PopupMenuButton(
+                        iconColor: const Color.fromRGBO(247, 243, 237, 1),
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: "Delete Post",
+                            child: Text("Delete Post"),
+                          )
+                        ],
+                        onSelected: (value) {
+                          _showMessage(
+                            "Are you sure you want to delete your post?",
+                            true,
+                            onYesPressed: () async {
+                              setState(() {
+                                isDeletingPost = true;
+                              });
+                              bool isDeleted = await onDeletePostPressed();
+
+                              if (isDeleted) {
+                                _showMessage(
+                                  "Post deleted successfully",
+                                  false,
+                                  onOKPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                );
+                              } else {
+                                _showMessage(
+                                  "Unable to delete post. Try again later...",
+                                  false,
+                                );
+                              }
+                            },
+                          );
+                        },
+                      )
+                    : Container(),
+              ],
             ),
             body: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
-                  ImagePageView(
-                    images: widget.images,
-                    maxHeight: maxHeight,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                    child: Text(
-                      widget.title,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                    child: Text(
-                      widget.description,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    child: Text(
-                      "$formatted \n$city",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  PostInteractionBar(
-                    likes: widget.likes,
-                    postId: widget.postId,
-                    userId: widget.userId,
-                  ),
-                  const SizedBox(height: 24),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection("posts")
-                        .doc(widget.postId)
-                        .collection("comments")
-                        .orderBy("timestamp", descending: true)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(
-                          child: CustomLoadingAnimation(),
-                        );
-                      }
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ImagePageView(
+                        images: widget.images,
+                        maxHeight: maxHeight,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                        child: Text(
+                          widget.title,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                        child: Text(
+                          widget.description,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Text(
+                          "$formatted \n$city",
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      PostInteractionBar(
+                        likes: widget.likes,
+                        postId: widget.postId,
+                        userId: widget.userId,
+                      ),
+                      const SizedBox(height: 24),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection("posts")
+                            .doc(widget.postId)
+                            .collection("comments")
+                            .orderBy("timestamp", descending: true)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: CustomLoadingAnimation(),
+                            );
+                          }
 
-                      return ListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: snapshot.data!.docs.map((doc) {
-                          final commentData =
-                              doc.data() as Map<String, dynamic>;
-                          return CommentPost(
-                            text: commentData["comment"],
-                            userId: commentData["userId"],
-                            time: fromDateToString(commentData["timestamp"]),
+                          return ListView(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: snapshot.data!.docs.map((doc) {
+                              final commentData =
+                                  doc.data() as Map<String, dynamic>;
+                              return CommentPost(
+                                text: commentData["comment"],
+                                userId: commentData["userId"],
+                                postId: widget.postId,
+                                commentId: doc.id,
+                                time:
+                                    fromDateToString(commentData["timestamp"]),
+                              );
+                            }).toList(),
                           );
-                        }).toList(),
-                      );
-                    },
+                        },
+                      ),
+                      const SizedBox(height: 4),
+                      const Center(
+                        child: Text(
+                          "~END~",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'Merriweather Sans',
+                            fontWeight: FontWeight.normal,
+                            color: Color.fromRGBO(211, 211, 211, 1),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  const Center(
-                    child: Text(
-                      "~END~",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Merriweather Sans',
-                        fontWeight: FontWeight.normal,
-                        color: Color.fromRGBO(211, 211, 211, 1),
+                  if (isDeletingPost)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.black.withOpacity(0.5),
+                        child: const Center(
+                          child: ContainerLoadingAnimation(),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
                 ],
               ),
             ),

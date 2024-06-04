@@ -30,8 +30,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     refreshProfileData();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   Future<void> refreshProfileData() async {
