@@ -107,6 +107,7 @@ flutter:
     - lib/assets/images/crown.png
     - lib/assets/images/second_place.png
     - lib/assets/images/third_place.png
+    - lib/assets/images/groups.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

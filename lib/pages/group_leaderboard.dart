@@ -41,10 +41,15 @@ class GroupLeaderboard extends StatelessWidget {
                   String top2UserId;
                   String top3UserId;
                   // Extract the first three user IDs
-                  if (leaderboardDocs.length > 1) {
+                  if (leaderboardDocs.length > 2) {
                     top1UserId = leaderboardDocs[0]['userId'];
                     top2UserId = leaderboardDocs[1]['userId'];
                     top3UserId = leaderboardDocs[2]['userId'];
+                  } else if (leaderboardDocs.length > 1 &&
+                      leaderboardDocs.isNotEmpty) {
+                    top1UserId = leaderboardDocs[0]['userId'];
+                    top2UserId = leaderboardDocs[1]['userId'];
+                    top3UserId = "";
                   } else {
                     top1UserId = leaderboardDocs[0]['userId'];
                     top2UserId = "";

@@ -1,6 +1,7 @@
 import 'package:ascend_fyp/getters/user_data.dart';
+import 'package:ascend_fyp/navigation/side_menu.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/current_user_joined_events.dart';
+import 'package:ascend_fyp/pages/user_joined_events.dart';
 import 'package:ascend_fyp/pages/current_user_posts.dart';
 import 'package:ascend_fyp/pages/edit_profile_screen.dart';
 import 'package:ascend_fyp/pages/welcome_screen.dart';
@@ -31,7 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   void initState() {
     super.initState();
     refreshProfileData();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
   }
 
   Future<void> refreshProfileData() async {
@@ -103,14 +104,6 @@ class _ProfileScreenState extends State<ProfileScreen>
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Image.asset(
-              "lib/assets/images/logo_noBg.png",
-              width: 130,
-              height: 50,
-            ),
-          ),
           actions: [
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 16, 0),
@@ -148,6 +141,11 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
             ),
           ],
+        ),
+        drawer: Drawer(
+          surfaceTintColor: const Color.fromRGBO(247, 243, 237, 1),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          child: const SideMenu(),
         ),
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -290,7 +288,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                     ),
                     tabs: const [
                       Tab(text: 'Posts'),
-                      Tab(text: 'Joined Events'),
                     ],
                   ),
                 ),

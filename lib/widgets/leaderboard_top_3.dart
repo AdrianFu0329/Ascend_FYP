@@ -85,7 +85,16 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         widget.top2UserId == ""
-            ? Container()
+            ? Container(
+                height: 180,
+                width: 100,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(15),
+                  ),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+              )
             : Container(
                 height: 180,
                 width: 100,
@@ -114,36 +123,56 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                   ],
                 ),
               ),
-        Container(
-          height: 200,
-          width: 100,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(15),
-            ),
-            color: Theme.of(context).scaffoldBackgroundColor,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 6),
-              userAvatar(
-                widget.top1UserId!,
-                const Color.fromRGBO(189, 155, 22, 1),
+        widget.top1UserId == ""
+            ? Container(
+                height: 200,
+                width: 100,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(15),
+                  ),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+              )
+            : Container(
+                height: 200,
+                width: 100,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(15),
+                  ),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 6),
+                    userAvatar(
+                      widget.top1UserId!,
+                      const Color.fromRGBO(189, 155, 22, 1),
+                    ),
+                    Image.asset(
+                      "lib/assets/images/crown.png",
+                      width: 25,
+                      height: 25,
+                    ),
+                    const SizedBox(height: 6),
+                    username(widget.top1UserId!),
+                  ],
+                ),
               ),
-              Image.asset(
-                "lib/assets/images/crown.png",
-                width: 25,
-                height: 25,
-              ),
-              const SizedBox(height: 6),
-              username(widget.top1UserId!),
-            ],
-          ),
-        ),
         widget.top3UserId == ""
-            ? Container()
+            ? Container(
+                height: 165,
+                width: 100,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(15),
+                  ),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+              )
             : Container(
                 height: 165,
                 width: 100,
