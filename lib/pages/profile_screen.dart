@@ -4,7 +4,6 @@ import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/user_joined_events.dart';
 import 'package:ascend_fyp/pages/current_user_posts.dart';
 import 'package:ascend_fyp/pages/edit_profile_screen.dart';
-import 'package:ascend_fyp/pages/welcome_screen.dart';
 import 'package:ascend_fyp/widgets/circle_tab_indicator.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
@@ -59,6 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser!;
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
     ButtonStyle buttonStyle = ButtonStyle(
       textStyle: WidgetStateProperty.all<TextStyle>(
@@ -101,46 +101,17 @@ class _ProfileScreenState extends State<ProfileScreen>
     return RefreshIndicator(
       onRefresh: refreshProfileData,
       child: Scaffold(
+        key: _scaffoldKey,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 16, 0),
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: IconButton(
-                  highlightColor: const Color.fromRGBO(194, 0, 0, 1),
-                  style: ButtonStyle(
-                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                        side: const BorderSide(
-                          color: Color.fromRGBO(194, 0, 0, 1),
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut();
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const WelcomeScreen()),
-                      (route) => false,
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.logout_rounded,
-                    size: 20,
-                    color: Color.fromRGBO(247, 243, 237, 1),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          leading: IconButton(
+            onPressed: () {
+              _scaffoldKey.currentState?.openDrawer();
+            },
+            icon: const Icon(Icons.menu),
+            color: const Color.fromRGBO(247, 243, 237, 1),
+          ),
         ),
         drawer: Drawer(
           surfaceTintColor: const Color.fromRGBO(247, 243, 237, 1),

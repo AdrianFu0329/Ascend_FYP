@@ -28,6 +28,14 @@ Future<bool> sendPasswordResetLink(String email) async {
   }
 }
 
+Stream<QuerySnapshot> getUserChatsFromDatabase() {
+  final CollectionReference chats =
+      FirebaseFirestore.instance.collection("chats");
+
+  final chatsStream = chats.orderBy('timestamp', descending: false).snapshots();
+  return chatsStream;
+}
+
 Stream<QuerySnapshot> getPostsFromDatabase() {
   final CollectionReference posts =
       FirebaseFirestore.instance.collection("posts");
