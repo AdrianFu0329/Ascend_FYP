@@ -49,10 +49,10 @@ class AuthService {
         final User? user = newUser.user;
 
         if (user != null) {
-          if (!user.emailVerified) {
+          /*if (!user.emailVerified) {
             await auth.signOut();
             return "Email not verified. Please check your email for verification.";
-          }
+          }*/
 
           final DocumentSnapshot userDoc = await FirebaseFirestore.instance
               .collection('users')

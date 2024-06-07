@@ -155,10 +155,11 @@ class _ChatScreenState extends State<ChatScreen> {
         padding: const EdgeInsets.all(8.0),
         child: (data['senderId'] == firebaseAuth.currentUser!.uid)
             ? Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       ChatBubble(
                         message: data['message'],
@@ -175,23 +176,24 @@ class _ChatScreenState extends State<ChatScreen> {
                   ProfilePicture(
                     userId: firebaseAuth.currentUser!.uid,
                     photoURL: currentUserphotoURL,
-                    radius: 25,
+                    radius: 18,
                     onTap: () {},
                   ),
                 ],
               )
             : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   ProfilePicture(
                     userId: widget.receiverUserId,
                     photoURL: widget.receiverPhotoUrl,
-                    radius: 25,
+                    radius: 18,
                     onTap: () {},
                   ),
                   const SizedBox(width: 5),
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ChatBubble(
                         message: data['message'],

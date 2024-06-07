@@ -4,6 +4,7 @@ import 'package:ascend_fyp/pages/general_notification_details_screen.dart';
 import 'package:ascend_fyp/pages/group_notification_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class NotificationCard extends StatelessWidget {
   final String notificationId;
@@ -29,33 +30,51 @@ class NotificationCard extends StatelessWidget {
     required this.requestUserLocation,
   });
 
+  String fromDateToString(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    DateTime now = DateTime.now();
+
+    // Check if the timestamp is today
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day) {
+      // Return the time only
+      String formattedTime = DateFormat('h:mm a').format(dateTime);
+      return formattedTime;
+    } else {
+      // Return the date only
+      String formattedDate = DateFormat('MMM dd, yyyy').format(dateTime);
+      return formattedDate;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextStyle notificationTextStyle = TextStyle(
-      fontSize: 12,
+    TextStyle notificationTextStyle = const TextStyle(
+      fontSize: 10,
       fontFamily: 'Merriweather Sans',
       fontWeight: FontWeight.normal,
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: Color.fromRGBO(247, 243, 237, 1),
     );
 
     Icon getNotiIcon(String type) {
-      Icon icon = Icon(
+      Icon icon = const Icon(
         Icons.circle_notifications_sharp,
-        color: Theme.of(context).scaffoldBackgroundColor,
-        size: 24,
+        color: Color.fromRGBO(247, 243, 237, 1),
+        size: 35,
       );
       switch (type) {
         case "Events":
-          icon = Icon(
+          icon = const Icon(
             Icons.calendar_today,
-            color: Theme.of(context).scaffoldBackgroundColor,
-            size: 24,
+            color: Color.fromRGBO(247, 243, 237, 1),
+            size: 35,
           );
         case "Groups":
-          icon = Icon(
+          icon = const Icon(
             Icons.groups_2_rounded,
-            color: Theme.of(context).scaffoldBackgroundColor,
-            size: 24,
+            color: Color.fromRGBO(247, 243, 237, 1),
+            size: 35,
           );
       }
 
@@ -63,38 +82,53 @@ class NotificationCard extends StatelessWidget {
     }
 
     Widget buildCard() {
-      return SizedBox(
-        height: 85,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-            side: const BorderSide(
-              color: Color.fromRGBO(194, 0, 0, 1),
-              width: 2.0,
-            ),
+      String formattedTime = fromDateToString(timestamp);
+      return Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+          side: const BorderSide(
+            color: Color.fromRGBO(194, 0, 0, 1),
+            width: 2.0,
           ),
-          color: const Color.fromRGBO(247, 243, 237, 1),
-          elevation: 4.0,
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
+        ),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 4.0,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     getNotiIcon(type),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        title,
-                        style: notificationTextStyle,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            title,
+                            style: notificationTextStyle,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              const SizedBox(width: 4),
+                              Text(
+                                formattedTime,
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );

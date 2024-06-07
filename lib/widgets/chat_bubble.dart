@@ -11,20 +11,18 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle msgStyle = TextStyle(
+    TextStyle msgStyle = const TextStyle(
       fontSize: 11,
       fontFamily: 'Merriweather Sans',
       fontWeight: FontWeight.normal,
-      color: isCurrentUser
-          ? Theme.of(context).scaffoldBackgroundColor
-          : const Color.fromRGBO(247, 243, 237, 1),
+      color: Color.fromRGBO(247, 243, 237, 1),
     );
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: isCurrentUser ? Colors.greenAccent : Colors.black38,
+        color: isCurrentUser ? Colors.blue[700] : Colors.grey[700],
       ),
       child: Text(
         message,

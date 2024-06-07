@@ -69,40 +69,43 @@ class _ChatCardState extends State<ChatCard> {
                 ),
               );
             },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    ProfilePicture(
-                      userId: widget.userId,
-                      photoURL: photoUrl,
-                      radius: 25,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          SlidingNav(
-                            builder: (context) => ChatScreen(
-                              receiverUserId: widget.userId,
-                              receiverUsername: username,
-                              receiverPhotoUrl: photoUrl,
-                              chatRoomId: widget.chatRoomId,
+            child: Card(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      ProfilePicture(
+                        userId: widget.userId,
+                        photoURL: photoUrl,
+                        radius: 25,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            SlidingNav(
+                              builder: (context) => ChatScreen(
+                                receiverUserId: widget.userId,
+                                receiverUsername: username,
+                                receiverPhotoUrl: photoUrl,
+                                chatRoomId: widget.chatRoomId,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      username,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-                Text(
-                  fromDateToString(widget.timestamp),
-                  style: Theme.of(context).textTheme.labelSmall,
-                )
-              ],
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        username,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                  Text(
+                    fromDateToString(widget.timestamp),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  )
+                ],
+              ),
             ),
           );
         }
