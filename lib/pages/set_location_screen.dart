@@ -1,5 +1,5 @@
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
-import 'package:ascend_fyp/models/autocomplete_prediction.dart';
+import 'package:ascend_fyp/models/location_autocomplete_prediction.dart';
 import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/models/place_autocomplete_response.dart';
 import 'package:ascend_fyp/network/network_utils.dart';
@@ -122,13 +122,9 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
             Navigator.pop(context, locationData);
           },
         ),
-        title: Row(
-          children: [
-            Text(
-              "Set Location",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
+        title: Text(
+          "Set Location",
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
       body: Padding(

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ascend_fyp/models/autocomplete_prediction.dart';
+import 'package:ascend_fyp/models/location_autocomplete_prediction.dart';
 
 class PlaceAutocompleteResponse {
   final String? status;
