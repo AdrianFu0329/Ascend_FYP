@@ -2,7 +2,7 @@ import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/geolocation/Geolocation.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/event_settings_screen.dart';
+import 'package:ascend_fyp/events/screens/edit/event_settings_screen.dart';
 import 'package:ascend_fyp/pages/user_profile_screen.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';

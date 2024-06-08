@@ -1,4 +1,4 @@
-import 'package:ascend_fyp/chat/chat_service.dart';
+import 'package:ascend_fyp/chat/service/chat_service.dart';
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/constants.dart';

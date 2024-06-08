@@ -1,5 +1,5 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/widgets/group_card.dart';
+import 'package:ascend_fyp/groups/widgets/group_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

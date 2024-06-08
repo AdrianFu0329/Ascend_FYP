@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/user_search.dart';
-import 'package:ascend_fyp/widgets/chat_card.dart';
+import 'package:ascend_fyp/chat/widgets/chat_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

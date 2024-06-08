@@ -1,26 +1,31 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/pages/create_events_screen.dart';
-import 'package:ascend_fyp/pages/filter_options_screen.dart';
-import 'package:ascend_fyp/widgets/event_card.dart';
+import 'package:ascend_fyp/groups/screens/create/create_group_events_screen.dart';
+import 'package:ascend_fyp/events/widgets/event_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class EventScreen extends StatefulWidget {
-  const EventScreen({super.key});
+class GroupEventsScreen extends StatefulWidget {
+  final String groupId;
+  final String groupSport;
+  const GroupEventsScreen({
+    super.key,
+    required this.groupId,
+    required this.groupSport,
+  });
 
   @override
-  State<EventScreen> createState() => _EventScreenState();
+  State<GroupEventsScreen> createState() => _GroupEventsScreenState();
 }
 
-class _EventScreenState extends State<EventScreen> {
+class _GroupEventsScreenState extends State<GroupEventsScreen> {
   Stream<QuerySnapshot>? eventsStream;
   Map<String, bool> filterOptions = {};
 
   @override
   void initState() {
     deleteOutdatedEvents();
-    eventsStream = getEventsFromDatabase();
+    eventsStream = getGroupEventsFromDatabase(widget.groupId);
     super.initState();
   }
 
@@ -30,8 +35,10 @@ class _EventScreenState extends State<EventScreen> {
       DateTime now = DateTime.now();
 
       // Reference to the events collection
-      CollectionReference eventsRef =
-          FirebaseFirestore.instance.collection('events');
+      CollectionReference eventsRef = FirebaseFirestore.instance
+          .collection('groups')
+          .doc(widget.groupId)
+          .collection('events');
 
       // Get all events
       QuerySnapshot snapshot = await eventsRef.get();
@@ -89,7 +96,7 @@ class _EventScreenState extends State<EventScreen> {
 
   Future<void> refreshPosts() async {
     setState(() {
-      eventsStream = getEventsFromDatabase();
+      eventsStream = getGroupEventsFromDatabase(widget.groupId);
     });
   }
 
@@ -102,66 +109,10 @@ class _EventScreenState extends State<EventScreen> {
     );
   }
 
-  void filterEvents() async {
-    final selectedFilters = await showModalBottomSheet<Map<String, bool>>(
-      context: context,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      isScrollControlled: true,
-      builder: (context) => const FilterOptionsScreen(),
-    );
-
-    if (selectedFilters != null) {
-      setState(() {
-        filterOptions = selectedFilters;
-        eventsStream = getFilteredEventsFromDatabase(filterOptions);
-      });
-    }
-  }
-
-  Stream<QuerySnapshot> getFilteredEventsFromDatabase(
-      Map<String, bool> filters) {
-    List<String> selectedSports = filters.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toList();
-
-    List<String> excludedSports = [
-      'Football',
-      'Basketball',
-      'Tennis',
-      'Gym',
-      'Jogging',
-      'Hiking',
-      'Futsal',
-      'Badminton',
-      'Cycling'
-    ];
-
-    if (selectedSports.isEmpty) {
-      return getEventsFromDatabase();
-    } else if (selectedSports.contains('Other') && selectedSports.length > 1) {
-      excludedSports.removeWhere((sport) => selectedSports.contains(sport));
-      return FirebaseFirestore.instance
-          .collection('events')
-          .where('sports', isNotEqualTo: excludedSports)
-          .snapshots();
-    } else if (selectedSports.contains('Other') && selectedSports.length == 1) {
-      return FirebaseFirestore.instance
-          .collection('events')
-          .where('isOther', isEqualTo: true)
-          .snapshots();
-    } else {
-      return FirebaseFirestore.instance
-          .collection('events')
-          .where('sports', arrayContainsAny: selectedSports)
-          .snapshots();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).cardColor,
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -170,29 +121,17 @@ class _EventScreenState extends State<EventScreen> {
               children: [
                 const SizedBox(height: 24),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       IconButton(
-                        onPressed: filterEvents,
-                        icon: Row(
-                          children: [
-                            Text(
-                              'Filter Options',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            const Icon(
-                              Icons.filter_alt_rounded,
-                              color: Color.fromRGBO(247, 243, 237, 1),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
                         onPressed: () {
-                          modalBottomSheet(const CreateEventsScreen());
+                          modalBottomSheet(CreateGroupEventsScreen(
+                            groupId: widget.groupId,
+                            groupSport: widget.groupSport,
+                          ));
                         },
                         icon: const Icon(Icons.add),
                         color: Colors.red,
@@ -222,7 +161,7 @@ class _EventScreenState extends State<EventScreen> {
               } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Center(
-                    child: Text('No Events Found.'),
+                    child: Text('No Group Events Found.'),
                   ),
                 );
               } else if (snapshot.hasData) {
@@ -238,6 +177,7 @@ class _EventScreenState extends State<EventScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: EventCard(
                           eventId: data['eventId'],
+                          groupId: widget.groupId,
                           userId: data['userId'],
                           eventTitle: data['title'],
                           requestList: List<String>.from(data['requestList']),
@@ -251,7 +191,7 @@ class _EventScreenState extends State<EventScreen> {
                           posterURL: data['posterURL'],
                           participants: data['participants'],
                           isOther: data['isOther'],
-                          isGroupEvent: false,
+                          isGroupEvent: true,
                         ),
                       );
                     },
@@ -264,7 +204,7 @@ class _EventScreenState extends State<EventScreen> {
                     children: [
                       SizedBox(height: 16),
                       Center(
-                        child: Text('No events at the moment!'),
+                        child: Text('No group events at the moment!'),
                       ),
                     ],
                   ),

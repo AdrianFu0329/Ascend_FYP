@@ -1,5 +1,5 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/event_details_screen.dart';
+import 'package:ascend_fyp/events/screens/details/event_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/widgets/loading.dart';

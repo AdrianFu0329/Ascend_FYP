@@ -1,31 +1,95 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/pages/create_groups_screen.dart';
+import 'package:ascend_fyp/events/screens/create/create_events_screen.dart';
 import 'package:ascend_fyp/pages/filter_options_screen.dart';
-import 'package:ascend_fyp/widgets/group_card.dart';
+import 'package:ascend_fyp/events/widgets/event_card.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class CommunityGroupsScreen extends StatefulWidget {
-  const CommunityGroupsScreen({super.key});
+class EventScreen extends StatefulWidget {
+  const EventScreen({super.key});
 
   @override
-  State<CommunityGroupsScreen> createState() => _CommunityGroupsScreenState();
+  State<EventScreen> createState() => _EventScreenState();
 }
 
-class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
-  Stream<QuerySnapshot>? groupsStream;
+class _EventScreenState extends State<EventScreen> {
+  Stream<QuerySnapshot>? eventsStream;
   Map<String, bool> filterOptions = {};
 
   @override
   void initState() {
-    groupsStream = getGroupsFromDatabase();
+    deleteOutdatedEvents();
+    eventsStream = getEventsFromDatabase();
     super.initState();
+  }
+
+  Future<void> deleteOutdatedEvents() async {
+    try {
+      // Get the current date and time
+      DateTime now = DateTime.now();
+
+      // Reference to the events collection
+      CollectionReference eventsRef =
+          FirebaseFirestore.instance.collection('events');
+
+      // Get all events
+      QuerySnapshot snapshot = await eventsRef.get();
+
+      // Batch for deleting documents
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+
+      // Iterate through each event document
+      for (DocumentSnapshot doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+        // Parse event date and time
+        DateTime eventDate = DateTime.parse(data['date'] as String);
+
+        // Parse event end time with AM/PM consideration
+        final timeString = data['endTime'] as String;
+        final timeParts = timeString.split(":");
+        int hour = int.parse(timeParts[0]);
+        int minute =
+            int.parse(timeParts[1].substring(0, 2)); // get first two characters
+
+        // Check for AM/PM and adjust hour accordingly
+        if (timeString.contains("PM") && hour != 12) {
+          hour += 12;
+        } else if (timeString.contains("AM") && hour == 12) {
+          hour = 0;
+        }
+        DateTime eventEndTime = DateTime(
+            eventDate.year, eventDate.month, eventDate.day, hour, minute);
+
+        // Combine event date and time to create DateTime object
+        DateTime eventDateTime = DateTime(
+          eventDate.year,
+          eventDate.month,
+          eventDate.day,
+          eventEndTime.hour,
+          eventEndTime.minute,
+        );
+
+        // Check if the event is outdated
+        if (eventDateTime.isBefore(now)) {
+          // Add the event document to the batch for deletion
+          batch.delete(doc.reference);
+        }
+      }
+
+      // Commit the batch
+      await batch.commit();
+
+      debugPrint('Outdated events deleted successfully.');
+    } catch (e) {
+      debugPrint('Error deleting outdated events: $e');
+    }
   }
 
   Future<void> refreshPosts() async {
     setState(() {
-      groupsStream = getGroupsFromDatabase();
+      eventsStream = getEventsFromDatabase();
     });
   }
 
@@ -38,7 +102,7 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
     );
   }
 
-  void filterGroups() async {
+  void filterEvents() async {
     final selectedFilters = await showModalBottomSheet<Map<String, bool>>(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -49,12 +113,12 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
     if (selectedFilters != null) {
       setState(() {
         filterOptions = selectedFilters;
-        groupsStream = getFilteredGroupsFromDatabase(filterOptions);
+        eventsStream = getFilteredEventsFromDatabase(filterOptions);
       });
     }
   }
 
-  Stream<QuerySnapshot> getFilteredGroupsFromDatabase(
+  Stream<QuerySnapshot> getFilteredEventsFromDatabase(
       Map<String, bool> filters) {
     List<String> selectedSports = filters.entries
         .where((entry) => entry.value)
@@ -74,21 +138,21 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
     ];
 
     if (selectedSports.isEmpty) {
-      return getGroupsFromDatabase(); //Change Function
+      return getEventsFromDatabase();
     } else if (selectedSports.contains('Other') && selectedSports.length > 1) {
       excludedSports.removeWhere((sport) => selectedSports.contains(sport));
       return FirebaseFirestore.instance
-          .collection('groups')
+          .collection('events')
           .where('sports', isNotEqualTo: excludedSports)
           .snapshots();
     } else if (selectedSports.contains('Other') && selectedSports.length == 1) {
       return FirebaseFirestore.instance
-          .collection('groups')
+          .collection('events')
           .where('isOther', isEqualTo: true)
           .snapshots();
     } else {
       return FirebaseFirestore.instance
-          .collection('groups')
+          .collection('events')
           .where('sports', arrayContainsAny: selectedSports)
           .snapshots();
     }
@@ -112,7 +176,7 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        onPressed: filterGroups,
+                        onPressed: filterEvents,
                         icon: Row(
                           children: [
                             Text(
@@ -128,7 +192,7 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                       ),
                       IconButton(
                         onPressed: () {
-                          modalBottomSheet(const CreateGroupsScreen());
+                          modalBottomSheet(const CreateEventsScreen());
                         },
                         icon: const Icon(Icons.add),
                         color: Colors.red,
@@ -141,7 +205,7 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
             ),
           ),
           StreamBuilder<QuerySnapshot>(
-            stream: groupsStream,
+            stream: eventsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SliverFillRemaining(
@@ -158,34 +222,40 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
               } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Center(
-                    child: Text('No Groups Found.'),
+                    child: Text('No Events Found.'),
                   ),
                 );
               } else if (snapshot.hasData) {
-                List<DocumentSnapshot> groupsList = snapshot.data!.docs;
+                List<DocumentSnapshot> eventsList = snapshot.data!.docs;
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      DocumentSnapshot doc = groupsList[index];
+                      DocumentSnapshot doc = eventsList[index];
                       Map<String, dynamic> data =
                           doc.data() as Map<String, dynamic>;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: GroupCard(
-                          groupId: data['groupId'],
-                          ownerUserId: data['ownerUserId'],
-                          groupTitle: data['name'],
-                          requestList: List<dynamic>.from(data['requestList']),
-                          memberList: List<dynamic>.from(data['memberList']),
-                          groupSport: data['sports'],
+                        child: EventCard(
+                          eventId: data['eventId'],
+                          userId: data['userId'],
+                          eventTitle: data['title'],
+                          requestList: List<String>.from(data['requestList']),
+                          acceptedList: List<String>.from(data['acceptedList']),
+                          eventDate: data['date'],
+                          eventStartTime: data['startTime'],
+                          eventEndTime: data['endTime'],
+                          eventFees: data['fees'],
+                          eventLocation: data['location'],
+                          eventSport: data['sports'],
                           posterURL: data['posterURL'],
                           participants: data['participants'],
                           isOther: data['isOther'],
+                          isGroupEvent: false,
                         ),
                       );
                     },
-                    childCount: groupsList.length,
+                    childCount: eventsList.length,
                   ),
                 );
               } else {
@@ -194,7 +264,7 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                     children: [
                       SizedBox(height: 16),
                       Center(
-                        child: Text('No groups at the moment!'),
+                        child: Text('No events at the moment!'),
                       ),
                     ],
                   ),

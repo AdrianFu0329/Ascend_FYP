@@ -1,4 +1,4 @@
-import 'package:ascend_fyp/chat/chat_service.dart';
+import 'package:ascend_fyp/chat/service/chat_service.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/user_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/pages/event_notification_details_screen.dart';
 import 'package:ascend_fyp/pages/general_notification_details_screen.dart';
-import 'package:ascend_fyp/pages/group_notification_details_screen.dart';
+import 'package:ascend_fyp/groups/screens/details/group_notification_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/pages/community_screen.dart';
 import 'package:ascend_fyp/pages/create_post_screen.dart';
 import 'package:ascend_fyp/pages/home_screen.dart';
-import 'package:ascend_fyp/pages/messages_screen.dart';
+import 'package:ascend_fyp/chat/screens/messages_screen.dart';
 import 'package:ascend_fyp/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
 

@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/chat_screen.dart';
+import 'package:ascend_fyp/chat/screens/chat_screen.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,18 +80,7 @@ class _ChatCardState extends State<ChatCard> {
                         userId: widget.userId,
                         photoURL: photoUrl,
                         radius: 25,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            SlidingNav(
-                              builder: (context) => ChatScreen(
-                                receiverUserId: widget.userId,
-                                receiverUsername: username,
-                                receiverPhotoUrl: photoUrl,
-                                chatRoomId: widget.chatRoomId,
-                              ),
-                            ),
-                          );
-                        },
+                        onTap: () {},
                       ),
                       const SizedBox(width: 16),
                       Text(

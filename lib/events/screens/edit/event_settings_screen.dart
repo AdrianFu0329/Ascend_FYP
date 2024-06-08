@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/edit_event_details_screen.dart';
-import 'package:ascend_fyp/pages/edit_event_participants_screen.dart';
+import 'package:ascend_fyp/events/screens/edit/edit_event_details_screen.dart';
+import 'package:ascend_fyp/events/screens/edit/edit_event_participants_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 

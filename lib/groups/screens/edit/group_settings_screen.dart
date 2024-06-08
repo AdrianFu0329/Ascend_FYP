@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/edit_group_details_screen.dart';
-import 'package:ascend_fyp/pages/edit_group_participants_screen.dart';
+import 'package:ascend_fyp/groups/screens/edit/edit_group_details_screen.dart';
+import 'package:ascend_fyp/groups/screens/edit/edit_group_participants_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
