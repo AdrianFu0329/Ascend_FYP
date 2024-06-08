@@ -87,6 +87,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget chatTextField(TextEditingController controller) {
     return Expanded(
       child: TextField(
+        minLines: 1,
+        maxLines: 5,
         cursorColor: const Color.fromRGBO(247, 243, 237, 1),
         controller: controller,
         style: Theme.of(context).textTheme.bodySmall,

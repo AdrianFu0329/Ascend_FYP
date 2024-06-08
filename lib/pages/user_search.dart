@@ -1,5 +1,4 @@
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/pages/chat_screen.dart';
+import 'package:ascend_fyp/chat/chat_service.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/user_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,42 +18,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   String searchUsername = "";
   TextEditingController searchController = TextEditingController();
   final currentUser = FirebaseAuth.instance.currentUser!;
-
-  Future<void> createChatRoom(String receiverUserId, String receiverUsername,
-      String receiverPhotoUrl) async {
-    try {
-      String chatRoomId = "${currentUser.uid}_$receiverUserId";
-
-      // Create chat room in firebase
-      final Map<String, dynamic> chatRoomData = {
-        'receiverId': receiverUserId,
-        'senderId': currentUser.uid,
-        'timestamp': Timestamp.now(),
-      };
-
-      FirebaseFirestore.instance
-          .collection('chats')
-          .doc(chatRoomId)
-          .set(chatRoomData);
-
-      // Pop to previous screen
-      Navigator.of(context).pop();
-
-      // Push to chat screen with chosen user
-      Navigator.of(context).push(
-        SlidingNav(
-          builder: (context) => ChatScreen(
-            receiverUserId: receiverUserId,
-            receiverUsername: receiverUsername,
-            receiverPhotoUrl: receiverPhotoUrl,
-            chatRoomId: chatRoomId,
-          ),
-        ),
-      );
-    } catch (e) {
-      debugPrint('Error obtaining user details: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,8 +109,12 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                             onPress: (selectedUserId, selectedUsername,
                                 selectedPhotoUrl) {
                               setState(() {
-                                createChatRoom(selectedUserId, selectedUsername,
-                                    selectedPhotoUrl);
+                                ChatService().createChatRoom(
+                                  selectedUserId,
+                                  selectedUsername,
+                                  selectedPhotoUrl,
+                                  context,
+                                );
                               });
                             },
                             userId: allUsersList[index].id,

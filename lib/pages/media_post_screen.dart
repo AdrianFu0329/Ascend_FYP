@@ -142,6 +142,8 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
                 children: [
                   Expanded(
                     child: TextField(
+                      minLines: 1,
+                      maxLines: 5,
                       controller: commentController,
                       style: Theme.of(context).textTheme.bodySmall,
                       decoration: InputDecoration(

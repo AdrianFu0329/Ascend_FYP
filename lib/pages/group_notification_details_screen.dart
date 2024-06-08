@@ -1,4 +1,6 @@
+import 'package:ascend_fyp/chat/chat_service.dart';
 import 'package:ascend_fyp/database/database_service.dart';
+import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -347,7 +349,19 @@ class _GroupNotificationDetailsScreenState
                             ),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () async {
+                          final Map<String, dynamic> userData =
+                              await getUserData(widget.requestUserId);
+                          final username = userData["username"] ?? "Unknown";
+                          final photoUrl = userData["photoURL"] ?? "Unknown";
+
+                          ChatService().createChatRoom(
+                            widget.requestUserId,
+                            username,
+                            photoUrl,
+                            context,
+                          );
+                        },
                         child: Text(
                           'Contact User',
                           style: TextStyle(

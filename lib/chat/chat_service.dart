@@ -1,4 +1,6 @@
 import 'package:ascend_fyp/models/message.dart';
+import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -45,5 +47,44 @@ class ChatService extends ChangeNotifier {
         .collection('messages')
         .orderBy('timestamp', descending: false)
         .snapshots();
+  }
+
+  // Create Chat Room
+  Future<void> createChatRoom(
+    String receiverUserId,
+    String receiverUsername,
+    String receiverPhotoUrl,
+    BuildContext context,
+  ) async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    try {
+      String chatRoomId = "${currentUser.uid}_$receiverUserId";
+
+      // Create chat room in firebase
+      final Map<String, dynamic> chatRoomData = {
+        'receiverId': receiverUserId,
+        'senderId': currentUser.uid,
+        'timestamp': Timestamp.now(),
+      };
+
+      FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatRoomId)
+          .set(chatRoomData);
+
+      // Push to chat screen with chosen user
+      Navigator.of(context).push(
+        SlidingNav(
+          builder: (context) => ChatScreen(
+            receiverUserId: receiverUserId,
+            receiverUsername: receiverUsername,
+            receiverPhotoUrl: receiverPhotoUrl,
+            chatRoomId: chatRoomId,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error obtaining creating chat with user: $e');
+    }
   }
 }
