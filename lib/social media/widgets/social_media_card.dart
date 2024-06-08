@@ -39,7 +39,7 @@ class SocialMediaCard extends StatefulWidget {
 class _SocialMediaCardState extends State<SocialMediaCard> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
-  int likeCount = 0;
+  late int likeCount;
   late ImageWithDimension firstImage;
 
   @override
@@ -149,8 +149,8 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
     );
   }
 
-  void _navigateToMediaPostScreen() {
-    Navigator.of(context).push(
+  void _navigateToMediaPostScreen() async {
+    final likesChange = await Navigator.of(context).push(
       SlidingNav(
         builder: (context) => MediaPostScreen(
           postId: widget.postId,
@@ -164,5 +164,11 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
         ),
       ),
     );
+
+    if (likesChange != null) {
+      setState(() {
+        likeCount = likesChange.length;
+      });
+    }
   }
 }
