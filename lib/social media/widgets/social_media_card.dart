@@ -51,99 +51,105 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _navigateToMediaPostScreen(),
-      child: _buildCard(),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: getUserData(widget.userId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: ContainerLoadingAnimation());
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          final userData = snapshot.data!;
+          final username = userData["username"] ?? "Unknown";
+          final photoUrl = userData["photoURL"] ?? "Unknown";
+
+          return GestureDetector(
+            onTap: () => _navigateToMediaPostScreen(),
+            child: _buildCard(username, photoUrl),
+          );
+        }
+      },
     );
   }
 
-  Widget _buildCard() {
+  Widget _buildCard(String username, String photoUrl) {
     double imageHeight = firstImage.height > 250 ? 250 : firstImage.height;
 
-    return SizedBox(
-      width: 135,
-      child: Card(
-        elevation: 4.0,
-        color: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    height: imageHeight,
-                    child: firstImage.image,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: SizedBox(
+        width: 135,
+        child: Card(
+          elevation: 4.0,
+          color: Theme.of(context).cardColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      height: imageHeight,
+                      child: firstImage.image,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                widget.title,
-                style: Theme.of(context).textTheme.titleMedium,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  widget.title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
-            ),
-            FutureBuilder<Map<String, dynamic>>(
-              future: getUserData(widget.userId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: ContainerLoadingAnimation());
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  final userData = snapshot.data!;
-                  final username = userData["username"] ?? "Unknown";
-                  final photoUrl = userData["photoURL"] ?? "Unknown";
-
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            ProfilePicture(
-                              userId: widget.userId,
-                              photoURL: photoUrl,
-                              radius: 12,
-                              onTap: () {},
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              username,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
+                        ProfilePicture(
+                          userId: widget.userId,
+                          photoURL: photoUrl,
+                          radius: 12,
+                          onTap: () {},
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              likeCount.toString(),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(width: 2),
-                            const Icon(
-                              Icons.favorite,
-                              color: Color.fromRGBO(247, 243, 237, 1),
-                              size: 15,
-                            ),
-                          ],
+                        const SizedBox(width: 8),
+                        Text(
+                          username,
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
-                  );
-                }
-              },
-            ),
-            const SizedBox(height: 4),
-          ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          likeCount.toString(),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(
+                          Icons.favorite,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                          size: 15,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
+          ),
         ),
       ),
     );
