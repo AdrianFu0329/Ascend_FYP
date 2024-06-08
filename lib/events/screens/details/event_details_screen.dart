@@ -1,11 +1,11 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/geolocation/Geolocation.dart';
+import 'package:ascend_fyp/location/service/Geolocation.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/events/screens/edit/event_settings_screen.dart';
-import 'package:ascend_fyp/pages/user_profile_screen.dart';
-import 'package:ascend_fyp/widgets/loading.dart';
-import 'package:ascend_fyp/widgets/profile_pic.dart';
+import 'package:ascend_fyp/profile/screens/details/user_profile_screen.dart';
+import 'package:ascend_fyp/general%20widgets/loading.dart';
+import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

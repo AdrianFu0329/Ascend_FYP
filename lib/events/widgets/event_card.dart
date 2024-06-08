@@ -2,7 +2,7 @@ import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/events/screens/details/event_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/widgets/loading.dart';
+import 'package:ascend_fyp/general%20widgets/loading.dart';
 
 class EventCard extends StatelessWidget {
   final String eventId;

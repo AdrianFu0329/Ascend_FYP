@@ -1,5 +1,5 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/pages/nav_screen.dart';
+import 'package:ascend_fyp/general%20pages/nav_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 

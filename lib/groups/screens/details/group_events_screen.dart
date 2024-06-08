@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/groups/screens/create/create_group_events_screen.dart';
 import 'package:ascend_fyp/events/widgets/event_card.dart';
-import 'package:ascend_fyp/widgets/loading.dart';
+import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 

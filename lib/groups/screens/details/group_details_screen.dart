@@ -1,12 +1,12 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/geolocation/Geolocation.dart';
+import 'package:ascend_fyp/location/service/Geolocation.dart';
 import 'package:ascend_fyp/navigation/sliding_nav.dart';
 import 'package:ascend_fyp/groups/screens/details/group_details.dart';
 import 'package:ascend_fyp/groups/screens/details/group_events_screen.dart';
 import 'package:ascend_fyp/groups/screens/details/group_leaderboard.dart';
 import 'package:ascend_fyp/groups/screens/edit/group_settings_screen.dart';
-import 'package:ascend_fyp/widgets/circle_tab_indicator.dart';
-import 'package:ascend_fyp/widgets/loading.dart';
+import 'package:ascend_fyp/general%20widgets/circle_tab_indicator.dart';
+import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

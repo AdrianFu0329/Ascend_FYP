@@ -1,9 +1,9 @@
 import 'package:ascend_fyp/models/constants.dart';
-import 'package:ascend_fyp/pages/set_location_screen.dart';
-import 'package:ascend_fyp/widgets/creation_sport_list.dart';
-import 'package:ascend_fyp/widgets/custom_text_field.dart';
-import 'package:ascend_fyp/widgets/loading.dart';
-import 'package:ascend_fyp/widgets/location_list_tile.dart';
+import 'package:ascend_fyp/location/screens/set_location_screen.dart';
+import 'package:ascend_fyp/general%20widgets/creation_sport_list.dart';
+import 'package:ascend_fyp/general%20widgets/custom_text_field.dart';
+import 'package:ascend_fyp/general%20widgets/loading.dart';
+import 'package:ascend_fyp/location/widgets/location_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
