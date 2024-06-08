@@ -155,13 +155,6 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
                 .doc(groupId)
                 .set(groupData);
 
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(currentUser.uid)
-                .collection('groups')
-                .doc(groupId)
-                .set(groupData);
-
             // Leaderboard data
             await FirebaseFirestore.instance
                 .collection('groups')

@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/database/database_service.dart';
+import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
@@ -275,7 +276,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
               ),
             ),
             StreamBuilder<QuerySnapshot>(
-              stream: getPostsForCurrentUser(widget.userId),
+              stream: getPostsFromDatabase(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SliverFillRemaining(
@@ -290,14 +291,19 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                     ),
                   );
                 } else {
-                  List postList = snapshot.data!.docs;
-                  return postList.isNotEmpty
+                  List<DocumentSnapshot> postList = snapshot.data!.docs;
+                  List<DocumentSnapshot> filteredPostsList =
+                      postList.where((doc) {
+                    String ownerUserId = doc['userId'];
+                    return ownerUserId == widget.userId;
+                  }).toList();
+                  return filteredPostsList.isNotEmpty
                       ? SliverMasonryGrid.count(
                           crossAxisCount: 2,
                           mainAxisSpacing: 0,
                           crossAxisSpacing: 0,
                           itemBuilder: (BuildContext context, int index) {
-                            DocumentSnapshot doc = postList[index];
+                            DocumentSnapshot doc = filteredPostsList[index];
                             Map<String, dynamic> data =
                                 doc.data() as Map<String, dynamic>;
                             String postId = data['postId'];
@@ -316,7 +322,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return const CustomLoadingAnimation();
+                                  return const PostLoadingWidget();
                                 } else if (snapshot.hasError) {
                                   return const Center(
                                     child: Text(
@@ -341,7 +347,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                               },
                             );
                           },
-                          childCount: postList.length,
+                          childCount: filteredPostsList.length,
                         )
                       : const SliverToBoxAdapter(
                           child: Center(

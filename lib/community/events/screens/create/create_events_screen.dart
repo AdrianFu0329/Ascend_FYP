@@ -272,13 +272,6 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                 .doc(eventId)
                 .set(eventData);
 
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(currentUser.uid)
-                .collection('events')
-                .doc(eventId)
-                .set(eventData);
-
             _showMessage('Event created successfully');
 
             titleController.clear();

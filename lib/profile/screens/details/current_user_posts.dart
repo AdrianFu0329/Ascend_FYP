@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/database/database_service.dart';
+import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/profile_media_card.dart';
@@ -22,22 +23,27 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: StreamBuilder<QuerySnapshot>(
-        stream: getPostsForCurrentUser(currentUser.uid),
+        stream: getPostsFromDatabase(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CustomLoadingAnimation());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            List postList = snapshot.data!.docs;
-            return postList.isNotEmpty
+            List<DocumentSnapshot> postList = snapshot.data!.docs;
+            List<DocumentSnapshot> filteredPostsList = postList.where((doc) {
+              String ownerUserId = doc['userId'];
+              return ownerUserId == currentUser.uid;
+            }).toList();
+
+            return filteredPostsList.isNotEmpty
                 ? MasonryGridView.count(
                     crossAxisCount: 2,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
-                    itemCount: postList.length,
+                    itemCount: filteredPostsList.length,
                     itemBuilder: (BuildContext context, int index) {
-                      DocumentSnapshot doc = postList[index];
+                      DocumentSnapshot doc = filteredPostsList[index];
                       Map<String, dynamic> data =
                           doc.data() as Map<String, dynamic>;
                       String postId = data['postId'];
@@ -55,7 +61,7 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const CustomLoadingAnimation();
+                            return const PostLoadingWidget();
                           } else if (snapshot.hasError) {
                             return const Center(
                               child: Text(

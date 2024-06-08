@@ -103,13 +103,6 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
     DocumentReference postRef =
         FirebaseFirestore.instance.collection('posts').doc(widget.postId);
     postRef.update({'likes': widget.likes});
-
-    DocumentReference userRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .collection('posts')
-        .doc(widget.postId);
-    userRef.update({'likes': widget.likes});
   }
 
   void addComment(String text) {
@@ -266,13 +259,6 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     DocumentReference postRef =
         FirebaseFirestore.instance.collection('posts').doc(widget.postId);
     postRef.update({'likes': widget.likes});
-
-    DocumentReference userRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .collection('posts')
-        .doc(widget.postId);
-    userRef.update({'likes': widget.likes});
   }
 
   String fromDateToString(Timestamp timestamp) {
@@ -293,19 +279,12 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       // Firestore references
       DocumentReference postDocRef =
           firestore.collection('posts').doc(widget.postId);
-      DocumentReference userPostRef = firestore
-          .collection('users')
-          .doc(widget.userId)
-          .collection('posts')
-          .doc(widget.postId);
       CollectionReference commentsCollectionRef =
           postDocRef.collection('comments');
 
       // Get all comments for the post
       QuerySnapshot commentsSnapshot = await commentsCollectionRef.get();
       WriteBatch batch = firestore.batch();
-
-      batch.delete(userPostRef);
 
       for (DocumentSnapshot doc in commentsSnapshot.docs) {
         batch.delete(doc.reference);
@@ -338,7 +317,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     final currentUser = FirebaseAuth.instance.currentUser!;
     bool isCurrentUser = currentUser.uid == widget.userId;
 
-    void _showMessage(String message, bool confirm,
+    void showMessage(String message, bool confirm,
         {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
       showDialog(
         context: context,
@@ -457,7 +436,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                           )
                         ],
                         onSelected: (value) {
-                          _showMessage(
+                          showMessage(
                             "Are you sure you want to delete your post?",
                             true,
                             onYesPressed: () async {
@@ -467,7 +446,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                               bool isDeleted = await onDeletePostPressed();
 
                               if (isDeleted) {
-                                _showMessage(
+                                showMessage(
                                   "Post deleted successfully",
                                   false,
                                   onOKPressed: () {
@@ -475,7 +454,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                                   },
                                 );
                               } else {
-                                _showMessage(
+                                showMessage(
                                   "Unable to delete post. Try again later...",
                                   false,
                                 );

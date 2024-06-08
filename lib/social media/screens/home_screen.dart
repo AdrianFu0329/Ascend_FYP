@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/notifications/screens/notification_modal.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
@@ -131,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return loadingCard();
+                            return const PostLoadingWidget();
                           } else if (snapshot.hasError) {
                             return const Center(
                               child: Text(
