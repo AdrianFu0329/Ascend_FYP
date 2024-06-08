@@ -1,5 +1,9 @@
-import 'package:ascend_fyp/models/location_autocomplete_prediction.dart';
+import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/pages/chat_screen.dart';
+import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:ascend_fyp/widgets/user_list_tile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UserSearchScreen extends StatefulWidget {
@@ -12,19 +16,41 @@ class UserSearchScreen extends StatefulWidget {
 }
 
 class _UserSearchScreenState extends State<UserSearchScreen> {
-  Map<String, dynamic> userData = {};
+  String searchUsername = "";
   TextEditingController searchController = TextEditingController();
-  List<AutocompletePrediction> searchPredictions = [];
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
-  Future<void> selectUser(String user) async {
+  Future<void> createChatRoom(String receiverUserId, String receiverUsername,
+      String receiverPhotoUrl) async {
     try {
-      String? userId;
-      Map<String, dynamic> result = {
-        'userId': userId,
+      String chatRoomId = "${currentUser.uid}_$receiverUserId";
+
+      // Create chat room in firebase
+      final Map<String, dynamic> chatRoomData = {
+        'receiverId': receiverUserId,
+        'senderId': currentUser.uid,
+        'timestamp': Timestamp.now(),
       };
-      setState(() {
-        userData = result;
-      });
+
+      FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatRoomId)
+          .set(chatRoomData);
+
+      // Pop to previous screen
+      Navigator.of(context).pop();
+
+      // Push to chat screen with chosen user
+      Navigator.of(context).push(
+        SlidingNav(
+          builder: (context) => ChatScreen(
+            receiverUserId: receiverUserId,
+            receiverUsername: receiverUsername,
+            receiverPhotoUrl: receiverPhotoUrl,
+            chatRoomId: chatRoomId,
+          ),
+        ),
+      );
     } catch (e) {
       debugPrint('Error obtaining user details: $e');
     }
@@ -37,11 +63,11 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
           icon: const Icon(
-            Icons.check,
+            Icons.arrow_back_ios_new,
             color: Color.fromRGBO(247, 243, 237, 1),
           ),
           onPressed: () {
-            Navigator.pop(context, userData);
+            Navigator.pop(context);
           },
         ),
         title: Text(
@@ -53,47 +79,92 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Form(
-              child: TextFormField(
-                controller: searchController,
-                onChanged: (value) {},
-                textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  hintText: "Search a user",
-                  hintStyle: Theme.of(context).textTheme.titleMedium,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Icon(
-                      Icons.search,
-                      color: Color.fromRGBO(247, 243, 237, 1),
-                      size: 20,
-                    ),
-                  ),
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Color.fromRGBO(247, 243, 237, 1),
-                      width: 2.5,
-                    ),
+            TextFormField(
+              controller: searchController,
+              onChanged: (value) {
+                setState(() {
+                  searchUsername = value;
+                });
+              },
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: "Search a user",
+                hintStyle: Theme.of(context).textTheme.titleMedium,
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Icon(
+                    Icons.search,
+                    color: Color.fromRGBO(247, 243, 237, 1),
+                    size: 20,
                   ),
                 ),
-                style: Theme.of(context).textTheme.titleMedium,
-                cursorColor: const Color.fromRGBO(247, 243, 237, 1),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Color.fromRGBO(247, 243, 237, 1),
+                    width: 2.5,
+                  ),
+                ),
               ),
+              style: Theme.of(context).textTheme.titleMedium,
+              cursorColor: const Color.fromRGBO(247, 243, 237, 1),
             ),
             const SizedBox(height: 24),
             Expanded(
-              child: ListView.builder(
-                itemCount: 0,
-                itemBuilder: (context, index) => UserListTile(
-                  onPress: (selectedUser) {
-                    setState(() {
-                      selectUser(selectedUser);
-                    });
-                  },
-                  userId: "jldskfjas", // [index].description!,
-                ),
+              child: StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance.collection('users').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CustomLoadingAnimation(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+                    return const Center(
+                      child: Text('No users found.'),
+                    );
+                  } else if (snapshot.hasData) {
+                    List<DocumentSnapshot> allUsersList = snapshot.data!.docs;
+                    return ListView.builder(
+                      itemCount: allUsersList.length,
+                      itemBuilder: (context, index) {
+                        var data =
+                            allUsersList[index].data() as Map<String, dynamic>;
+
+                        if (searchUsername.isEmpty ||
+                            (data['displayName'] != null &&
+                                data['displayName']
+                                    .toString()
+                                    .toLowerCase()
+                                    .contains(
+                                      searchUsername.toLowerCase(),
+                                    ))) {
+                          return UserListTile(
+                            onPress: (selectedUserId, selectedUsername,
+                                selectedPhotoUrl) {
+                              setState(() {
+                                createChatRoom(selectedUserId, selectedUsername,
+                                    selectedPhotoUrl);
+                              });
+                            },
+                            userId: allUsersList[index].id,
+                          );
+                        } else {
+                          return Container();
+                        }
+                      },
+                    );
+                  } else {
+                    return const Center(
+                      child: Text('Oops! No users found!'),
+                    );
+                  }
+                },
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -32,7 +32,7 @@ Stream<QuerySnapshot> getUserChatsFromDatabase() {
   final CollectionReference chats =
       FirebaseFirestore.instance.collection("chats");
 
-  final chatsStream = chats.orderBy('timestamp', descending: false).snapshots();
+  final chatsStream = chats.orderBy('timestamp', descending: true).snapshots();
   return chatsStream;
 }
 

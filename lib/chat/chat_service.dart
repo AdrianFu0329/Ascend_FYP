@@ -10,21 +10,30 @@ class ChatService extends ChangeNotifier {
   //Send Messages
   Future<void> sendMessage(
       String receiverId, String message, String chatRoomId) async {
-    final String currentUserId = firebaseAuth.currentUser!.uid;
-    final Timestamp timestamp = Timestamp.now();
+    try {
+      final String currentUserId = firebaseAuth.currentUser!.uid;
+      final Timestamp timestamp = Timestamp.now();
 
-    Message newMsg = Message(
-      senderId: currentUserId,
-      receiverId: receiverId,
-      message: message,
-      timestamp: timestamp,
-    );
+      Message newMsg = Message(
+        senderId: currentUserId,
+        receiverId: receiverId,
+        message: message,
+        timestamp: timestamp,
+      );
 
-    await firestore
-        .collection('chats')
-        .doc(chatRoomId)
-        .collection('messages')
-        .add(newMsg.toMap());
+      await firestore
+          .collection('chats')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add(newMsg.toMap());
+
+      DocumentReference chatRef = firestore.collection('chats').doc(chatRoomId);
+      await chatRef.update({
+        'timestamp': Timestamp.now(),
+      });
+    } catch (e) {
+      debugPrint("Error sending message: $e");
+    }
   }
 
   //Get Messages

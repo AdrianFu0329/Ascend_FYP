@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class UserListTile extends StatelessWidget {
   final String userId;
-  final Function(String)? onPress;
+  final Function(String, String, String)? onPress;
   const UserListTile({
     super.key,
     required this.userId,
@@ -25,27 +25,27 @@ class UserListTile extends StatelessWidget {
           final userData = snapshot.data!;
           final username = userData["username"] ?? "Unknown";
           final photoUrl = userData["photoURL"] ?? "Unknown";
-          return Column(
-            children: [
-              ListTile(
-                onTap: () {
-                  onPress == null ? () {} : onPress!(userId);
-                },
-                horizontalTitleGap: 12,
-                leading: ProfilePicture(
-                  userId: userId,
-                  photoURL: photoUrl,
-                  radius: 20,
-                  onTap: () {},
-                ),
-                title: Text(
-                  username,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              )
-            ],
+
+          return ListTile(
+            onTap: () {
+              onPress == null ? () {} : onPress!(userId, username, photoUrl);
+            },
+            horizontalTitleGap: 12,
+            leading: SizedBox(
+              width: 40,
+              child: ProfilePicture(
+                userId: userId,
+                photoURL: photoUrl,
+                radius: 20,
+                onTap: () {},
+              ),
+            ),
+            title: Text(
+              username,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           );
         }
       },

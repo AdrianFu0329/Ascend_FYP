@@ -6,7 +6,6 @@ import 'package:ascend_fyp/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -17,7 +16,6 @@ class MessagesScreen extends StatefulWidget {
 
 class _MessagesScreenState extends State<MessagesScreen> {
   final currentUser = FirebaseAuth.instance.currentUser;
-  late String userId;
 
   @override
   Widget build(BuildContext context) {
@@ -31,18 +29,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
           ),
           actions: [
             GestureDetector(
-              onTap: () async {
-                final newChatRoomData = await Navigator.of(context).push(
+              onTap: () {
+                Navigator.of(context).push(
                   SlidingNav(
                     builder: (context) => const UserSearchScreen(),
                   ),
                 );
-
-                if (newChatRoomData != null) {
-                  setState(() {
-                    userId = newChatRoomData['userId'];
-                  });
-                }
               },
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
