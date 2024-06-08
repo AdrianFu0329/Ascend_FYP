@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/profile/screens/details/user_profile_screen.dart';
 import 'package:ascend_fyp/social%20media/widgets/like_button.dart';
 import 'package:ascend_fyp/social%20media/widgets/comment_card.dart';

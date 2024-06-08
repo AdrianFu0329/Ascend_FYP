@@ -5,7 +5,7 @@ import 'package:ascend_fyp/social%20media/widgets/social_media_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../database/database_service.dart';
+import '../../database/database_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

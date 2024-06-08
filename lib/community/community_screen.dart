@@ -1,5 +1,5 @@
-import 'package:ascend_fyp/groups/screens/community_groups_screen.dart';
-import 'package:ascend_fyp/events/screens/event_screen.dart';
+import 'package:ascend_fyp/community/groups/screens/community_groups_screen.dart';
+import 'package:ascend_fyp/community/events/screens/event_screen.dart';
 import 'package:ascend_fyp/general%20widgets/circle_tab_indicator.dart';
 import 'package:flutter/material.dart';
 

@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/chat/service/chat_service.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
-import 'package:ascend_fyp/general%20widgets/user_list_tile.dart';
+import 'package:ascend_fyp/chat/widgets/user_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

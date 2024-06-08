@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/profile/screens/side%20menu/view/side_menu.dart';
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/profile/screens/details/user_joined_events.dart';
 import 'package:ascend_fyp/profile/screens/details/current_user_posts.dart';
 import 'package:ascend_fyp/profile/screens/edit/edit_profile_screen.dart';

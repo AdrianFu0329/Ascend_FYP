@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/profile/screens/details/user_events_screen.dart';
 import 'package:ascend_fyp/profile/screens/details/user_groups_screen.dart';
-import 'package:ascend_fyp/social%20media/screens/welcome_screen.dart';
+import 'package:ascend_fyp/welcome/screens/welcome_screen.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:ascend_fyp/profile/screens/side%20menu/widgets/side_menu_tile.dart';

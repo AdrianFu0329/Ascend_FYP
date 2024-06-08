@@ -1,9 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/navigation/wrapper_nav.dart';
-import 'package:ascend_fyp/general%20pages/forgot_pwd_screen.dart';
-import 'package:ascend_fyp/general%20pages/registration_screen.dart';
+import 'package:ascend_fyp/welcome/screens/forgot%20pwd/forgot_pwd_screen.dart';
+import 'package:ascend_fyp/welcome/screens/registration/registration_screen.dart';
 import 'package:ascend_fyp/auth_service/AuthService.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:flutter/material.dart';

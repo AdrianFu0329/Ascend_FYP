@@ -1,4 +1,4 @@
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/notifications/screens/event_notification_details_screen.dart';
 import 'package:ascend_fyp/notifications/screens/general_notification_details_screen.dart';
 import 'package:ascend_fyp/notifications/screens/group_notification_details_screen.dart';

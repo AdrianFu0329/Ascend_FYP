@@ -1,69 +1,48 @@
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/events/screens/details/event_details_screen.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
+import 'package:ascend_fyp/community/groups/screens/details/group_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 
-class EventCard extends StatelessWidget {
-  final String eventId;
-  final String? groupId;
-  final String userId;
-  final String eventTitle;
+class GroupCard extends StatelessWidget {
+  final String groupId;
+  final String ownerUserId;
+  final String groupTitle;
   final List<dynamic> requestList;
-  final List<dynamic> acceptedList;
-  final String eventDate;
-  final String eventStartTime;
-  final String eventEndTime;
-  final String eventFees;
-  final String eventSport;
-  final String eventLocation;
+  final List<dynamic> memberList;
+  final String groupSport;
   final String posterURL;
   final String participants;
   final bool isOther;
-  final bool isGroupEvent;
 
-  const EventCard({
+  const GroupCard({
     super.key,
-    required this.eventId,
-    required this.userId,
-    required this.eventTitle,
+    required this.groupId,
+    required this.ownerUserId,
+    required this.groupTitle,
     required this.requestList,
-    required this.acceptedList,
-    required this.eventDate,
-    required this.eventStartTime,
-    required this.eventEndTime,
-    required this.eventFees,
-    required this.eventSport,
-    required this.eventLocation,
+    required this.memberList,
+    required this.groupSport,
     required this.posterURL,
     required this.participants,
     required this.isOther,
-    required this.isGroupEvent,
-    this.groupId,
   });
 
   @override
   Widget build(BuildContext context) {
-    void _navigateToEventDetailsScreen() {
+    void navigateToGroupDetailsScreen() {
       Navigator.of(context).push(
         SlidingNav(
-          builder: (context) => EventDetailsScreen(
-            eventId: eventId,
+          builder: (context) => GroupDetailsScreen(
             groupId: groupId,
-            userId: userId,
-            eventTitle: eventTitle,
+            ownerUserId: ownerUserId,
+            groupTitle: groupTitle,
             requestList: requestList,
-            acceptedList: acceptedList,
-            eventDate: eventDate,
-            eventStartTime: eventStartTime,
-            eventEndTime: eventEndTime,
-            eventFees: eventFees,
-            eventSport: eventSport,
-            eventLocation: eventLocation,
+            memberList: memberList,
+            groupSport: groupSport,
             posterURL: posterURL,
             participants: participants,
             isOther: isOther,
-            isGroupEvent: isGroupEvent,
           ),
         ),
       );
@@ -120,27 +99,16 @@ class EventCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        eventTitle,
+                        groupTitle,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            eventSport,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Date: $eventDate",
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                      ],
+                    Flexible(
+                      child: Text(
+                        groupSport,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ),
                   ],
                 ),
@@ -152,7 +120,7 @@ class EventCard extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: _navigateToEventDetailsScreen,
+      onTap: navigateToGroupDetailsScreen,
       child: buildCard(),
     );
   }

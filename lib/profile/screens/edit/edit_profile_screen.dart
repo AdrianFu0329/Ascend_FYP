@@ -1,4 +1,4 @@
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/profile/screens/edit/change_prof_pic.dart';
 import 'package:ascend_fyp/profile/screens/edit/change_pwd_screen.dart';
 import 'package:ascend_fyp/profile/screens/edit/profile_details_screen.dart';

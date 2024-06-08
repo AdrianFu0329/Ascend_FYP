@@ -1,4 +1,4 @@
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuTile extends StatelessWidget {

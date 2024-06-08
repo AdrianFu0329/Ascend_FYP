@@ -1,49 +1,73 @@
-import 'package:ascend_fyp/navigation/sliding_nav.dart';
-import 'package:ascend_fyp/groups/screens/edit/edit_group_details_screen.dart';
-import 'package:ascend_fyp/groups/screens/edit/edit_group_participants_screen.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
+import 'package:ascend_fyp/community/events/screens/edit/edit_event_details_screen.dart';
+import 'package:ascend_fyp/community/events/screens/edit/edit_event_participants_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class GroupSettingsScreen extends StatefulWidget {
-  final String groupId;
-  final String groupTitle;
-  final String groupSport;
+class EventSettingsScreen extends StatefulWidget {
+  final String eventId;
+  final String? groupId;
+  final String eventTitle;
+  final String eventDate;
+  final String eventStartTime;
+  final String eventEndTime;
+  final String eventFees;
+  final String eventSport;
+  final String eventLocation;
   final String participants;
   final String posterURL;
-  final List<dynamic> memberList;
+  final List<dynamic> acceptedList;
   final bool isOther;
+  final bool isGroupEvent;
 
-  const GroupSettingsScreen({
+  const EventSettingsScreen({
     super.key,
-    required this.groupId,
-    required this.groupTitle,
-    required this.groupSport,
+    required this.eventId,
+    required this.eventTitle,
+    required this.eventDate,
+    required this.eventStartTime,
+    required this.eventEndTime,
+    required this.eventFees,
+    required this.eventSport,
+    required this.eventLocation,
     required this.participants,
     required this.posterURL,
-    required this.memberList,
     required this.isOther,
+    required this.isGroupEvent,
+    required this.acceptedList,
+    this.groupId,
   });
 
   @override
-  State<GroupSettingsScreen> createState() => _GroupSettingsScreenState();
+  State<EventSettingsScreen> createState() => _EventSettingsScreenState();
 }
 
-class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
-  late String groupSport;
-  late String groupTitle;
+class _EventSettingsScreenState extends State<EventSettingsScreen> {
+  late String eventDate;
+  late String eventEndTime;
+  late String eventFees;
+  late String eventLocation;
+  late String eventSport;
+  late String eventStartTime;
+  late String eventTitle;
   late String participants;
   late String posterURL;
-  late List<dynamic> memberList;
+  late List<dynamic> acceptedList;
   late bool isOther;
 
   @override
   void initState() {
     super.initState();
-    groupSport = widget.groupSport;
-    groupTitle = widget.groupTitle;
+    eventDate = widget.eventDate;
+    eventEndTime = widget.eventEndTime;
+    eventFees = widget.eventFees;
+    eventLocation = widget.eventLocation;
+    eventSport = widget.eventSport;
+    eventStartTime = widget.eventStartTime;
+    eventTitle = widget.eventTitle;
     participants = widget.participants;
     posterURL = widget.posterURL;
-    memberList = widget.memberList;
+    acceptedList = widget.acceptedList;
     isOther = widget.isOther;
   }
 
@@ -94,22 +118,19 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
     );
   }
 
-  Future<bool> deleteGroup() async {
+  Future<bool> deleteEvent() async {
     try {
-      DocumentReference groupDocRef =
-          FirebaseFirestore.instance.collection('groups').doc(widget.groupId);
-
-      CollectionReference leaderboardCollectionRef =
-          groupDocRef.collection('leaderboard');
-
-      QuerySnapshot leaderboardSnapshot = await leaderboardCollectionRef.get();
-      WriteBatch batch = FirebaseFirestore.instance.batch();
-
-      for (DocumentSnapshot doc in leaderboardSnapshot.docs) {
-        batch.delete(doc.reference);
-      }
-      await batch.commit();
-      await groupDocRef.delete();
+      widget.isGroupEvent
+          ? await FirebaseFirestore.instance
+              .collection('groups')
+              .doc(widget.groupId)
+              .collection('events')
+              .doc(widget.eventId)
+              .delete()
+          : await FirebaseFirestore.instance
+              .collection('events')
+              .doc(widget.eventId)
+              .delete();
 
       return true;
     } catch (error) {
@@ -178,7 +199,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
-          'Group Settings',
+          'Event Settings',
           style: Theme.of(context).textTheme.titleLarge!,
         ),
         leading: PopScope(
@@ -189,12 +210,17 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
             }
             Navigator.of(context).pop(
               {
-                'title': groupTitle,
-                'sports': groupSport,
+                'title': eventTitle,
+                'sports': eventSport,
+                'fees': eventFees,
+                'location': eventLocation,
                 'participants': participants,
+                'date': eventDate,
+                'startTime': eventStartTime,
+                'endTime': eventEndTime,
                 'isOther': isOther,
                 'posterURL': posterURL,
-                'memberList': memberList,
+                'acceptedList': acceptedList,
               },
             );
           }),
@@ -206,12 +232,17 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
             onPressed: () {
               Navigator.of(context).pop(
                 {
-                  'title': groupTitle,
-                  'sports': groupSport,
+                  'title': eventTitle,
+                  'sports': eventSport,
+                  'fees': eventFees,
+                  'location': eventLocation,
                   'participants': participants,
+                  'date': eventDate,
+                  'startTime': eventStartTime,
+                  'endTime': eventEndTime,
                   'isOther': isOther,
                   'posterURL': posterURL,
-                  'memberList': memberList,
+                  'acceptedList': acceptedList,
                 },
               );
             },
@@ -223,13 +254,13 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
         child: ElevatedButton(
           onPressed: () {
             _showMessage(
-              "Are you sure you would like to delete your community group?",
+              "Are you sure you would like to delete your sports event?",
               true,
               onYesPressed: () async {
-                bool isDeleted = await deleteGroup();
+                bool isDeleted = await deleteEvent();
                 if (isDeleted) {
                   _showMessage(
-                    "Group deleted successfully",
+                    "Event deleted successfully",
                     false,
                     onOKPressed: () {
                       Navigator.of(context).pop();
@@ -238,7 +269,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                   );
                 } else {
                   _showMessage(
-                      "Unable to delete group. Try again later...", false);
+                      "Unable to delete event. Try again later...", false);
                 }
               },
             );
@@ -255,7 +286,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                     color: Colors.red,
                   ),
                   SizedBox(width: 8),
-                  Text('Delete Group'),
+                  Text('Delete Event'),
                 ],
               ),
             ],
@@ -271,23 +302,34 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                 onPressed: () async {
                   final changeResult = await Navigator.of(context).push(
                     SlidingNav(
-                      builder: (context) => EditGroupDetailsScreen(
-                        groupId: widget.groupId,
-                        groupSport: widget.groupSport,
-                        groupTitle: widget.groupTitle,
+                      builder: (context) => EditEventDetailsScreen(
+                        eventId: widget.eventId,
+                        eventDate: widget.eventDate,
+                        eventEndTime: widget.eventEndTime,
+                        eventFees: widget.eventFees,
+                        eventLocation: widget.eventLocation,
+                        eventSport: widget.eventSport,
+                        eventStartTime: widget.eventStartTime,
+                        eventTitle: widget.eventTitle,
                         participants: widget.participants,
                         posterURL: widget.posterURL,
                         isOther: widget.isOther,
+                        isGroupEvent: widget.isGroupEvent,
                       ),
                     ),
                   );
 
                   if (changeResult != null) {
                     setState(() {
-                      groupSport = changeResult['sports'];
-                      groupTitle = changeResult['title'];
+                      eventEndTime = changeResult['endTime'];
+                      eventFees = changeResult['fees'];
+                      eventLocation = changeResult['location'];
+                      eventSport = changeResult['sports'];
+                      eventStartTime = changeResult['startTime'];
+                      eventTitle = changeResult['title'];
                       participants = changeResult['participants'];
                       posterURL = changeResult['posterURL'];
+                      eventDate = changeResult['date'];
                       isOther = changeResult['isOther'];
                     });
                   }
@@ -301,7 +343,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                       color: Color.fromRGBO(247, 243, 237, 1),
                     ),
                     SizedBox(width: 16),
-                    Text('Edit Group Details'),
+                    Text('Edit Event Details'),
                   ],
                 ),
               ),
@@ -310,16 +352,16 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                 onPressed: () async {
                   final changeResult = await Navigator.of(context).push(
                     SlidingNav(
-                      builder: (context) => EditGroupParticipantsScreen(
-                        groupId: widget.groupId,
-                        memberList: widget.memberList,
+                      builder: (context) => EditEventParticipantsScreen(
+                        eventId: widget.eventId,
+                        acceptedList: widget.acceptedList,
                       ),
                     ),
                   );
 
                   if (changeResult != null) {
                     setState(() {
-                      memberList = changeResult['memberList'];
+                      acceptedList = changeResult['acceptedList'];
                     });
                   }
                 },
@@ -335,7 +377,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                           color: Color.fromRGBO(247, 243, 237, 1),
                         ),
                         SizedBox(width: 16),
-                        Text('Edit Group Members'),
+                        Text('Edit Participants'),
                       ],
                     ),
                   ],

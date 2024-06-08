@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/general%20widgets/user_details_tile.dart';
-import 'package:ascend_fyp/groups/widgets/leaderboard_top_3.dart';
+import 'package:ascend_fyp/community/groups/widgets/leaderboard_top_3.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';

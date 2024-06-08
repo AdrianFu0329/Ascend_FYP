@@ -1,95 +1,31 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/events/screens/create/create_events_screen.dart';
+import 'package:ascend_fyp/community/groups/screens/create/create_groups_screen.dart';
 import 'package:ascend_fyp/general%20pages/filter_options_screen.dart';
-import 'package:ascend_fyp/events/widgets/event_card.dart';
+import 'package:ascend_fyp/community/groups/widgets/group_card.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class EventScreen extends StatefulWidget {
-  const EventScreen({super.key});
+class CommunityGroupsScreen extends StatefulWidget {
+  const CommunityGroupsScreen({super.key});
 
   @override
-  State<EventScreen> createState() => _EventScreenState();
+  State<CommunityGroupsScreen> createState() => _CommunityGroupsScreenState();
 }
 
-class _EventScreenState extends State<EventScreen> {
-  Stream<QuerySnapshot>? eventsStream;
+class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
+  Stream<QuerySnapshot>? groupsStream;
   Map<String, bool> filterOptions = {};
 
   @override
   void initState() {
-    deleteOutdatedEvents();
-    eventsStream = getEventsFromDatabase();
+    groupsStream = getGroupsFromDatabase();
     super.initState();
-  }
-
-  Future<void> deleteOutdatedEvents() async {
-    try {
-      // Get the current date and time
-      DateTime now = DateTime.now();
-
-      // Reference to the events collection
-      CollectionReference eventsRef =
-          FirebaseFirestore.instance.collection('events');
-
-      // Get all events
-      QuerySnapshot snapshot = await eventsRef.get();
-
-      // Batch for deleting documents
-      WriteBatch batch = FirebaseFirestore.instance.batch();
-
-      // Iterate through each event document
-      for (DocumentSnapshot doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-        // Parse event date and time
-        DateTime eventDate = DateTime.parse(data['date'] as String);
-
-        // Parse event end time with AM/PM consideration
-        final timeString = data['endTime'] as String;
-        final timeParts = timeString.split(":");
-        int hour = int.parse(timeParts[0]);
-        int minute =
-            int.parse(timeParts[1].substring(0, 2)); // get first two characters
-
-        // Check for AM/PM and adjust hour accordingly
-        if (timeString.contains("PM") && hour != 12) {
-          hour += 12;
-        } else if (timeString.contains("AM") && hour == 12) {
-          hour = 0;
-        }
-        DateTime eventEndTime = DateTime(
-            eventDate.year, eventDate.month, eventDate.day, hour, minute);
-
-        // Combine event date and time to create DateTime object
-        DateTime eventDateTime = DateTime(
-          eventDate.year,
-          eventDate.month,
-          eventDate.day,
-          eventEndTime.hour,
-          eventEndTime.minute,
-        );
-
-        // Check if the event is outdated
-        if (eventDateTime.isBefore(now)) {
-          // Add the event document to the batch for deletion
-          batch.delete(doc.reference);
-        }
-      }
-
-      // Commit the batch
-      await batch.commit();
-
-      debugPrint('Outdated events deleted successfully.');
-    } catch (e) {
-      debugPrint('Error deleting outdated events: $e');
-    }
   }
 
   Future<void> refreshPosts() async {
     setState(() {
-      eventsStream = getEventsFromDatabase();
+      groupsStream = getGroupsFromDatabase();
     });
   }
 
@@ -102,7 +38,7 @@ class _EventScreenState extends State<EventScreen> {
     );
   }
 
-  void filterEvents() async {
+  void filterGroups() async {
     final selectedFilters = await showModalBottomSheet<Map<String, bool>>(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -113,12 +49,12 @@ class _EventScreenState extends State<EventScreen> {
     if (selectedFilters != null) {
       setState(() {
         filterOptions = selectedFilters;
-        eventsStream = getFilteredEventsFromDatabase(filterOptions);
+        groupsStream = getFilteredGroupsFromDatabase(filterOptions);
       });
     }
   }
 
-  Stream<QuerySnapshot> getFilteredEventsFromDatabase(
+  Stream<QuerySnapshot> getFilteredGroupsFromDatabase(
       Map<String, bool> filters) {
     List<String> selectedSports = filters.entries
         .where((entry) => entry.value)
@@ -138,21 +74,21 @@ class _EventScreenState extends State<EventScreen> {
     ];
 
     if (selectedSports.isEmpty) {
-      return getEventsFromDatabase();
+      return getGroupsFromDatabase(); //Change Function
     } else if (selectedSports.contains('Other') && selectedSports.length > 1) {
       excludedSports.removeWhere((sport) => selectedSports.contains(sport));
       return FirebaseFirestore.instance
-          .collection('events')
+          .collection('groups')
           .where('sports', isNotEqualTo: excludedSports)
           .snapshots();
     } else if (selectedSports.contains('Other') && selectedSports.length == 1) {
       return FirebaseFirestore.instance
-          .collection('events')
+          .collection('groups')
           .where('isOther', isEqualTo: true)
           .snapshots();
     } else {
       return FirebaseFirestore.instance
-          .collection('events')
+          .collection('groups')
           .where('sports', arrayContainsAny: selectedSports)
           .snapshots();
     }
@@ -176,7 +112,7 @@ class _EventScreenState extends State<EventScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        onPressed: filterEvents,
+                        onPressed: filterGroups,
                         icon: Row(
                           children: [
                             Text(
@@ -192,7 +128,7 @@ class _EventScreenState extends State<EventScreen> {
                       ),
                       IconButton(
                         onPressed: () {
-                          modalBottomSheet(const CreateEventsScreen());
+                          modalBottomSheet(const CreateGroupsScreen());
                         },
                         icon: const Icon(Icons.add),
                         color: Colors.red,
@@ -205,7 +141,7 @@ class _EventScreenState extends State<EventScreen> {
             ),
           ),
           StreamBuilder<QuerySnapshot>(
-            stream: eventsStream,
+            stream: groupsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SliverFillRemaining(
@@ -222,40 +158,34 @@ class _EventScreenState extends State<EventScreen> {
               } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Center(
-                    child: Text('No Events Found.'),
+                    child: Text('No Groups Found.'),
                   ),
                 );
               } else if (snapshot.hasData) {
-                List<DocumentSnapshot> eventsList = snapshot.data!.docs;
+                List<DocumentSnapshot> groupsList = snapshot.data!.docs;
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      DocumentSnapshot doc = eventsList[index];
+                      DocumentSnapshot doc = groupsList[index];
                       Map<String, dynamic> data =
                           doc.data() as Map<String, dynamic>;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: EventCard(
-                          eventId: data['eventId'],
-                          userId: data['userId'],
-                          eventTitle: data['title'],
-                          requestList: List<String>.from(data['requestList']),
-                          acceptedList: List<String>.from(data['acceptedList']),
-                          eventDate: data['date'],
-                          eventStartTime: data['startTime'],
-                          eventEndTime: data['endTime'],
-                          eventFees: data['fees'],
-                          eventLocation: data['location'],
-                          eventSport: data['sports'],
+                        child: GroupCard(
+                          groupId: data['groupId'],
+                          ownerUserId: data['ownerUserId'],
+                          groupTitle: data['name'],
+                          requestList: List<dynamic>.from(data['requestList']),
+                          memberList: List<dynamic>.from(data['memberList']),
+                          groupSport: data['sports'],
                           posterURL: data['posterURL'],
                           participants: data['participants'],
                           isOther: data['isOther'],
-                          isGroupEvent: false,
                         ),
                       );
                     },
-                    childCount: eventsList.length,
+                    childCount: groupsList.length,
                   ),
                 );
               } else {
@@ -264,7 +194,7 @@ class _EventScreenState extends State<EventScreen> {
                     children: [
                       SizedBox(height: 16),
                       Center(
-                        child: Text('No events at the moment!'),
+                        child: Text('No groups at the moment!'),
                       ),
                     ],
                   ),
