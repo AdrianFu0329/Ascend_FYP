@@ -1,8 +1,10 @@
 import 'package:ascend_fyp/location/service/Geolocation.dart';
 import 'package:ascend_fyp/navigation/wrapper_nav.dart';
+import 'package:ascend_fyp/notifications/service/notification_service.dart';
 import 'package:ascend_fyp/welcome/screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -25,6 +27,8 @@ class SplashScreen extends StatelessWidget {
         }
         GeoLocation geoLocation = GeoLocation();
         await geoLocation.getLocation();
+        await NotificationService.init();
+        tz.initializeTimeZones();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

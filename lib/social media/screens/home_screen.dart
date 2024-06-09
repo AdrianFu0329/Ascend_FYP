@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/database/firebase_notifications.dart';
 import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/notifications/screens/notification_modal.dart';
@@ -21,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    FirebaseNotifications.getFirebaseMessagingToken();
     postsStream = getPostsFromDatabase();
   }
 
