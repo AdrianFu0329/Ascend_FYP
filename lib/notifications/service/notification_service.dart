@@ -37,28 +37,38 @@ class NotificationService {
   }
 
   static Future<void> showInstantNotification(String title, String body) async {
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
         android: AndroidNotificationDetails(
           "channelId",
           "channelName",
           importance: Importance.high,
           priority: Priority.high,
+          styleInformation: BigTextStyleInformation(
+            body, // The full content of the notification
+            contentTitle: title,
+            summaryText: '',
+          ),
         ),
-        iOS: DarwinNotificationDetails());
+        iOS: const DarwinNotificationDetails());
     await flutterLocalNotificationsPlugin.show(
         0, title, body, platformChannelSpecifics);
   }
 
   static Future<void> scheduleNotification(
       String title, String body, DateTime scheduledTime) async {
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
         android: AndroidNotificationDetails(
           "channelId",
           "channelName",
           importance: Importance.high,
           priority: Priority.high,
+          styleInformation: BigTextStyleInformation(
+            body, // The full content of the notification
+            contentTitle: title,
+            summaryText: '',
+          ),
         ),
-        iOS: DarwinNotificationDetails());
+        iOS: const DarwinNotificationDetails());
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       title,

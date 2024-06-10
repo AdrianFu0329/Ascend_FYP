@@ -3,10 +3,12 @@ import 'package:ascend_fyp/location/screens/set_location_screen.dart';
 import 'package:ascend_fyp/general%20widgets/creation_sport_list.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/location/widgets/location_list_tile.dart';
+import 'package:ascend_fyp/notifications/service/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/general%20widgets/custom_text_field.dart';
+import 'package:intl/intl.dart';
 
 class CreateEventsScreen extends StatefulWidget {
   const CreateEventsScreen({super.key});
@@ -223,6 +225,60 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       return posterURL;
     }
 
+    String fromDateToString(Timestamp timestamp) {
+      DateTime dateTime = timestamp.toDate();
+      DateTime now = DateTime.now();
+
+      // Check if the timestamp is today
+      if (dateTime.year == now.year &&
+          dateTime.month == now.month &&
+          dateTime.day == now.day) {
+        // Return the time only
+        String formattedTime = DateFormat('h:mm a').format(dateTime);
+        return formattedTime;
+      } else {
+        // Return the date only
+        String formattedDate = DateFormat('MMM dd, yyyy').format(dateTime);
+        return formattedDate;
+      }
+    }
+
+    Future<void> applyEventScheduleNotification(String eventId) async {
+      final DocumentReference events =
+          FirebaseFirestore.instance.collection("events").doc(eventId);
+
+      try {
+        DocumentSnapshot eventSnapshot = await events.get();
+        if (eventSnapshot.exists) {
+          Map<String, dynamic> eventsData =
+              eventSnapshot.data() as Map<String, dynamic>;
+          final Timestamp eventTimestamp = eventsData['timestamp'];
+          final String eventTitle = eventsData['title'];
+          final String eventLocation = eventsData['location'];
+          DateTime scheduledTime =
+              eventTimestamp.toDate().subtract(const Duration(hours: 1));
+          final String formattedTime = fromDateToString(eventTimestamp);
+
+          // Schedule Event Notification
+          NotificationService.scheduleNotification(
+            "Event Participation Reminder",
+            "Reminder: $eventTitle sports event at $eventLocation at $formattedTime",
+            scheduledTime,
+          );
+
+          // Instant Notification to notify scheduled notification
+          NotificationService.showInstantNotification(
+            "Event Participation Reminder",
+            "Event reminder has been set for $eventTitle sports event at $eventLocation at $formattedTime",
+          );
+        } else {
+          debugPrint("Event data not found");
+        }
+      } catch (e) {
+        debugPrint("Failed to schedule notification: $e");
+      }
+    }
+
     Future<void> createEvent() async {
       if (validateEvent()) {
         final currentUser = FirebaseAuth.instance.currentUser!;
@@ -272,6 +328,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                 .doc(eventId)
                 .set(eventData);
 
+            applyEventScheduleNotification(eventId);
             _showMessage('Event created successfully');
 
             titleController.clear();

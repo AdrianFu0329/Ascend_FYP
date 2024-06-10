@@ -114,13 +114,6 @@ class _EventNotificationDetailsScreenState
           FirebaseFirestore.instance.collection('events').doc(widget.eventId);
       await postRef.update({'requestList': requestList});
 
-      DocumentReference userRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.ownerUserId)
-          .collection('events')
-          .doc(widget.eventId);
-      await userRef.update({'requestList': requestList});
-
       // Delete Notification
       await deleteNotification();
 
@@ -173,14 +166,6 @@ class _EventNotificationDetailsScreenState
       await postRef.update({'requestList': requestList});
       await postRef.update({'acceptedList': acceptedList});
 
-      DocumentReference userRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.ownerUserId)
-          .collection('events')
-          .doc(widget.eventId);
-      await userRef.update({'requestList': requestList});
-      await userRef.update({'acceptedList': acceptedList});
-
       // Delete Notification
       await deleteNotification();
 
@@ -201,7 +186,7 @@ class _EventNotificationDetailsScreenState
             "Your request to join ${currentUser.displayName}'s Sport Event '$eventTitle' has been approved! Please be on time!",
         'requestUserId': widget.ownerUserId,
         'timestamp': Timestamp.now(),
-        'type': "General",
+        'type': "Event-General",
       };
 
       // Add the notification document to Firestore

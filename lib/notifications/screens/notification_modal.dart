@@ -88,11 +88,12 @@ class NotificationModal extends StatelessWidget {
                             eventId: data['eventId'] ?? data['groupId'],
                             ownerUserId: data['ownerUserId'],
                             requestUserId: data['requestUserId'],
-                            timestamp: data['timestamp'], // Problem here
+                            timestamp: data['timestamp'],
                             title: data['title'],
                             message: data['message'],
                             type: data['type'],
-                            requestUserLocation: data['type'] == "General"
+                            requestUserLocation: data['type'] == "General" ||
+                                    data['type'] == "Event-General"
                                 ? "Unknown"
                                 : data['requestUserLocation'],
                           );

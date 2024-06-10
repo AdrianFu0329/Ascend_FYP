@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
+import 'package:ascend_fyp/notifications/screens/event_general_notification_details_screen.dart';
 import 'package:ascend_fyp/notifications/screens/event_notification_details_screen.dart';
 import 'package:ascend_fyp/notifications/screens/general_notification_details_screen.dart';
 import 'package:ascend_fyp/notifications/screens/group_notification_details_screen.dart';
@@ -169,6 +170,19 @@ class NotificationCard extends StatelessWidget {
                     message: message,
                     type: type,
                     requestUserLocation: requestUserLocation,
+                  ),
+                ),
+              );
+            }
+          case "Event-General":
+            {
+              Navigator.of(context).push(
+                SlidingNav(
+                  builder: (context) => EventGeneralNotificationDetailsScreen(
+                    notificationId: notificationId,
+                    eventId: eventId,
+                    title: title,
+                    message: message,
                   ),
                 ),
               );
