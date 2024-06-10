@@ -8,6 +8,34 @@ import 'package:flutter/material.dart';
 class ChatService extends ChangeNotifier {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final currentUser = FirebaseAuth.instance.currentUser!;
+
+  // Update is read status
+  Future<void> updateIsRead(String chatRoomId) async {
+    DocumentReference chatRef =
+        FirebaseFirestore.instance.collection('chats').doc(chatRoomId);
+
+    try {
+      DocumentSnapshot chatSnapshot = await chatRef.get();
+
+      if (chatSnapshot.exists) {
+        Map<String, dynamic> chatData =
+            chatSnapshot.data() as Map<String, dynamic>;
+        bool isSender = currentUser.uid == chatData["senderId"];
+        if (isSender) {
+          chatRef.update({
+            'receiverRead': false,
+          });
+        } else {
+          chatRef.update({
+            'senderRead': false,
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Failed to update read status for user: $e");
+    }
+  }
 
   //Send Messages
   Future<void> sendMessage(
@@ -22,6 +50,8 @@ class ChatService extends ChangeNotifier {
         message: message,
         timestamp: timestamp,
       );
+
+      await updateIsRead(chatRoomId);
 
       await firestore
           .collection('chats')

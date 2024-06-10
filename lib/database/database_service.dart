@@ -36,6 +36,16 @@ Stream<QuerySnapshot> getUserChatsFromDatabase() {
   return chatsStream;
 }
 
+Stream<QuerySnapshot> getChatData(String chatRoomId) {
+  final CollectionReference chats = FirebaseFirestore.instance
+      .collection("chats")
+      .doc(chatRoomId)
+      .collection('messages');
+
+  final chatsStream = chats.orderBy('timestamp', descending: true).snapshots();
+  return chatsStream;
+}
+
 Stream<QuerySnapshot> getPostsFromDatabase() {
   final CollectionReference posts =
       FirebaseFirestore.instance.collection("posts");

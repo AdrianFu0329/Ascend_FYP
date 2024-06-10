@@ -89,8 +89,9 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                 height: 180,
                 width: 100,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(15),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
                   ),
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
@@ -99,8 +100,9 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                 height: 180,
                 width: 100,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(15),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
                   ),
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
@@ -128,8 +130,9 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                 height: 200,
                 width: 100,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(15),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
                   ),
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
@@ -138,8 +141,9 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                 height: 200,
                 width: 100,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(15),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
                   ),
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
@@ -167,8 +171,9 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                 height: 165,
                 width: 100,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(15),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
                   ),
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
@@ -177,8 +182,9 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                 height: 165,
                 width: 100,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(15),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
                   ),
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
