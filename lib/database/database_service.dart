@@ -75,11 +75,29 @@ Stream<QuerySnapshot> getGroupEventsFromDatabase(String groupId) {
   return eventsStream;
 }
 
-Stream<DocumentSnapshot> getParticipantsForCurrentEvent(String eventId) {
+Future<DocumentSnapshot> getSpecificGroupEventFromDatabase(
+    String groupId, String eventId) async {
   return FirebaseFirestore.instance
+      .collection('groups')
+      .doc(groupId)
       .collection('events')
       .doc(eventId)
-      .snapshots();
+      .get();
+}
+
+Stream<DocumentSnapshot> getParticipantsForCurrentEvent(
+    String eventId, String groupId) {
+  return groupId != "Unknown"
+      ? FirebaseFirestore.instance
+          .collection('groups')
+          .doc(groupId)
+          .collection('events')
+          .doc(eventId)
+          .snapshots()
+      : FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventId)
+          .snapshots();
 }
 
 Stream<DocumentSnapshot> getMembersForGroup(String groupId) {
@@ -135,10 +153,8 @@ Stream<QuerySnapshot> getPostsForCurrentUser(String currentUserUid) {
   return postsStream;
 }
 
-Future<Map<String, dynamic>> getEventData(String eventId) async {
-  DocumentSnapshot eventSnapshot =
-      await FirebaseFirestore.instance.collection('events').doc(eventId).get();
-  return eventSnapshot.data() as Map<String, dynamic>;
+Future<DocumentSnapshot> getEventData(String eventId) async {
+  return FirebaseFirestore.instance.collection('events').doc(eventId).get();
 }
 
 Future<Map<String, dynamic>> getGroupData(String groupId) async {

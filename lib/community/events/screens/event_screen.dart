@@ -238,10 +238,15 @@ class _EventScreenState extends State<EventScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: EventCard(
                           eventId: data['eventId'],
+                          groupId: data['isGroupEvent']
+                              ? data['groupId']
+                              : "Unknown",
                           userId: data['userId'],
                           eventTitle: data['title'],
                           requestList: List<String>.from(data['requestList']),
                           acceptedList: List<String>.from(data['acceptedList']),
+                          attendanceList:
+                              List<String>.from(data['attendanceList']),
                           eventDate: data['date'],
                           eventStartTime: data['startTime'],
                           eventEndTime: data['endTime'],
@@ -251,7 +256,7 @@ class _EventScreenState extends State<EventScreen> {
                           posterURL: data['posterURL'],
                           participants: data['participants'],
                           isOther: data['isOther'],
-                          isGroupEvent: false,
+                          isGroupEvent: data['isGroupEvent'],
                         ),
                       );
                     },

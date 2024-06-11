@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 class EditEventDetailsScreen extends StatefulWidget {
   final String eventId;
+  final String groupId;
   final String eventTitle;
   final String eventDate;
   final String eventStartTime;
@@ -36,6 +37,7 @@ class EditEventDetailsScreen extends StatefulWidget {
     required this.isOther,
     required this.posterURL,
     required this.isGroupEvent,
+    required this.groupId,
   });
 
   @override
@@ -227,8 +229,13 @@ class _EditEventDetailsScreenState extends State<EditEventDetailsScreen> {
       }
     });
 
-    DocumentReference eventRef =
-        FirebaseFirestore.instance.collection('events').doc(widget.eventId);
+    DocumentReference eventRef = widget.groupId != "Unknown"
+        ? FirebaseFirestore.instance
+            .collection('groups')
+            .doc(widget.groupId)
+            .collection('events')
+            .doc(widget.eventId)
+        : FirebaseFirestore.instance.collection('events').doc(widget.eventId);
 
     try {
       await eventRef.update({

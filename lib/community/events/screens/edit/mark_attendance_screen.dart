@@ -5,32 +5,32 @@ import 'package:ascend_fyp/general%20widgets/user_details_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class EditEventParticipantsScreen extends StatefulWidget {
+class MarkAttendanceScreen extends StatefulWidget {
   final String eventId;
   final String groupId;
   final List<dynamic> acceptedList;
+  final List<dynamic> attendanceList;
 
-  const EditEventParticipantsScreen({
+  const MarkAttendanceScreen({
     super.key,
     required this.eventId,
     required this.acceptedList,
     required this.groupId,
+    required this.attendanceList,
   });
 
   @override
-  State<EditEventParticipantsScreen> createState() =>
-      _EditEventParticipantsScreenState();
+  State<MarkAttendanceScreen> createState() => _MarkAttendanceScreenState();
 }
 
-class _EditEventParticipantsScreenState
-    extends State<EditEventParticipantsScreen> {
-  late List<dynamic> acceptedList;
+class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
+  late List<dynamic> attendanceList;
   bool isUpdating = false;
 
   @override
   void initState() {
     super.initState();
-    acceptedList = List.from(widget.acceptedList);
+    attendanceList = List.from(widget.attendanceList);
   }
 
   void _showMessage(String message) {
@@ -59,7 +59,31 @@ class _EditEventParticipantsScreenState
     );
   }
 
-  Future<void> updateFields() async {
+  Future<void> updateLeaderboard(String userId) async {
+    DocumentReference userLeaderboardRef = FirebaseFirestore.instance
+        .collection('groups')
+        .doc(widget.groupId)
+        .collection('leaderboard')
+        .doc(userId);
+
+    try {
+      DocumentSnapshot docSnapshot = await userLeaderboardRef.get();
+
+      if (docSnapshot.exists) {
+        int currentEventsJoined = docSnapshot.get('groupEventsJoined');
+        int updatedEventsJoined = currentEventsJoined + 1;
+
+        // Update the document with the new value
+        await userLeaderboardRef.update({
+          'groupEventsJoined': updatedEventsJoined,
+        });
+      }
+    } catch (e) {
+      debugPrint("Leaderboard data for $userId did not update successfull: $e");
+    }
+  }
+
+  Future<void> updateAttendanceList(String userId) async {
     setState(() {
       isUpdating = true;
     });
@@ -74,18 +98,18 @@ class _EditEventParticipantsScreenState
 
     try {
       await eventRef.update({
-        'acceptedList': acceptedList,
+        'attendanceList': attendanceList,
       });
       setState(() {
         isUpdating = false;
       });
-      _showMessage('Event participants updated successfully!');
+      _showMessage('Attendance updated successfully!');
     } catch (error) {
       setState(() {
         isUpdating = false;
       });
       _showMessage(
-          'An error occurred. Failed to update event participants: $error');
+          'An error occurred. Failed to update event attendance: $error');
     }
   }
 
@@ -98,31 +122,14 @@ class _EditEventParticipantsScreenState
           'Event Participants',
           style: Theme.of(context).textTheme.titleLarge!,
         ),
-        leading: PopScope(
-          canPop: false,
-          onPopInvoked: ((didPop) {
-            if (didPop) {
-              return;
-            }
-            Navigator.of(context).pop(
-              {
-                'acceptedList': acceptedList,
-              },
-            );
-          }),
-          child: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Color.fromRGBO(247, 243, 237, 1),
-            ),
-            onPressed: () {
-              Navigator.of(context).pop(
-                {
-                  'acceptedList': acceptedList,
-                },
-              );
-            },
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color.fromRGBO(247, 243, 237, 1),
           ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
       ),
       body: Stack(
@@ -172,16 +179,17 @@ class _EditEventParticipantsScreenState
                           username: userData['username'],
                           photoURL: userData['photoURL'],
                           trailing: IconButton(
-                            icon: const Icon(
-                              Icons.remove_circle_outline_rounded,
-                              color: Colors.red,
+                            icon: Icon(
+                              widget.attendanceList.contains(userId)
+                                  ? Icons.check_circle_rounded
+                                  : Icons.check_circle_outline_rounded,
+                              color: Colors.green,
                             ),
                             onPressed: () {
                               setState(() {
-                                participantsList.remove(userId);
-                                acceptedList = participantsList;
+                                attendanceList.add(userId);
                               });
-                              updateFields();
+                              updateAttendanceList(userId);
                             },
                           ),
                         );

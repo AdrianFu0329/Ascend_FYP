@@ -182,6 +182,8 @@ class _GroupEventsScreenState extends State<GroupEventsScreen> {
                           eventTitle: data['title'],
                           requestList: List<String>.from(data['requestList']),
                           acceptedList: List<String>.from(data['acceptedList']),
+                          attendanceList:
+                              List<String>.from(data['attendanceList']),
                           eventDate: data['date'],
                           eventStartTime: data['startTime'],
                           eventEndTime: data['endTime'],

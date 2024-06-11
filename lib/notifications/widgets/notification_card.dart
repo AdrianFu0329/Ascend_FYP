@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 class NotificationCard extends StatelessWidget {
   final String notificationId;
   final String eventId;
+  final String groupId;
   final String ownerUserId;
   final String requestUserId;
   final Timestamp timestamp;
@@ -29,6 +30,7 @@ class NotificationCard extends StatelessWidget {
     required this.requestUserId,
     required this.type,
     required this.requestUserLocation,
+    required this.groupId,
   });
 
   String fromDateToString(Timestamp timestamp) {
@@ -145,6 +147,7 @@ class NotificationCard extends StatelessWidget {
                   builder: (context) => EventNotificationDetailsScreen(
                     notificationId: notificationId,
                     eventId: eventId,
+                    groupId: groupId,
                     ownerUserId: ownerUserId,
                     requestUserId: requestUserId,
                     timestamp: timestamp,
@@ -181,6 +184,7 @@ class NotificationCard extends StatelessWidget {
                   builder: (context) => EventGeneralNotificationDetailsScreen(
                     notificationId: notificationId,
                     eventId: eventId,
+                    groupId: groupId,
                     title: title,
                     message: message,
                   ),

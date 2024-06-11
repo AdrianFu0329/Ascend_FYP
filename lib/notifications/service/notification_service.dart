@@ -36,13 +36,14 @@ class NotificationService {
         .requestNotificationsPermission();
   }
 
-  static Future<void> showInstantNotification(String title, String body) async {
+  static Future<void> showInstantNotification(
+      int notificationId, String title, String body) async {
     NotificationDetails platformChannelSpecifics = NotificationDetails(
         android: AndroidNotificationDetails(
           "channelId",
           "channelName",
-          importance: Importance.high,
-          priority: Priority.high,
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
           styleInformation: BigTextStyleInformation(
             body, // The full content of the notification
             contentTitle: title,
@@ -51,17 +52,17 @@ class NotificationService {
         ),
         iOS: const DarwinNotificationDetails());
     await flutterLocalNotificationsPlugin.show(
-        0, title, body, platformChannelSpecifics);
+        notificationId, title, body, platformChannelSpecifics);
   }
 
-  static Future<void> scheduleNotification(
-      String title, String body, DateTime scheduledTime) async {
+  static Future<void> scheduleNotification(int notificationId, String title,
+      String body, DateTime scheduledTime) async {
     NotificationDetails platformChannelSpecifics = NotificationDetails(
         android: AndroidNotificationDetails(
           "channelId",
           "channelName",
-          importance: Importance.high,
-          priority: Priority.high,
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
           styleInformation: BigTextStyleInformation(
             body, // The full content of the notification
             contentTitle: title,
@@ -70,7 +71,7 @@ class NotificationService {
         ),
         iOS: const DarwinNotificationDetails());
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      0,
+      notificationId,
       title,
       body,
       tz.TZDateTime.from(scheduledTime, tz.local),

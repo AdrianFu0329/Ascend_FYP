@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 class EventNotificationDetailsScreen extends StatefulWidget {
   final String notificationId;
   final String eventId;
+  final String? groupId;
   final String ownerUserId;
   final String requestUserId;
   final Timestamp timestamp;
@@ -29,6 +30,7 @@ class EventNotificationDetailsScreen extends StatefulWidget {
     required this.message,
     required this.type,
     required this.requestUserLocation,
+    this.groupId,
   });
 
   @override
@@ -54,7 +56,16 @@ class _EventNotificationDetailsScreenState
   }
 
   Future<void> _fetchEventData() async {
-    final eventData = await getEventData(widget.eventId);
+    DocumentSnapshot eventRef;
+    if (widget.groupId != "Unknown") {
+      eventRef = await getSpecificGroupEventFromDatabase(
+          widget.groupId!, widget.eventId);
+    } else {
+      eventRef = await getEventData(widget.eventId);
+    }
+
+    Map<String, dynamic> eventData = eventRef.data() as Map<String, dynamic>;
+
     setState(() {
       eventTitle = eventData['title'];
       eventSport = eventData['sports'];
@@ -110,9 +121,14 @@ class _EventNotificationDetailsScreenState
         requestList.remove(widget.requestUserId);
       });
 
-      DocumentReference postRef =
-          FirebaseFirestore.instance.collection('events').doc(widget.eventId);
-      await postRef.update({'requestList': requestList});
+      DocumentReference eventRef = widget.groupId != "Unknown"
+          ? FirebaseFirestore.instance
+              .collection('groups')
+              .doc(widget.groupId)
+              .collection('events')
+              .doc(widget.eventId)
+          : FirebaseFirestore.instance.collection('events').doc(widget.eventId);
+      await eventRef.update({'requestList': requestList});
 
       // Delete Notification
       await deleteNotification();
@@ -161,10 +177,15 @@ class _EventNotificationDetailsScreenState
         requestList.remove(widget.requestUserId);
       });
 
-      DocumentReference postRef =
-          FirebaseFirestore.instance.collection('events').doc(widget.eventId);
-      await postRef.update({'requestList': requestList});
-      await postRef.update({'acceptedList': acceptedList});
+      DocumentReference eventRef = widget.groupId != "Unknown"
+          ? FirebaseFirestore.instance
+              .collection('groups')
+              .doc(widget.groupId)
+              .collection('events')
+              .doc(widget.eventId)
+          : FirebaseFirestore.instance.collection('events').doc(widget.eventId);
+      await eventRef.update({'requestList': requestList});
+      await eventRef.update({'acceptedList': acceptedList});
 
       // Delete Notification
       await deleteNotification();
@@ -180,6 +201,7 @@ class _EventNotificationDetailsScreenState
       final Map<String, dynamic> notificationData = {
         'notificationId': notificationId,
         'eventId': widget.eventId,
+        'groupId': widget.groupId ?? "Unknown",
         'ownerUserId': currentUser.uid,
         'title': "Request to join sport event approved!",
         'message':

@@ -6,11 +6,12 @@ import 'package:ascend_fyp/general%20widgets/loading.dart';
 
 class EventCard extends StatelessWidget {
   final String eventId;
-  final String? groupId;
+  final String groupId;
   final String userId;
   final String eventTitle;
   final List<dynamic> requestList;
   final List<dynamic> acceptedList;
+  final List<dynamic> attendanceList;
   final String eventDate;
   final String eventStartTime;
   final String eventEndTime;
@@ -29,6 +30,7 @@ class EventCard extends StatelessWidget {
     required this.eventTitle,
     required this.requestList,
     required this.acceptedList,
+    required this.attendanceList,
     required this.eventDate,
     required this.eventStartTime,
     required this.eventEndTime,
@@ -39,7 +41,7 @@ class EventCard extends StatelessWidget {
     required this.participants,
     required this.isOther,
     required this.isGroupEvent,
-    this.groupId,
+    required this.groupId,
   });
 
   @override
@@ -54,6 +56,7 @@ class EventCard extends StatelessWidget {
             eventTitle: eventTitle,
             requestList: requestList,
             acceptedList: acceptedList,
+            attendanceList: attendanceList,
             eventDate: eventDate,
             eventStartTime: eventStartTime,
             eventEndTime: eventEndTime,

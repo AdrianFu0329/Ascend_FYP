@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/community/events/screens/edit/mark_attendance_screen.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/community/events/screens/edit/edit_event_details_screen.dart';
 import 'package:ascend_fyp/community/events/screens/edit/edit_event_participants_screen.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class EventSettingsScreen extends StatefulWidget {
   final String eventId;
-  final String? groupId;
+  final String groupId;
   final String eventTitle;
   final String eventDate;
   final String eventStartTime;
@@ -17,6 +18,7 @@ class EventSettingsScreen extends StatefulWidget {
   final String participants;
   final String posterURL;
   final List<dynamic> acceptedList;
+  final List<dynamic> attendanceList;
   final bool isOther;
   final bool isGroupEvent;
 
@@ -35,7 +37,8 @@ class EventSettingsScreen extends StatefulWidget {
     required this.isOther,
     required this.isGroupEvent,
     required this.acceptedList,
-    this.groupId,
+    required this.attendanceList,
+    required this.groupId,
   });
 
   @override
@@ -304,6 +307,7 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
                     SlidingNav(
                       builder: (context) => EditEventDetailsScreen(
                         eventId: widget.eventId,
+                        groupId: widget.groupId,
                         eventDate: widget.eventDate,
                         eventEndTime: widget.eventEndTime,
                         eventFees: widget.eventFees,
@@ -354,6 +358,7 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
                     SlidingNav(
                       builder: (context) => EditEventParticipantsScreen(
                         eventId: widget.eventId,
+                        groupId: widget.groupId,
                         acceptedList: widget.acceptedList,
                       ),
                     ),
@@ -384,6 +389,43 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  final changeResult = await Navigator.of(context).push(
+                    SlidingNav(
+                      builder: (context) => MarkAttendanceScreen(
+                        eventId: widget.eventId,
+                        groupId: widget.groupId,
+                        acceptedList: widget.acceptedList,
+                        attendanceList: widget.attendanceList,
+                      ),
+                    ),
+                  );
+
+                  if (changeResult != null) {
+                    setState(() {
+                      acceptedList = changeResult['acceptedList'];
+                    });
+                  }
+                },
+                style: buttonStyle,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 30,
+                          color: Color.fromRGBO(247, 243, 237, 1),
+                        ),
+                        SizedBox(width: 16),
+                        Text('Mark Attendance'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

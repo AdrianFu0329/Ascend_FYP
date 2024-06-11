@@ -2,10 +2,12 @@ import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/location/screens/set_location_screen.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/location/widgets/location_list_tile.dart';
+import 'package:ascend_fyp/notifications/service/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/general%20widgets/custom_text_field.dart';
+import 'package:intl/intl.dart';
 
 class CreateGroupEventsScreen extends StatefulWidget {
   final String groupId;
@@ -224,6 +226,93 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
       return posterURL;
     }
 
+    String fromDateToString(Timestamp timestamp) {
+      DateTime dateTime = timestamp.toDate();
+      DateTime now = DateTime.now();
+
+      // Check if the timestamp is today
+      if (dateTime.year == now.year &&
+          dateTime.month == now.month &&
+          dateTime.day == now.day) {
+        // Return the time only in 24-hour format
+        String formattedTime = DateFormat('HH:mm').format(dateTime);
+        return formattedTime;
+      } else {
+        // Return the date and time in 24-hour format
+        String formattedDateTime =
+            DateFormat('MMM dd, yyyy HH:mm').format(dateTime);
+        return formattedDateTime;
+      }
+    }
+
+    DateTime getDateTimeFromStrings(String date, String time) {
+      final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+      final DateFormat timeFormat = DateFormat('HH:mm');
+      final DateTime datePart = dateFormat.parse(date);
+      final DateTime timePart = timeFormat.parse(time);
+
+      // Combine the date and time parts
+      return DateTime(
+        datePart.year,
+        datePart.month,
+        datePart.day,
+        timePart.hour,
+        timePart.minute,
+      );
+    }
+
+    Future<void> applyEventScheduleNotification(String eventId) async {
+      final DocumentReference events = FirebaseFirestore.instance
+          .collection('groups')
+          .doc(widget.groupId)
+          .collection("events")
+          .doc(eventId);
+
+      try {
+        DocumentSnapshot eventSnapshot = await events.get();
+        if (eventSnapshot.exists) {
+          Map<String, dynamic> eventsData =
+              eventSnapshot.data() as Map<String, dynamic>;
+          final String eventDate = eventsData['date']; // e.g., 2026-06-25
+          final String eventStartTime = eventsData['startTime']; // e.g., 19:30
+          final String eventTitle = eventsData['title'];
+          final String eventLocation = eventsData['location'];
+
+          // Combine date and time to create a DateTime object
+          DateTime eventDateTime =
+              getDateTimeFromStrings(eventDate, eventStartTime);
+
+          // Subtract one hour for the notification schedule
+          DateTime scheduledTime =
+              eventDateTime.subtract(const Duration(hours: 1));
+          debugPrint(scheduledTime.toString());
+
+          // Format the time for the notification
+          final String formattedTime =
+              fromDateToString(Timestamp.fromDate(eventDateTime));
+
+          // Schedule Event Notification
+          await NotificationService.scheduleNotification(
+            0,
+            "Event Participation Reminder",
+            "Reminder: $eventTitle sports event at $eventLocation at $formattedTime",
+            scheduledTime,
+          );
+
+          // Instant Notification to notify scheduled notification
+          await NotificationService.showInstantNotification(
+            1,
+            "Event Participation Reminder",
+            "Event reminder has been set for $eventTitle sports event at $eventLocation at $formattedTime",
+          );
+        } else {
+          debugPrint("Group event data not found");
+        }
+      } catch (e) {
+        debugPrint("Failed to schedule notification: $e");
+      }
+    }
+
     Future<void> createEvent() async {
       if (validateEvent()) {
         final currentUser = FirebaseAuth.instance.currentUser!;
@@ -235,8 +324,12 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
           });
 
           try {
-            final String eventId =
-                FirebaseFirestore.instance.collection('events').doc().id;
+            final String eventId = FirebaseFirestore.instance
+                .collection('groups')
+                .doc(widget.groupId)
+                .collection('events')
+                .doc()
+                .id;
             List<String> acceptedList = [];
             if (ownerParticipation == false) {
               acceptedList = [];
@@ -246,6 +339,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
 
             final Map<String, dynamic> eventData = {
               'eventId': eventId,
+              'groupId': widget.groupId,
               'title': titleController.text.trim(),
               'participants': participantsController.text.trim(),
               'fees': feesController.text.trim(),
@@ -259,7 +353,9 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
               'posterURL': getPosterURL(widget.groupSport),
               'requestList': [],
               'acceptedList': acceptedList,
+              'attendanceList': [],
               'isOther': isOther,
+              'isGroupEvent': true,
             };
 
             // Add the event document to Firestore
@@ -270,7 +366,8 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
                 .doc(eventId)
                 .set(eventData);
 
-            _showMessage('Event created successfully');
+            applyEventScheduleNotification(eventId);
+            _showMessage('Group Event created successfully');
 
             titleController.clear();
             participantsController.clear();
@@ -286,7 +383,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
             resetNotifierParticipation.value =
                 !resetNotifierParticipation.value;
           } catch (error) {
-            _showMessage('Error creating event: $error');
+            _showMessage('Error creating group event: $error');
             setState(() {
               isCreating = false;
             });

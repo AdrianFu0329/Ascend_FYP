@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:ascend_fyp/database/firebase_notifications.dart';
 import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/notifications/screens/notification_modal.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
+import 'package:ascend_fyp/notifications/service/notification_service.dart';
 import 'package:ascend_fyp/social%20media/widgets/social_media_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../database/database_service.dart';
@@ -18,12 +22,48 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Stream<QuerySnapshot>? postsStream;
+  StreamSubscription<QuerySnapshot>? notificationsSubscription;
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
     super.initState();
     FirebaseNotifications.getFirebaseMessagingToken();
+    // Listen for notifications
+    notificationsSubscription = getNotiForCurrentUser(currentUser.uid).listen(
+      (snapshot) {
+        debugPrint(
+            "Notifications snapshot received: ${snapshot.docs.length} docs");
+
+        var id = 0;
+
+        for (var doc in snapshot.docs) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          final String title = data['title'];
+          final String body = data['message'];
+
+          try {
+            NotificationService.showInstantNotification(id, title, body);
+          } catch (e) {
+            debugPrint("Error displaying notification: $e");
+          }
+          id++;
+        }
+      },
+      onError: (error) {
+        debugPrint("Error in notification stream: $error");
+      },
+    );
+
+    debugPrint("Notification subscription started");
     postsStream = getPostsFromDatabase();
+  }
+
+  @override
+  void dispose() {
+    notificationsSubscription?.cancel();
+    debugPrint("Notification subscription canceled");
+    super.dispose();
   }
 
   Future<void> refreshPosts() async {

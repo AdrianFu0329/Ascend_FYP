@@ -13,11 +13,12 @@ import 'package:geolocator/geolocator.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   final String eventId;
-  final String? groupId;
+  final String groupId;
   final String userId;
   final String eventTitle;
   final List<dynamic> requestList;
   final List<dynamic> acceptedList;
+  final List<dynamic> attendanceList;
   final String eventDate;
   final String eventStartTime;
   final String eventEndTime;
@@ -36,6 +37,7 @@ class EventDetailsScreen extends StatefulWidget {
     required this.eventTitle,
     required this.requestList,
     required this.acceptedList,
+    required this.attendanceList,
     required this.eventDate,
     required this.eventStartTime,
     required this.eventEndTime,
@@ -46,7 +48,7 @@ class EventDetailsScreen extends StatefulWidget {
     required this.participants,
     required this.isOther,
     required this.isGroupEvent,
-    this.groupId,
+    required this.groupId,
   });
 
   @override
@@ -178,6 +180,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     final Map<String, dynamic> notificationData = {
       'notificationId': notificationId,
       'eventId': widget.eventId,
+      'groupId': widget.groupId,
       'ownerUserId': widget.userId,
       'title': "A request has been made to join your sports event!",
       'message':
@@ -287,6 +290,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 participants: widget.participants,
                                 posterURL: widget.posterURL,
                                 acceptedList: widget.acceptedList,
+                                attendanceList: widget.attendanceList,
                                 isOther: widget.isOther,
                                 isGroupEvent: widget.isGroupEvent,
                               ),
