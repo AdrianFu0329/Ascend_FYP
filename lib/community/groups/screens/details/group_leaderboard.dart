@@ -40,20 +40,32 @@ class GroupLeaderboard extends StatelessWidget {
                   String top1UserId;
                   String top2UserId;
                   String top3UserId;
+                  int top1Points;
+                  int top2Points;
+                  int top3Points;
                   // Extract the first three user IDs
                   if (leaderboardDocs.length > 2) {
                     top1UserId = leaderboardDocs[0]['userId'];
                     top2UserId = leaderboardDocs[1]['userId'];
                     top3UserId = leaderboardDocs[2]['userId'];
+                    top1Points = leaderboardDocs[0]['participationPoints'];
+                    top2Points = leaderboardDocs[1]['participationPoints'];
+                    top3Points = leaderboardDocs[2]['participationPoints'];
                   } else if (leaderboardDocs.length > 1 &&
                       leaderboardDocs.isNotEmpty) {
                     top1UserId = leaderboardDocs[0]['userId'];
                     top2UserId = leaderboardDocs[1]['userId'];
                     top3UserId = "";
+                    top1Points = leaderboardDocs[0]['participationPoints'];
+                    top2Points = leaderboardDocs[1]['participationPoints'];
+                    top3Points = 0;
                   } else {
                     top1UserId = leaderboardDocs[0]['userId'];
                     top2UserId = "";
                     top3UserId = "";
+                    top1Points = leaderboardDocs[0]['participationPoints'];
+                    top2Points = 0;
+                    top3Points = 0;
                   }
 
                   return SizedBox(
@@ -64,6 +76,9 @@ class GroupLeaderboard extends StatelessWidget {
                           top1UserId: top1UserId,
                           top2UserId: top2UserId,
                           top3UserId: top3UserId,
+                          top1Points: top1Points,
+                          top2Points: top2Points,
+                          top3Points: top3Points,
                         ),
                         const SizedBox(height: 12),
                         Expanded(
@@ -79,7 +94,7 @@ class GroupLeaderboard extends StatelessWidget {
                                       as Map<String, dynamic>;
                               final userId = leaderboardData['userId'];
                               final participation =
-                                  leaderboardData['groupEventsJoined'];
+                                  leaderboardData['participationPoints'];
 
                               return FutureBuilder<Map<String, dynamic>>(
                                 future: getUserData(userId),

@@ -135,7 +135,7 @@ Stream<QuerySnapshot> getLeaderboardForCurrentGroup(String groupId) {
 
   final grpStream = grpRef
       .collection('leaderboard')
-      .orderBy('groupEventsJoined', descending: false)
+      .orderBy('participationPoints', descending: true)
       .snapshots();
 
   return grpStream;

@@ -146,7 +146,7 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
               'userId': currentUser.uid,
               'role': "Owner",
               'dateJoined': Timestamp.now(),
-              'groupEventsJoined': 0,
+              'participationPoints': 0,
             };
 
             // Add the group document to Firestore

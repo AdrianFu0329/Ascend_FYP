@@ -70,12 +70,12 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
       DocumentSnapshot docSnapshot = await userLeaderboardRef.get();
 
       if (docSnapshot.exists) {
-        int currentEventsJoined = docSnapshot.get('groupEventsJoined');
-        int updatedEventsJoined = currentEventsJoined + 1;
+        int currentEventsJoined = docSnapshot.get('participationPoints');
+        int updatedEventsJoined = currentEventsJoined + 9;
 
         // Update the document with the new value
         await userLeaderboardRef.update({
-          'groupEventsJoined': updatedEventsJoined,
+          'participationPoints': updatedEventsJoined,
         });
       }
     } catch (e) {
@@ -100,6 +100,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
       await eventRef.update({
         'attendanceList': attendanceList,
       });
+      await updateLeaderboard(userId);
       setState(() {
         isUpdating = false;
       });
@@ -180,7 +181,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                           photoURL: userData['photoURL'],
                           trailing: IconButton(
                             icon: Icon(
-                              widget.attendanceList.contains(userId)
+                              attendanceList.contains(userId)
                                   ? Icons.check_circle_rounded
                                   : Icons.check_circle_outline_rounded,
                               color: Colors.green,

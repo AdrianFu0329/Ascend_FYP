@@ -7,11 +7,17 @@ class LeaderboardTop3 extends StatefulWidget {
   final String? top1UserId;
   final String? top2UserId;
   final String? top3UserId;
+  final int? top1Points;
+  final int? top2Points;
+  final int? top3Points;
   const LeaderboardTop3({
     super.key,
     required this.top1UserId,
     required this.top2UserId,
     required this.top3UserId,
+    this.top1Points,
+    this.top2Points,
+    this.top3Points,
   });
 
   @override
@@ -19,6 +25,13 @@ class LeaderboardTop3 extends StatefulWidget {
 }
 
 class _LeaderboardTop3State extends State<LeaderboardTop3> {
+  TextStyle textStyle = const TextStyle(
+    fontSize: 11,
+    fontFamily: 'Merriweather Sans',
+    fontWeight: FontWeight.normal,
+    color: Color.fromRGBO(247, 243, 237, 1),
+  );
+
   Widget userAvatar(String userId, Color borderColor) {
     return FutureBuilder<Map<String, dynamic>>(
       future: getUserData(userId),
@@ -66,12 +79,7 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
           final userData = snapshot.data!;
           return Text(
             userData['username'],
-            style: const TextStyle(
-              fontSize: 11,
-              fontFamily: 'Merriweather Sans',
-              fontWeight: FontWeight.normal,
-              color: Color.fromRGBO(247, 243, 237, 1),
-            ),
+            style: textStyle,
           );
         }
       },
@@ -120,8 +128,13 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                       width: 25,
                       height: 25,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 6),
                     username(widget.top2UserId!),
+                    const SizedBox(height: 6),
+                    Text(
+                      widget.top2Points.toString(),
+                      style: textStyle,
+                    ),
                   ],
                 ),
               ),
@@ -163,6 +176,11 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                     ),
                     const SizedBox(height: 6),
                     username(widget.top1UserId!),
+                    const SizedBox(height: 6),
+                    Text(
+                      widget.top1Points.toString(),
+                      style: textStyle,
+                    ),
                   ],
                 ),
               ),
@@ -204,6 +222,11 @@ class _LeaderboardTop3State extends State<LeaderboardTop3> {
                     ),
                     const SizedBox(height: 12),
                     username(widget.top3UserId!),
+                    const SizedBox(height: 6),
+                    Text(
+                      widget.top3Points.toString(),
+                      style: textStyle,
+                    ),
                   ],
                 ),
               ),

@@ -167,7 +167,7 @@ class _GroupNotificationDetailsScreenState
         'userId': widget.requestUserId,
         'role': "Member",
         'dateJoined': Timestamp.now(),
-        'groupEventsJoined': 0,
+        'participationPoints': 0,
       };
 
       // Add new member to Leaderboard
