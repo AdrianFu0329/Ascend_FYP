@@ -66,24 +66,81 @@ class NotificationModal extends StatelessWidget {
                       return Center(
                         child: Text('Error: ${snapshot.error}'),
                       );
-                    } else if (snapshot.hasData) {
-                      List<DocumentSnapshot> notiList = snapshot.data!.docs;
+                    } else if (!snapshot.hasData ||
+                        snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                        child: Text('No notifications at the moment!'),
+                      );
+                    }
 
-                      if (notiList.isEmpty) {
-                        return const Center(
-                          child: Text('No notifications at the moment!'),
-                        );
-                      }
+                    List<DocumentSnapshot> notiList = snapshot.data!.docs;
 
-                      return ListView.builder(
-                        controller: controller,
-                        itemCount: notiList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          DocumentSnapshot doc = notiList[index];
-                          Map<String, dynamic> data =
-                              doc.data() as Map<String, dynamic>;
+                    return ListView.builder(
+                      controller: controller,
+                      itemCount: notiList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        DocumentSnapshot doc = notiList[index];
+                        Map<String, dynamic> data =
+                            doc.data() as Map<String, dynamic>;
 
-                          return NotificationCard(
+                        return Dismissible(
+                          key: Key(
+                              doc.id), // Unique key for each notification card
+                          direction: DismissDirection.startToEnd,
+                          background: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 20.0),
+                            child:
+                                const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          confirmDismiss: (DismissDirection direction) async {
+                            // Confirm deletion
+                            return await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  backgroundColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  content: Text(
+                                    "Are you sure you want to delete this notification?",
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall,
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: Text(
+                                        "Delete",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: Text(
+                                        "Cancel",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          onDismissed: (DismissDirection direction) {
+                            // Delete notification from Firestore after swipe action
+                            deleteNotification(data['notificationId']);
+                          },
+                          child: NotificationCard(
                             notificationId: data['notificationId'],
                             eventId: data['eventId'] ?? data['groupId'],
                             groupId: data['groupId'] ?? "Unknown",
@@ -97,14 +154,10 @@ class NotificationModal extends StatelessWidget {
                                     data['type'] == "Event-General"
                                 ? "Unknown"
                                 : data['requestUserLocation'],
-                          );
-                        },
-                      );
-                    } else {
-                      return const Center(
-                        child: Text('No notifications at the moment!'),
-                      );
-                    }
+                          ),
+                        );
+                      },
+                    );
                   },
                 ),
               ),
@@ -113,5 +166,20 @@ class NotificationModal extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> deleteNotification(String notificationId) async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('notification')
+          .doc(notificationId)
+          .delete();
+    } catch (e) {
+      print("Error deleting notification: $e");
+      // Handle error as needed
+    }
   }
 }
