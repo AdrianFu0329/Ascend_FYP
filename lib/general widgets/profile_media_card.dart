@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:ascend_fyp/models/video_with_dimension.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/social%20media/screens/details/media_post_screen.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
@@ -7,29 +8,32 @@ import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 class ProfileMediaCard extends StatefulWidget {
   final int index;
   final String postId;
-  final List<ImageWithDimension> images;
+  final dynamic media;
   final String title;
   final String userId;
   final List<String> likes;
   final Timestamp timestamp;
   final String description;
   final String location;
+  final String type;
 
   const ProfileMediaCard({
     super.key,
     required this.postId,
     required this.index,
-    required this.images,
+    required this.media,
     required this.userId,
     required this.likes,
     required this.title,
     required this.timestamp,
     required this.description,
     required this.location,
+    required this.type,
   });
 
   @override
@@ -41,12 +45,69 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
   bool isLiked = false;
   late int likeCount;
   late ImageWithDimension firstImage;
+  late VideoPlayerController? videoController;
+  late double imageHeight;
+  late double videoHeight;
+  late double videoAspectRatio;
+  ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
 
   @override
   void initState() {
-    super.initState();
     likeCount = widget.likes.length;
-    firstImage = widget.images[0];
+    if (widget.type == "Images") {
+      firstImage = widget.media[0];
+      imageHeight = firstImage.height > 250 ? 250 : firstImage.height;
+    } else if (widget.type == "Video") {
+      final video = widget.media as VideoWithDimension;
+      videoController = video.videoController;
+      videoHeight = video.height;
+      videoAspectRatio = video.aspectRatio;
+      videoController?.initialize().then((_) {
+        videoController!.seekTo(Duration.zero);
+        videoController!.pause();
+      });
+    }
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.type == "Images") {
+      firstImage = widget.media[0];
+      imageHeight = firstImage.height > 250 ? 250 : firstImage.height;
+    } else if (widget.type == "Video") {
+      initializeVideoController();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.type == "Video" && videoController != null) {
+      videoController!.pause();
+      videoController!.dispose();
+    }
+    super.dispose();
+  }
+
+  void initializeVideoController() async {
+    if (videoController != null) {
+      videoController!.dispose();
+    }
+    final video = widget.media as VideoWithDimension;
+    videoController = video.videoController;
+    videoHeight = video.height;
+    videoAspectRatio = video.aspectRatio;
+    await videoController?.initialize();
+    if (mounted) {
+      setState(() {});
+    }
+    videoController?.pause();
+    videoController?.addListener(() {
+      if (videoController!.value.isPlaying != isPlaying.value) {
+        isPlaying.value = videoController!.value.isPlaying;
+      }
+    });
   }
 
   @override
@@ -73,8 +134,6 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
   }
 
   Widget _buildCard(String username, String photoUrl) {
-    double imageHeight = firstImage.height > 225 ? 225 : firstImage.height;
-
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(0),
@@ -97,8 +156,17 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
                     child: FittedBox(
                       fit: BoxFit.cover,
                       child: SizedBox(
-                        height: imageHeight,
-                        child: firstImage.image,
+                        height:
+                            widget.type == "Video" ? videoHeight : imageHeight,
+                        child: widget.type == "Images"
+                            ? firstImage.image
+                            : videoController != null &&
+                                    videoController!.value.isInitialized
+                                ? AspectRatio(
+                                    aspectRatio: videoAspectRatio,
+                                    child: VideoPlayer(videoController!),
+                                  )
+                                : Container(),
                       ),
                     ),
                   ),
@@ -163,13 +231,14 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
       SlidingNav(
         builder: (context) => MediaPostScreen(
           postId: widget.postId,
-          images: widget.images,
+          media: widget.media,
           title: widget.title,
           userId: widget.userId,
           likes: widget.likes,
           timestamp: widget.timestamp,
           description: widget.description,
           location: widget.location,
+          type: widget.type,
         ),
       ),
     );

@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:ascend_fyp/models/video_with_dimension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 String generateUniqueId() {
   const String chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -187,6 +189,39 @@ Stream<QuerySnapshot> getNotiForCurrentUser(String currentUserUid) {
   return eventsStream;
 }
 
+Future<VideoWithDimension?> getPostVideo(String videoURL) async {
+  VideoWithDimension? video;
+
+  try {
+    if (videoURL == "Unknown") {
+      debugPrint("No Video Found");
+      return null;
+    } else {
+      Uri videoUri = Uri.parse(videoURL);
+      VideoPlayerController videoController =
+          VideoPlayerController.networkUrl(videoUri);
+
+      await videoController.initialize();
+
+      double videoHeight = videoController.value.size.height;
+      double videoWidth = videoController.value.size.width;
+
+      VideoWithDimension videoWithDimension = VideoWithDimension(
+        videoController: videoController,
+        height: videoHeight,
+        width: videoWidth,
+        aspectRatio: videoWidth / videoHeight,
+      );
+
+      video = videoWithDimension;
+      return video;
+    }
+  } catch (e) {
+    debugPrint("Error loading video: $e");
+    return null;
+  }
+}
+
 Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
   List<ImageWithDimension> images = [];
 
@@ -194,7 +229,7 @@ Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
     for (String imageURL in imageURLs) {
       Image imageWidget = Image.network(
         imageURL,
-        fit: BoxFit.fitHeight,
+        fit: BoxFit.contain,
       );
 
       Completer<ImageInfo> completer = Completer<ImageInfo>();

@@ -177,7 +177,19 @@ class _ChatCardState extends State<ChatCard> {
                               userId: widget.userId,
                               photoURL: photoUrl,
                               radius: 25,
-                              onTap: () {},
+                              onTap: () async {
+                                await updateIsRead(widget.chatRoomId);
+                                Navigator.of(context).push(
+                                  SlidingNav(
+                                    builder: (context) => ChatScreen(
+                                      receiverUserId: widget.userId,
+                                      receiverUsername: username,
+                                      receiverPhotoUrl: photoUrl,
+                                      chatRoomId: widget.chatRoomId,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                             title: Text(
                               username,

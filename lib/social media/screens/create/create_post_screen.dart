@@ -8,11 +8,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 class CreatePostScreen extends StatefulWidget {
+  final List<File> images;
+  final File? video;
   const CreatePostScreen({
     super.key,
+    required this.images,
+    required this.video,
   });
 
   @override
@@ -20,7 +23,6 @@ class CreatePostScreen extends StatefulWidget {
 }
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
-  final List<File> _images = [];
   Map<String, dynamic> _locationData = {};
   String? location;
   TextEditingController titleController = TextEditingController();
@@ -31,10 +33,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   bool _isCreatingPost = false;
 
   @override
-  Widget build(BuildContext context) {
-    final picker = ImagePicker();
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    locationController.dispose();
+    super.dispose();
+  }
 
-    void _showMessage(String message) {
+  @override
+  Widget build(BuildContext context) {
+    void showMessage(String message) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -60,16 +68,48 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       );
     }
 
+    bool validatePost() {
+      if (titleController.text.trim().isEmpty) {
+        showMessage('Please enter a title.');
+        return false;
+      }
+
+      if (_locationData.isEmpty) {
+        showMessage('Please set a location.');
+        return false;
+      }
+
+      return true;
+    }
+
+    Future<String> uploadVideo(String postId) async {
+      if (widget.video == null) return "";
+
+      try {
+        final String fileName = '$postId.mp4';
+        final Reference reference =
+            FirebaseStorage.instance.ref().child('posts/$postId/$fileName');
+        final UploadTask uploadTask = reference.putFile(widget.video!);
+        final TaskSnapshot taskSnapshot = await uploadTask;
+        final String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+        return downloadURL;
+      } catch (error) {
+        showMessage('Error uploading video: $error');
+        throw error;
+      }
+    }
+
     Future<List<String>> uploadImages(String postId) async {
       List<String> imageURLs = [];
 
       try {
         // Upload each image to Firebase Storage
-        for (int i = 0; i < _images.length; i++) {
+        for (int i = 0; i < widget.images.length; i++) {
           final String fileName = '${postId}_$i.jpeg';
           final Reference reference =
               FirebaseStorage.instance.ref().child('posts/$postId/$fileName');
-          final UploadTask uploadTask = reference.putFile(_images[i]);
+          final UploadTask uploadTask = reference.putFile(widget.images[i]);
           final TaskSnapshot taskSnapshot = await uploadTask;
           final String downloadURL = await taskSnapshot.ref.getDownloadURL();
 
@@ -77,29 +117,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         }
       } catch (error) {
         // Handle error while uploading images
-        _showMessage('Error uploading images: $error');
+        showMessage('Error uploading images: $error');
       }
 
       return imageURLs;
-    }
-
-    bool validatePost() {
-      if (titleController.text.trim().isEmpty) {
-        _showMessage('Please enter a title.');
-        return false;
-      }
-
-      if (_images.isEmpty) {
-        _showMessage('Please select at least one image.');
-        return false;
-      }
-
-      if (_locationData.isEmpty) {
-        _showMessage('Please set a location.');
-        return false;
-      }
-
-      return true;
     }
 
     Future<void> createPost() async {
@@ -119,6 +140,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             // Upload images to Firebase Storage
             List<String> imageURLs = await uploadImages(postId);
 
+            // Upload video to Firebase Storage
+            String videoURL = await uploadVideo(postId);
+
             final Map<String, dynamic> postData = {
               'postId': postId,
               'title': titleController.text.trim(),
@@ -127,7 +151,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               'likes': [],
               'timestamp': Timestamp.now(),
               'location': location,
-              'imageURLs': imageURLs,
+              widget.video != null ? 'videoURL' : 'imageURLs':
+                  widget.video != null ? videoURL : imageURLs,
+              'type': widget.video != null ? "Video" : "Images",
             };
 
             // Add the post document to Firestore
@@ -143,37 +169,22 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 .doc(postId)
                 .set(postData);
 
-            _showMessage('Post created successfully');
+            showMessage('Post created successfully');
 
             titleController.clear();
             descriptionController.clear();
             _locationData.clear();
             setState(() {
-              _images.clear();
               _isCreatingPost = false;
             });
           } catch (error) {
-            _showMessage('Error creating post: $error');
+            showMessage('Error creating post: $error');
             setState(() {
               _isCreatingPost = false;
             });
           }
         }
       }
-    }
-
-    Future<void> getImage() async {
-      final pickedImages = await picker.pickMultiImage();
-
-      setState(() {
-        int remainingSlots = 10 - _images.length;
-        _images.addAll(pickedImages
-            .take(remainingSlots)
-            .map((pickedImage) => File(pickedImage.path)));
-        if (pickedImages.length > remainingSlots) {
-          _showMessage("You can only select up to 10 media items.");
-        }
-      });
     }
 
     Future<void> getLocation() async {
@@ -194,13 +205,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         debugPrint("No location data...");
       }
     }
-
-    TextStyle textStyle = const TextStyle(
-      fontSize: 13,
-      fontFamily: 'Merriweather Sans',
-      fontWeight: FontWeight.normal,
-      color: Colors.grey,
-    );
 
     ButtonStyle buttonStyle = ButtonStyle(
       textStyle: WidgetStateProperty.all<TextStyle>(
@@ -249,9 +253,14 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text(
-          'Create Post',
-          style: Theme.of(context).textTheme.titleLarge!,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color.fromRGBO(247, 243, 237, 1),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         actions: [
           Padding(
@@ -278,84 +287,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Selected Media",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        Text(
-                          "${_images.length}/10",
-                          style: textStyle,
-                        )
-                      ],
-                    ),
-                    // Display selected images
-                    if (_images.isNotEmpty) ...[
-                      SizedBox(
-                        height: 150,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: _images.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Image.file(
-                                        _images[index],
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: getImage,
-                                child: Container(
-                                  width: 100,
-                                  height: 100,
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 40,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ] else ...[
-                      GestureDetector(
-                        onTap: getImage,
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          color: Theme.of(context).scaffoldBackgroundColor,
-                          child: const Center(
-                            child: Icon(
-                              Icons.add,
-                              size: 40,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 36.0),
+                    const SizedBox(height: 12),
                     CustomTextField(
                       controller: titleController,
                       hintText: "Title",

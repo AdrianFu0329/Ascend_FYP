@@ -5,6 +5,7 @@ import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/profile_media_card.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
+import 'package:ascend_fyp/models/video_with_dimension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -308,17 +309,21 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                 doc.data() as Map<String, dynamic>;
                             String postId = data['postId'];
                             String title = data['title'];
-                            List<String> imageURLs =
-                                List<String>.from(data['imageURLs']);
+                            List<String> photoURLs =
+                                List<String>.from(data['imageURLs'] ?? []);
+                            String videoURL = data['videoURL'] ?? "Unknown";
                             List<String> likes =
                                 List<String>.from(data['likes']);
                             String userId = data['userId'];
                             Timestamp timestamp = data['timestamp'];
                             String description = data['description'];
                             String location = data['location'];
+                            String type = data['type'];
 
-                            return FutureBuilder<List<ImageWithDimension>>(
-                              future: getPostImg(imageURLs),
+                            return FutureBuilder<dynamic>(
+                              future: type == "Images"
+                                  ? getPostImg(photoURLs)
+                                  : getPostVideo(videoURL),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -330,19 +335,36 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                     ),
                                   );
                                 } else {
-                                  List<ImageWithDimension> images =
-                                      snapshot.data!;
-                                  return ProfileMediaCard(
-                                    index: index,
-                                    postId: postId,
-                                    images: images,
-                                    title: title,
-                                    userId: userId,
-                                    likes: likes,
-                                    timestamp: timestamp,
-                                    description: description,
-                                    location: location,
-                                  );
+                                  if (type == "Images") {
+                                    List<ImageWithDimension> images =
+                                        snapshot.data!;
+                                    return ProfileMediaCard(
+                                      index: index,
+                                      postId: postId,
+                                      media: images,
+                                      title: title,
+                                      userId: userId,
+                                      likes: likes,
+                                      timestamp: timestamp,
+                                      description: description,
+                                      location: location,
+                                      type: type,
+                                    );
+                                  } else {
+                                    VideoWithDimension video = snapshot.data!;
+                                    return ProfileMediaCard(
+                                      index: index,
+                                      postId: postId,
+                                      media: video,
+                                      title: title,
+                                      userId: userId,
+                                      likes: likes,
+                                      timestamp: timestamp,
+                                      description: description,
+                                      location: location,
+                                      type: type,
+                                    );
+                                  }
                                 }
                               },
                             );

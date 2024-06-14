@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ascend_fyp/database/firebase_notifications.dart';
 import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:ascend_fyp/models/video_with_dimension.dart';
 import 'package:ascend_fyp/notifications/screens/notification_modal.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/notifications/service/notification_service.dart';
@@ -161,42 +162,60 @@ class _HomeScreenState extends State<HomeScreen> {
                           doc.data() as Map<String, dynamic>;
                       String postId = data['postId'];
                       String title = data['title'];
-                      List<String> imageURLs =
-                          List<String>.from(data['imageURLs']);
+                      List<String> photoURLs =
+                          List<String>.from(data['imageURLs'] ?? []);
+                      String videoURL = data['videoURL'] ?? "Unknown";
                       List<String> likes = List<String>.from(data['likes']);
                       String userId = data['userId'];
                       Timestamp timestamp = data['timestamp'];
                       String description = data['description'];
                       String location = data['location'];
+                      String type = data['type'];
 
-                      return FutureBuilder<List<ImageWithDimension>>(
-                        future: getPostImg(imageURLs),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const PostLoadingWidget();
-                          } else if (snapshot.hasError) {
-                            return const Center(
-                              child: Text(
-                                "An unexpected error occurred. Try again later...",
-                              ),
-                            );
-                          } else {
-                            List<ImageWithDimension> images = snapshot.data!;
-                            return SocialMediaCard(
+                      return type == "Images"
+                          ? FutureBuilder<dynamic>(
+                              future: getPostImg(photoURLs),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const PostLoadingWidget();
+                                } else if (snapshot.hasError) {
+                                  return const Center(
+                                    child: Text(
+                                      "An unexpected error occurred. Try again later...",
+                                    ),
+                                  );
+                                } else {
+                                  List<ImageWithDimension> images =
+                                      snapshot.data!;
+                                  return SocialMediaCard(
+                                    index: index,
+                                    postId: postId,
+                                    media: images,
+                                    title: title,
+                                    userId: userId,
+                                    likes: likes,
+                                    timestamp: timestamp,
+                                    description: description,
+                                    location: location,
+                                    type: type,
+                                  );
+                                }
+                              },
+                            )
+                          : //VideoWithDimension video = snapshot.data!;
+                          SocialMediaCard(
                               index: index,
                               postId: postId,
-                              images: images,
+                              media: videoURL,
                               title: title,
                               userId: userId,
                               likes: likes,
                               timestamp: timestamp,
                               description: description,
                               location: location,
+                              type: type,
                             );
-                          }
-                        },
-                      );
                     },
                     childCount: postList.length,
                   );

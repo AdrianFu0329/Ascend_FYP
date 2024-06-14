@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:ascend_fyp/models/video_with_dimension.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/profile/screens/details/user_profile_screen.dart';
 import 'package:ascend_fyp/social%20media/widgets/like_button.dart';
@@ -12,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:video_player/video_player.dart';
 
 class PostInteractionBar extends StatefulWidget {
   final List<String> likes;
@@ -36,9 +38,9 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
 
   @override
   void initState() {
-    super.initState();
     likeCount = widget.likes.length;
     isLiked = widget.likes.contains(currentUser.uid);
+    super.initState();
   }
 
   void _showMessage(String message, bool confirm,
@@ -213,28 +215,65 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
 
 class MediaPostScreen extends StatefulWidget {
   final String postId;
-  final List<ImageWithDimension> images;
+  final dynamic media;
   final String title;
   final String userId;
   final List<String> likes;
   final Timestamp timestamp;
   final String description;
   final String location;
+  final String type;
 
   const MediaPostScreen({
     super.key,
     required this.postId,
-    required this.images,
+    required this.media,
     required this.title,
     required this.userId,
     required this.likes,
     required this.timestamp,
     required this.description,
     required this.location,
+    required this.type,
   });
 
   @override
   State<MediaPostScreen> createState() => _MediaPostScreenState();
+
+  static Future<bool> show(
+    BuildContext context, {
+    required String postId,
+    required dynamic media,
+    required String title,
+    required String userId,
+    required List<String> likes,
+    required Timestamp timestamp,
+    required String description,
+    required String location,
+    required String type,
+  }) async {
+    final likesChange = await Navigator.of(context).push(
+      SlidingNav(
+        builder: (context) => MediaPostScreen(
+          postId: postId,
+          media: media,
+          title: title,
+          userId: userId,
+          likes: likes,
+          timestamp: timestamp,
+          description: description,
+          location: location,
+          type: type,
+        ),
+      ),
+    );
+
+    if (likesChange != null) {
+      return likesChange["isPlaying"] ?? false;
+    }
+
+    return false;
+  }
 }
 
 class _MediaPostScreenState extends State<MediaPostScreen> {
@@ -243,6 +282,64 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   int likeCount = 0;
   late int currentIndex = 0;
   bool isDeletingPost = false;
+  VideoPlayerController? videoController;
+  ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
+  late VideoWithDimension? video;
+
+  @override
+  void initState() {
+    if (widget.type == "Video") {
+      initializeVideoController();
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    videoController?.dispose();
+    super.dispose();
+  }
+
+  void initializeVideoController() async {
+    try {
+      Uri videoUri = Uri.parse(widget.media);
+      VideoPlayerController controller =
+          VideoPlayerController.networkUrl(videoUri);
+
+      await controller.initialize();
+
+      double height = controller.value.size.height;
+      double width = controller.value.size.width;
+
+      VideoWithDimension videoWithDimension = VideoWithDimension(
+        videoController: controller,
+        height: height,
+        width: width,
+        aspectRatio: width / height,
+      );
+
+      videoController = videoWithDimension.videoController;
+
+      if (mounted) {
+        setState(() {});
+      }
+
+      video = videoWithDimension;
+      videoController!.play();
+      videoController!.addListener(() {
+        if (videoController!.value.isPlaying != isPlaying.value) {
+          isPlaying.value = videoController!.value.isPlaying;
+        }
+      });
+    } catch (e) {
+      debugPrint("Error loading video: $e");
+    }
+  }
+
+  void resetVideoController() {
+    videoController!.seekTo(Duration.zero);
+    videoController!.play();
+  }
 
   void onLikePressed() {
     setState(() {
@@ -255,7 +352,6 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
         widget.likes.remove(currentUser.uid);
       }
     });
-
     DocumentReference postRef =
         FirebaseFirestore.instance.collection('posts').doc(widget.postId);
     postRef.update({'likes': widget.likes});
@@ -376,191 +472,265 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
           final username = userData["username"] ?? "Unknown";
           final photoUrl = userData["photoURL"] ?? "Unknown";
           String city = widget.location;
-          double imgHeight = widget.images[0].height;
-          double maxHeight = imgHeight > 500 ? 500 : imgHeight;
+          double mediaHeight;
+          if (widget.type == "Images") {
+            if (widget.media is List) {
+              if (widget.media.isNotEmpty &&
+                  widget.media[0] is ImageWithDimension) {
+                mediaHeight = widget.media[0].height;
+              } else {
+                // Handle the case where the list is empty or contains unexpected objects
+                mediaHeight = 0.0;
+              }
+            } else {
+              // Handle the case where widget.media is not a list
+              mediaHeight = 0.0;
+            }
+          } else {
+            mediaHeight = video!.height;
+          }
+          double maxHeight = mediaHeight > 500 ? 500 : mediaHeight;
 
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Color.fromRGBO(247, 243, 237, 1),
+          return PopScope(
+            canPop: false,
+            onPopInvoked: ((didPop) async {
+              if (didPop) {
+                return;
+              }
+              Navigator.pop(context, widget.likes);
+              dispose();
+            }),
+            child: Scaffold(
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                leading: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Color.fromRGBO(247, 243, 237, 1),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, widget.likes);
+                    dispose();
+                  },
                 ),
-                onPressed: () {
-                  Navigator.pop(context, widget.likes);
-                },
-              ),
-              title: Row(
-                children: [
-                  ProfilePicture(
-                    userId: widget.userId,
-                    photoURL: photoUrl,
-                    radius: 15,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        SlidingNav(
-                          builder: (context) => UserProfileScreen(
-                              userId: widget.userId,
-                              isCurrentUser: isCurrentUser),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        SlidingNav(
-                          builder: (context) => UserProfileScreen(
-                              userId: widget.userId,
-                              isCurrentUser: isCurrentUser),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      username,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                title: Row(
+                  children: [
+                    ProfilePicture(
+                      userId: widget.userId,
+                      photoURL: photoUrl,
+                      radius: 15,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          SlidingNav(
+                            builder: (context) => UserProfileScreen(
+                                userId: widget.userId,
+                                isCurrentUser: isCurrentUser),
+                          ),
+                        );
+                      },
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          SlidingNav(
+                            builder: (context) => UserProfileScreen(
+                                userId: widget.userId,
+                                isCurrentUser: isCurrentUser),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        username,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  isCurrentUser
+                      ? PopupMenuButton(
+                          iconColor: const Color.fromRGBO(247, 243, 237, 1),
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: "Delete Post",
+                              child: Text("Delete Post"),
+                            )
+                          ],
+                          onSelected: (value) {
+                            showMessage(
+                              "Are you sure you want to delete your post?",
+                              true,
+                              onYesPressed: () async {
+                                setState(() {
+                                  isDeletingPost = true;
+                                });
+                                bool isDeleted = await onDeletePostPressed();
+
+                                if (isDeleted) {
+                                  showMessage(
+                                    "Post deleted successfully",
+                                    false,
+                                    onOKPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  );
+                                } else {
+                                  showMessage(
+                                    "Unable to delete post. Try again later...",
+                                    false,
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        )
+                      : Container(),
                 ],
               ),
-              actions: [
-                isCurrentUser
-                    ? PopupMenuButton(
-                        iconColor: const Color.fromRGBO(247, 243, 237, 1),
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: "Delete Post",
-                            child: Text("Delete Post"),
-                          )
-                        ],
-                        onSelected: (value) {
-                          showMessage(
-                            "Are you sure you want to delete your post?",
-                            true,
-                            onYesPressed: () async {
-                              setState(() {
-                                isDeletingPost = true;
-                              });
-                              bool isDeleted = await onDeletePostPressed();
-
-                              if (isDeleted) {
-                                showMessage(
-                                  "Post deleted successfully",
-                                  false,
-                                  onOKPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                );
-                              } else {
-                                showMessage(
-                                  "Unable to delete post. Try again later...",
-                                  false,
-                                );
-                              }
-                            },
-                          );
-                        },
-                      )
-                    : Container(),
-              ],
-            ),
-            body: SingleChildScrollView(
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ImagePageView(
-                        images: widget.images,
-                        maxHeight: maxHeight,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                        child: Text(
-                          widget.title,
-                          style: Theme.of(context).textTheme.bodyLarge,
+              body: SingleChildScrollView(
+                child: Stack(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        widget.type == "Video"
+                            ? videoController != null &&
+                                    videoController!.value.isInitialized
+                                ? Center(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        if (videoController!.value.isPlaying) {
+                                          videoController!.pause();
+                                        } else {
+                                          videoController!.play();
+                                        }
+                                      },
+                                      child: ValueListenableBuilder<bool>(
+                                        valueListenable: isPlaying,
+                                        builder: (context, isPlaying, child) {
+                                          return AspectRatio(
+                                            aspectRatio: videoController!
+                                                .value.aspectRatio,
+                                            child: Stack(
+                                              alignment: Alignment.center,
+                                              children: [
+                                                VideoPlayer(videoController!),
+                                                if (!isPlaying)
+                                                  const Icon(
+                                                    Icons.play_arrow_rounded,
+                                                    size: 70,
+                                                    color: Colors.white,
+                                                  ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                : const CustomLoadingAnimation()
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ImagePageView(
+                                    images: widget.media,
+                                    maxHeight: maxHeight,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 12, 16, 4),
+                                    child: Text(
+                                      widget.title,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                                    child: Text(
+                                      widget.description,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                                    child: Text(
+                                      "$formatted \n$city",
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                        const SizedBox(height: 24),
+                        PostInteractionBar(
+                          likes: widget.likes,
+                          postId: widget.postId,
+                          userId: widget.userId,
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                        child: Text(
-                          widget.description,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                        child: Text(
-                          "$formatted \n$city",
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      PostInteractionBar(
-                        likes: widget.likes,
-                        postId: widget.postId,
-                        userId: widget.userId,
-                      ),
-                      const SizedBox(height: 24),
-                      StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection("posts")
-                            .doc(widget.postId)
-                            .collection("comments")
-                            .orderBy("timestamp", descending: true)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                              child: CustomLoadingAnimation(),
-                            );
-                          }
-
-                          return ListView(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: snapshot.data!.docs.map((doc) {
-                              final commentData =
-                                  doc.data() as Map<String, dynamic>;
-                              return CommentPost(
-                                text: commentData["comment"],
-                                userId: commentData["userId"],
-                                postId: widget.postId,
-                                commentId: doc.id,
-                                time:
-                                    fromDateToString(commentData["timestamp"]),
+                        const SizedBox(height: 24),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection("posts")
+                              .doc(widget.postId)
+                              .collection("comments")
+                              .orderBy("timestamp", descending: true)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                child: CustomLoadingAnimation(),
                               );
-                            }).toList(),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 4),
-                      const Center(
-                        child: Text(
-                          "~END~",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'Merriweather Sans',
-                            fontWeight: FontWeight.normal,
-                            color: Color.fromRGBO(211, 211, 211, 1),
+                            }
+
+                            return ListView(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: snapshot.data!.docs.map((doc) {
+                                final commentData =
+                                    doc.data() as Map<String, dynamic>;
+                                return CommentPost(
+                                  text: commentData["comment"],
+                                  userId: commentData["userId"],
+                                  postId: widget.postId,
+                                  commentId: doc.id,
+                                  time: fromDateToString(
+                                      commentData["timestamp"]),
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 4),
+                        const Center(
+                          child: Text(
+                            "~END~",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'Merriweather Sans',
+                              fontWeight: FontWeight.normal,
+                              color: Color.fromRGBO(211, 211, 211, 1),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                    if (isDeletingPost)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.black.withOpacity(0.5),
+                          child: const Center(
+                            child: ContainerLoadingAnimation(),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                  if (isDeletingPost)
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.black.withOpacity(0.5),
-                        child: const Center(
-                          child: ContainerLoadingAnimation(),
-                        ),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

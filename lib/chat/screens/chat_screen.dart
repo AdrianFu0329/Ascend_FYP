@@ -1,6 +1,8 @@
 import 'package:ascend_fyp/chat/service/chat_service.dart';
 import 'package:ascend_fyp/chat/widgets/chat_bubble.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
+import 'package:ascend_fyp/profile/screens/details/user_profile_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,13 @@ class _ChatScreenState extends State<ChatScreen> {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final currentUserphotoURL =
       FirebaseAuth.instance.currentUser!.photoURL ?? "Unknown";
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollToEnd();
+  }
 
   void sendMessage() async {
     if (messageController.text.isNotEmpty) {
@@ -40,6 +49,17 @@ class _ChatScreenState extends State<ChatScreen> {
       );
 
       messageController.clear();
+    }
+    _scrollToEnd();
+  }
+
+  void _scrollToEnd() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -54,12 +74,33 @@ class _ChatScreenState extends State<ChatScreen> {
               userId: widget.receiverUserId,
               photoURL: widget.receiverPhotoUrl,
               radius: 20,
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(
+                  SlidingNav(
+                    builder: (context) => UserProfileScreen(
+                      userId: widget.receiverUserId,
+                      isCurrentUser: false,
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(width: 16),
-            Text(
-              widget.receiverUsername,
-              style: Theme.of(context).textTheme.bodyLarge,
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  SlidingNav(
+                    builder: (context) => UserProfileScreen(
+                      userId: widget.receiverUserId,
+                      isCurrentUser: false,
+                    ),
+                  ),
+                );
+              },
+              child: Text(
+                widget.receiverUsername,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
           ],
         ),
@@ -134,7 +175,12 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           );
         } else {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToEnd();
+          });
+
           return ListView(
+            controller: _scrollController,
             children: snapshot.data!.docs
                 .map((document) => _buildMessageItem(document))
                 .toList(),

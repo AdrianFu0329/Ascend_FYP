@@ -1,5 +1,5 @@
 import 'package:ascend_fyp/community/community_screen.dart';
-import 'package:ascend_fyp/social%20media/screens/create/create_post_screen.dart';
+import 'package:ascend_fyp/social%20media/screens/create/media_picker_screen.dart';
 import 'package:ascend_fyp/social%20media/screens/home_screen.dart';
 import 'package:ascend_fyp/chat/screens/messages_screen.dart';
 import 'package:ascend_fyp/profile/screens/details/profile_screen.dart';
@@ -69,7 +69,7 @@ class _NavScreenState extends State<NavScreen> {
     final List pages = [
       const HomeScreen(),
       const MessagesScreen(),
-      const CreatePostScreen(),
+      const MediaPickerScreen(),
       const CommunityScreen(),
       const ProfileScreen(),
     ];
