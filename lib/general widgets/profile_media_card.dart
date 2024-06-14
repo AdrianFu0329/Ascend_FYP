@@ -1,7 +1,6 @@
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/models/video_with_dimension.dart';
-import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/social%20media/screens/details/media_post_screen.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
@@ -44,30 +43,23 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
   late int likeCount;
-  late ImageWithDimension firstImage;
-  late VideoPlayerController? videoController;
-  late double imageHeight;
-  late double videoHeight;
-  late double videoAspectRatio;
+  ImageWithDimension? firstImage;
+  VideoPlayerController? videoController;
+  double? imageHeight;
+  double? videoHeight;
+  double? videoAspectRatio;
   ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
 
   @override
   void initState() {
+    super.initState();
     likeCount = widget.likes.length;
     if (widget.type == "Images") {
       firstImage = widget.media[0];
-      imageHeight = firstImage.height > 250 ? 250 : firstImage.height;
+      imageHeight = firstImage!.height > 250 ? 250 : firstImage?.height;
     } else if (widget.type == "Video") {
-      final video = widget.media as VideoWithDimension;
-      videoController = video.videoController;
-      videoHeight = video.height;
-      videoAspectRatio = video.aspectRatio;
-      videoController?.initialize().then((_) {
-        videoController!.seekTo(Duration.zero);
-        videoController!.pause();
-      });
+      initializeVideoController();
     }
-    super.initState();
   }
 
   @override
@@ -75,7 +67,7 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
     super.didChangeDependencies();
     if (widget.type == "Images") {
       firstImage = widget.media[0];
-      imageHeight = firstImage.height > 250 ? 250 : firstImage.height;
+      imageHeight = firstImage!.height > 250 ? 250 : firstImage?.height;
     } else if (widget.type == "Video") {
       initializeVideoController();
     }
@@ -91,23 +83,40 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
   }
 
   void initializeVideoController() async {
-    if (videoController != null) {
-      videoController!.dispose();
-    }
-    final video = widget.media as VideoWithDimension;
-    videoController = video.videoController;
-    videoHeight = video.height;
-    videoAspectRatio = video.aspectRatio;
-    await videoController?.initialize();
-    if (mounted) {
-      setState(() {});
-    }
-    videoController?.pause();
-    videoController?.addListener(() {
-      if (videoController!.value.isPlaying != isPlaying.value) {
-        isPlaying.value = videoController!.value.isPlaying;
+    try {
+      Uri videoUri = Uri.parse(widget.media);
+      VideoPlayerController controller =
+          VideoPlayerController.networkUrl(videoUri);
+
+      await controller.initialize();
+
+      double height = controller.value.size.height;
+      double width = controller.value.size.width;
+
+      VideoWithDimension video = VideoWithDimension(
+        videoController: controller,
+        height: height,
+        width: width,
+        aspectRatio: width / height,
+      );
+
+      videoController = video.videoController;
+      videoHeight = video.height;
+      videoAspectRatio = video.aspectRatio;
+
+      if (mounted) {
+        setState(() {});
       }
-    });
+
+      videoController!.pause();
+      videoController!.addListener(() {
+        if (videoController!.value.isPlaying != isPlaying.value) {
+          isPlaying.value = videoController!.value.isPlaying;
+        }
+      });
+    } catch (e) {
+      debugPrint("Error loading video: $e");
+    }
   }
 
   @override
@@ -154,16 +163,18 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
                   color: Theme.of(context).scaffoldBackgroundColor,
                   child: Center(
                     child: FittedBox(
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                       child: SizedBox(
                         height:
                             widget.type == "Video" ? videoHeight : imageHeight,
                         child: widget.type == "Images"
-                            ? firstImage.image
+                            ? (firstImage != null
+                                ? firstImage!.image
+                                : Container())
                             : videoController != null &&
                                     videoController!.value.isInitialized
                                 ? AspectRatio(
-                                    aspectRatio: videoAspectRatio,
+                                    aspectRatio: videoAspectRatio!,
                                     child: VideoPlayer(videoController!),
                                   )
                                 : Container(),
@@ -227,26 +238,24 @@ class ProfileMediaCardState extends State<ProfileMediaCard> {
   }
 
   void _navigateToMediaPostScreen() async {
-    final likesChange = await Navigator.of(context).push(
-      SlidingNav(
-        builder: (context) => MediaPostScreen(
-          postId: widget.postId,
-          media: widget.media,
-          title: widget.title,
-          userId: widget.userId,
-          likes: widget.likes,
-          timestamp: widget.timestamp,
-          description: widget.description,
-          location: widget.location,
-          type: widget.type,
-        ),
-      ),
+    final isVideoPlaying = await MediaPostScreen.show(
+      context,
+      postId: widget.postId,
+      media: widget.media,
+      title: widget.title,
+      userId: widget.userId,
+      likes: widget.likes,
+      timestamp: widget.timestamp,
+      description: widget.description,
+      location: widget.location,
+      type: widget.type,
     );
 
-    if (likesChange != null) {
-      setState(() {
-        likeCount = likesChange.length;
-      });
+    if (!isVideoPlaying) {
+      // Reset video controller only if it was not playing
+      if (widget.type == "Video") {
+        initializeVideoController();
+      }
     }
   }
 }

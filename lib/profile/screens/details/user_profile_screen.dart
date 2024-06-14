@@ -5,7 +5,6 @@ import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/profile_media_card.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
-import 'package:ascend_fyp/models/video_with_dimension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -335,36 +334,49 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                     ),
                                   );
                                 } else {
-                                  if (type == "Images") {
-                                    List<ImageWithDimension> images =
-                                        snapshot.data!;
-                                    return ProfileMediaCard(
-                                      index: index,
-                                      postId: postId,
-                                      media: images,
-                                      title: title,
-                                      userId: userId,
-                                      likes: likes,
-                                      timestamp: timestamp,
-                                      description: description,
-                                      location: location,
-                                      type: type,
-                                    );
-                                  } else {
-                                    VideoWithDimension video = snapshot.data!;
-                                    return ProfileMediaCard(
-                                      index: index,
-                                      postId: postId,
-                                      media: video,
-                                      title: title,
-                                      userId: userId,
-                                      likes: likes,
-                                      timestamp: timestamp,
-                                      description: description,
-                                      location: location,
-                                      type: type,
-                                    );
-                                  }
+                                  return type == "Images"
+                                      ? FutureBuilder<dynamic>(
+                                          future: getPostImg(photoURLs),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const PostLoadingWidget();
+                                            } else if (snapshot.hasError) {
+                                              return const Center(
+                                                child: Text(
+                                                  "An unexpected error occurred. Try again later...",
+                                                ),
+                                              );
+                                            } else {
+                                              List<ImageWithDimension> images =
+                                                  snapshot.data!;
+                                              return ProfileMediaCard(
+                                                index: index,
+                                                postId: postId,
+                                                media: images,
+                                                title: title,
+                                                userId: userId,
+                                                likes: likes,
+                                                timestamp: timestamp,
+                                                description: description,
+                                                location: location,
+                                                type: type,
+                                              );
+                                            }
+                                          },
+                                        )
+                                      : ProfileMediaCard(
+                                          index: index,
+                                          postId: postId,
+                                          media: videoURL,
+                                          title: title,
+                                          userId: userId,
+                                          likes: likes,
+                                          timestamp: timestamp,
+                                          description: description,
+                                          location: location,
+                                          type: type,
+                                        );
                                 }
                               },
                             );

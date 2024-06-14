@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:ascend_fyp/database/firebase_notifications.dart';
 import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
-import 'package:ascend_fyp/models/video_with_dimension.dart';
 import 'package:ascend_fyp/notifications/screens/notification_modal.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/notifications/service/notification_service.dart';
@@ -203,8 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 }
                               },
                             )
-                          : //VideoWithDimension video = snapshot.data!;
-                          SocialMediaCard(
+                          : SocialMediaCard(
                               index: index,
                               postId: postId,
                               media: videoURL,
