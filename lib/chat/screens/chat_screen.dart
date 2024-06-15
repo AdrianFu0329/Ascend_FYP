@@ -1,5 +1,6 @@
 import 'package:ascend_fyp/chat/service/chat_service.dart';
 import 'package:ascend_fyp/chat/widgets/chat_bubble.dart';
+import 'package:ascend_fyp/database/firebase_notifications.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/profile/screens/details/user_profile_screen.dart';
@@ -12,6 +13,7 @@ class ChatScreen extends StatefulWidget {
   final String chatRoomId;
   final String receiverUserId;
   final String receiverUsername;
+  final String receiverFcmToken;
   final String receiverPhotoUrl;
 
   const ChatScreen({
@@ -20,6 +22,7 @@ class ChatScreen extends StatefulWidget {
     required this.receiverUsername,
     required this.receiverPhotoUrl,
     required this.chatRoomId,
+    required this.receiverFcmToken,
   });
 
   @override
@@ -47,6 +50,17 @@ class _ChatScreenState extends State<ChatScreen> {
         messageController.text,
         widget.chatRoomId,
       );
+
+      try {
+        FirebaseNotifications.sendNotificaionToSelectedDriver(
+          widget.receiverFcmToken,
+          "Message",
+          "${widget.receiverUsername}: ${messageController.text}",
+        );
+        debugPrint("Notification success");
+      } catch (e) {
+        debugPrint("Notification failed: $e");
+      }
 
       messageController.clear();
     }

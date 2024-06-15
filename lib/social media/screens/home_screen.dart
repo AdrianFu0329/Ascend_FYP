@@ -5,7 +5,7 @@ import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/notifications/screens/notification_modal.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
-import 'package:ascend_fyp/notifications/service/notification_service.dart';
+import 'package:ascend_fyp/notifications/service/local_notification_service.dart';
 import 'package:ascend_fyp/social%20media/widgets/social_media_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

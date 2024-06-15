@@ -12,6 +12,7 @@ Future<Map<String, dynamic>> getUserData(String userId) async {
         docSnapshot.data()?["description"] ?? "Empty~~ Add one today!",
     'following': docSnapshot.data()?["following"] ?? [],
     'followers': docSnapshot.data()?["followers"] ?? [],
+    'fcmToken': docSnapshot.data()?["fcmToken"] ?? 'Unknown',
   };
 
   return userData;

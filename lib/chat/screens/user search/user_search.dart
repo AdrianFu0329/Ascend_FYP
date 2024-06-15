@@ -1,4 +1,3 @@
-import 'package:ascend_fyp/chat/service/chat_service.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/chat/widgets/user_list_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -106,17 +105,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                                       searchUsername.toLowerCase(),
                                     ))) {
                           return UserListTile(
-                            onPress: (selectedUserId, selectedUsername,
-                                selectedPhotoUrl) {
-                              setState(() {
-                                ChatService().createChatRoom(
-                                  selectedUserId,
-                                  selectedUsername,
-                                  selectedPhotoUrl,
-                                  context,
-                                );
-                              });
-                            },
                             userId: allUsersList[index].id,
                           );
                         } else {

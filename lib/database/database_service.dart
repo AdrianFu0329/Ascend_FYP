@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:ascend_fyp/location/service/Geolocation.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/models/video_with_dimension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:video_player/video_player.dart';
 
 String generateUniqueId() {
@@ -58,12 +60,37 @@ Stream<QuerySnapshot> getPostsFromDatabase() {
 }
 
 Stream<QuerySnapshot> getEventsFromDatabase() {
-  final CollectionReference events =
-      FirebaseFirestore.instance.collection("events");
+  return FirebaseFirestore.instance
+      .collection("events")
+      .orderBy('date', descending: false)
+      .snapshots();
+}
 
-  final eventsStream = events.orderBy('date', descending: false).snapshots();
+Future<List<DocumentSnapshot>> sortEventsByDistance(
+    List<DocumentSnapshot> events) async {
+  Position userLocation = await GeoLocation().getLocation();
+  List<Map<String, dynamic>> eventsWithDistance = [];
 
-  return eventsStream;
+  for (var event in events) {
+    String address = event['location'];
+    Position? eventPosition =
+        await GeoLocation().getCoordinatesFromAddress(address);
+
+    if (eventPosition != null) {
+      double distance = GeoLocation().calculateDistance(
+        userLocation,
+        eventPosition,
+      );
+      eventsWithDistance.add({
+        'event': event,
+        'distance': distance,
+      });
+    }
+  }
+
+  eventsWithDistance.sort((a, b) => a['distance'].compareTo(b['distance']));
+
+  return eventsWithDistance.map((e) => e['event'] as DocumentSnapshot).toList();
 }
 
 Stream<QuerySnapshot> getGroupEventsFromDatabase(String groupId) {

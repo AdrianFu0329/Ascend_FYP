@@ -138,6 +138,7 @@ class _ChatCardState extends State<ChatCard> {
           final userData = snapshot.data!;
           final username = userData["username"] ?? "Unknown";
           final photoUrl = userData["photoURL"] ?? "Unknown";
+          final userFcmToken = userData["fcmToken"] ?? "Unknown";
 
           return GestureDetector(
             onTap: () async {
@@ -148,6 +149,7 @@ class _ChatCardState extends State<ChatCard> {
                     receiverUserId: widget.userId,
                     receiverUsername: username,
                     receiverPhotoUrl: photoUrl,
+                    receiverFcmToken: userFcmToken,
                     chatRoomId: widget.chatRoomId,
                   ),
                 ),
@@ -185,6 +187,7 @@ class _ChatCardState extends State<ChatCard> {
                                       receiverUserId: widget.userId,
                                       receiverUsername: username,
                                       receiverPhotoUrl: photoUrl,
+                                      receiverFcmToken: userFcmToken,
                                       chatRoomId: widget.chatRoomId,
                                     ),
                                   ),

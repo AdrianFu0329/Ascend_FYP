@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/location/service/Geolocation.dart';
 import 'package:ascend_fyp/navigation/wrapper_nav.dart';
-import 'package:ascend_fyp/notifications/service/notification_service.dart';
+import 'package:ascend_fyp/notifications/service/local_notification_service.dart';
 import 'package:ascend_fyp/welcome/screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

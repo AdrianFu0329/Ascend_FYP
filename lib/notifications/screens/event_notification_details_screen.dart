@@ -364,11 +364,14 @@ class _EventNotificationDetailsScreenState
                               await getUserData(widget.requestUserId);
                           final username = userData["username"] ?? "Unknown";
                           final photoUrl = userData["photoURL"] ?? "Unknown";
+                          final userFcmToken =
+                              userData["fcmToken"] ?? "Unknown";
 
                           ChatService().createChatRoom(
                             widget.requestUserId,
                             username,
                             photoUrl,
+                            userFcmToken,
                             context,
                           );
                         },

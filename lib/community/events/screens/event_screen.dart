@@ -227,41 +227,77 @@ class _EventScreenState extends State<EventScreen> {
                 );
               } else if (snapshot.hasData) {
                 List<DocumentSnapshot> eventsList = snapshot.data!.docs;
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      DocumentSnapshot doc = eventsList[index];
-                      Map<String, dynamic> data =
-                          doc.data() as Map<String, dynamic>;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: EventCard(
-                          eventId: data['eventId'],
-                          groupId: data['isGroupEvent']
-                              ? data['groupId']
-                              : "Unknown",
-                          userId: data['userId'],
-                          eventTitle: data['title'],
-                          requestList: List<String>.from(data['requestList']),
-                          acceptedList: List<String>.from(data['acceptedList']),
-                          attendanceList:
-                              List<String>.from(data['attendanceList']),
-                          eventDate: data['date'],
-                          eventStartTime: data['startTime'],
-                          eventEndTime: data['endTime'],
-                          eventFees: data['fees'],
-                          eventLocation: data['location'],
-                          eventSport: data['sports'],
-                          posterURL: data['posterURL'],
-                          participants: data['participants'],
-                          isOther: data['isOther'],
-                          isGroupEvent: data['isGroupEvent'],
+                return FutureBuilder<List<DocumentSnapshot>>(
+                  future: sortEventsByDistance(eventsList),
+                  builder: (context, sortedSnapshot) {
+                    if (sortedSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const SliverFillRemaining(
+                        child: Center(
+                          child: CustomLoadingAnimation(),
                         ),
                       );
-                    },
-                    childCount: eventsList.length,
-                  ),
+                    } else if (sortedSnapshot.hasError) {
+                      return SliverToBoxAdapter(
+                        child: Center(
+                          child: Text('Error: ${sortedSnapshot.error}'),
+                        ),
+                      );
+                    } else if (sortedSnapshot.hasData) {
+                      List<DocumentSnapshot> sortedEventsList =
+                          sortedSnapshot.data!;
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            DocumentSnapshot doc = sortedEventsList[index];
+                            Map<String, dynamic> data =
+                                doc.data() as Map<String, dynamic>;
+
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: EventCard(
+                                eventId: data['eventId'],
+                                groupId: data['isGroupEvent']
+                                    ? data['groupId']
+                                    : "Unknown",
+                                userId: data['userId'],
+                                eventTitle: data['title'],
+                                requestList:
+                                    List<String>.from(data['requestList']),
+                                acceptedList:
+                                    List<String>.from(data['acceptedList']),
+                                attendanceList:
+                                    List<String>.from(data['attendanceList']),
+                                eventDate: data['date'],
+                                eventStartTime: data['startTime'],
+                                eventEndTime: data['endTime'],
+                                eventFees: data['fees'],
+                                eventLocation: data['location'],
+                                eventSport: data['sports'],
+                                posterURL: data['posterURL'],
+                                participants: data['participants'],
+                                isOther: data['isOther'],
+                                isGroupEvent: data['isGroupEvent'],
+                              ),
+                            );
+                          },
+                          childCount: eventsList.length,
+                        ),
+                      );
+                    } else {
+                      return const SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            SizedBox(height: 16),
+                            Center(
+                              child: Text('No events at the moment!'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                 );
               } else {
                 return const SliverToBoxAdapter(

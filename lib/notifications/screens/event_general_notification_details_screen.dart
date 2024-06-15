@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
-import 'package:ascend_fyp/notifications/service/notification_service.dart';
+import 'package:ascend_fyp/notifications/service/local_notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

@@ -59,6 +59,9 @@ dependencies:
   flutter_local_notifications: ^17.1.2
   timezone: ^0.9.3
   video_player: ^2.8.7
+  googleapis: ^13.2.0
+  googleapis_auth: ^1.6.0
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:

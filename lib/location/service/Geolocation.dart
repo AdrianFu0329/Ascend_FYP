@@ -1,9 +1,42 @@
 // ignore_for_file: file_names
 
+import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class GeoLocation {
+  double calculateDistance(Position start, Position end) {
+    return Geolocator.distanceBetween(
+      start.latitude,
+      start.longitude,
+      end.latitude,
+      end.longitude,
+    );
+  }
+
+  Future<Position?> getCoordinatesFromAddress(String address) async {
+    try {
+      List<Location> locations = await locationFromAddress(address);
+      if (locations.isNotEmpty) {
+        return Position(
+          latitude: locations.first.latitude,
+          longitude: locations.first.longitude,
+          timestamp: DateTime.now(),
+          altitude: 0,
+          accuracy: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0,
+          altitudeAccuracy: 0,
+          headingAccuracy: 0,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error getting coordinates: $e');
+    }
+    return null;
+  }
+
   Future<String?> getCityFromCoordinates(
       double latitude, double longitude) async {
     try {

@@ -84,6 +84,7 @@ class ChatService extends ChangeNotifier {
     String receiverUserId,
     String receiverUsername,
     String receiverPhotoUrl,
+    String receiverFcmToken,
     BuildContext context,
   ) async {
     final currentUser = FirebaseAuth.instance.currentUser!;
@@ -95,6 +96,8 @@ class ChatService extends ChangeNotifier {
         'receiverId': receiverUserId,
         'senderId': currentUser.uid,
         'timestamp': Timestamp.now(),
+        'receiverRead': false,
+        'senderRead': true,
       };
 
       FirebaseFirestore.instance
@@ -109,6 +112,7 @@ class ChatService extends ChangeNotifier {
             receiverUserId: receiverUserId,
             receiverUsername: receiverUsername,
             receiverPhotoUrl: receiverPhotoUrl,
+            receiverFcmToken: receiverFcmToken,
             chatRoomId: chatRoomId,
           ),
         ),
