@@ -284,14 +284,14 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   bool isDeletingPost = false;
   VideoPlayerController? videoController;
   ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
-  late VideoWithDimension? video;
+  VideoWithDimension? video;
 
   @override
   void initState() {
+    super.initState();
     if (widget.type == "Video") {
       initializeVideoController();
     }
-    super.initState();
   }
 
   @override
@@ -321,10 +321,11 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       videoController = videoWithDimension.videoController;
 
       if (mounted) {
-        setState(() {});
+        setState(() {
+          video = videoWithDimension;
+        });
       }
 
-      video = videoWithDimension;
       videoController!.play();
       videoController!.addListener(() {
         if (videoController!.value.isPlaying != isPlaying.value) {
@@ -337,8 +338,8 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   }
 
   void resetVideoController() {
-    videoController!.seekTo(Duration.zero);
-    videoController!.play();
+    videoController?.seekTo(Duration.zero);
+    videoController?.play();
   }
 
   void onLikePressed() {
@@ -487,7 +488,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
               mediaHeight = 0.0;
             }
           } else {
-            mediaHeight = video!.height;
+            mediaHeight = video?.height ?? 0.0;
           }
           double maxHeight = mediaHeight > 500 ? 500 : mediaHeight;
 

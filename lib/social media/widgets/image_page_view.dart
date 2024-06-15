@@ -41,9 +41,7 @@ class _ImagePageViewState extends State<ImagePageView> {
                           child: Center(
                             child: FittedBox(
                               fit: BoxFit.cover,
-                              child: Expanded(
-                                child: widget.images[index].image,
-                              ),
+                              child: widget.images[index].image,
                             ),
                           ),
                         );

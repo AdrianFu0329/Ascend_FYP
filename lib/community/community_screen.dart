@@ -46,35 +46,18 @@ class _CommunityScreenState extends State<CommunityScreen>
       ),
       body: Column(
         children: [
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Expanded(
-              child: TabBar(
-                controller: tabController,
-                isScrollable: true,
-                labelStyle: selectedTabBarStyle,
-                unselectedLabelStyle: unselectedTabBarStyle,
-                indicator: CircleTabIndicator(
-                  color: Colors.red,
-                  radius: 4,
-                ),
-                tabs: [
-                  Tab(
-                    child: Text(
-                      "Events",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                  Tab(
-                    child: Text(
-                      "Groups",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
+          TabBar(
+            controller: tabController,
+            labelStyle: selectedTabBarStyle,
+            unselectedLabelStyle: unselectedTabBarStyle,
+            indicator: CircleTabIndicator(
+              color: Colors.red,
+              radius: 4,
             ),
+            tabs: const [
+              Tab(text: 'Events'),
+              Tab(text: 'Groups'),
+            ],
           ),
           Expanded(
             child: TabBarView(
@@ -85,7 +68,6 @@ class _CommunityScreenState extends State<CommunityScreen>
               ],
             ),
           ),
-          const SizedBox(height: 24),
         ],
       ),
     );

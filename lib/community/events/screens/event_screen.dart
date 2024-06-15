@@ -160,70 +160,56 @@ class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        onPressed: filterEvents,
-                        icon: Row(
-                          children: [
-                            Text(
-                              'Filter Options',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            const Icon(
-                              Icons.filter_alt_rounded,
-                              color: Color.fromRGBO(247, 243, 237, 1),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          modalBottomSheet(const CreateEventsScreen());
-                        },
-                        icon: const Icon(Icons.add),
-                        color: Colors.red,
-                        iconSize: 24,
-                      ),
-                    ],
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: filterEvents,
+                icon: Row(
+                  children: [
+                    Text(
+                      'Filter Options',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const Icon(
+                      Icons.filter_alt_rounded,
+                      color: Color.fromRGBO(247, 243, 237, 1),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              IconButton(
+                onPressed: () {
+                  modalBottomSheet(const CreateEventsScreen());
+                },
+                icon: const Icon(Icons.add),
+                color: Colors.red,
+                iconSize: 24,
+              ),
+            ],
           ),
-          StreamBuilder<QuerySnapshot>(
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
             stream: eventsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverFillRemaining(
-                  child: Center(
-                    child: CustomLoadingAnimation(),
-                  ),
+                return const Center(
+                  child: CustomLoadingAnimation(),
                 );
               } else if (snapshot.hasError) {
-                return SliverToBoxAdapter(
-                  child: Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  ),
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
                 );
               } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-                return const SliverToBoxAdapter(
-                  child: Center(
-                    child: Text('No Events Found.'),
-                  ),
+                return const Center(
+                  child: Text('No Events Found.'),
                 );
               } else if (snapshot.hasData) {
                 List<DocumentSnapshot> eventsList = snapshot.data!.docs;
@@ -232,89 +218,79 @@ class _EventScreenState extends State<EventScreen> {
                   builder: (context, sortedSnapshot) {
                     if (sortedSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return const SliverFillRemaining(
-                        child: Center(
-                          child: CustomLoadingAnimation(),
-                        ),
+                      return const Center(
+                        child: CustomLoadingAnimation(),
                       );
                     } else if (sortedSnapshot.hasError) {
-                      return SliverToBoxAdapter(
-                        child: Center(
-                          child: Text('Error: ${sortedSnapshot.error}'),
-                        ),
+                      return Center(
+                        child: Text('Error: ${sortedSnapshot.error}'),
                       );
                     } else if (sortedSnapshot.hasData) {
                       List<DocumentSnapshot> sortedEventsList =
                           sortedSnapshot.data!;
-                      return SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                            DocumentSnapshot doc = sortedEventsList[index];
-                            Map<String, dynamic> data =
-                                doc.data() as Map<String, dynamic>;
+                      return ListView.builder(
+                        itemCount: sortedEventsList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          DocumentSnapshot doc = sortedEventsList[index];
+                          Map<String, dynamic> data =
+                              doc.data() as Map<String, dynamic>;
 
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: EventCard(
-                                eventId: data['eventId'],
-                                groupId: data['isGroupEvent']
-                                    ? data['groupId']
-                                    : "Unknown",
-                                userId: data['userId'],
-                                eventTitle: data['title'],
-                                requestList:
-                                    List<String>.from(data['requestList']),
-                                acceptedList:
-                                    List<String>.from(data['acceptedList']),
-                                attendanceList:
-                                    List<String>.from(data['attendanceList']),
-                                eventDate: data['date'],
-                                eventStartTime: data['startTime'],
-                                eventEndTime: data['endTime'],
-                                eventFees: data['fees'],
-                                eventLocation: data['location'],
-                                eventSport: data['sports'],
-                                posterURL: data['posterURL'],
-                                participants: data['participants'],
-                                isOther: data['isOther'],
-                                isGroupEvent: data['isGroupEvent'],
-                              ),
-                            );
-                          },
-                          childCount: eventsList.length,
-                        ),
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: EventCard(
+                              eventId: data['eventId'],
+                              groupId: data['isGroupEvent']
+                                  ? data['groupId']
+                                  : "Unknown",
+                              userId: data['userId'],
+                              eventTitle: data['title'],
+                              requestList:
+                                  List<String>.from(data['requestList']),
+                              acceptedList:
+                                  List<String>.from(data['acceptedList']),
+                              attendanceList:
+                                  List<String>.from(data['attendanceList']),
+                              eventDate: data['date'],
+                              eventStartTime: data['startTime'],
+                              eventEndTime: data['endTime'],
+                              eventFees: data['fees'],
+                              eventLocation: data['location'],
+                              eventSport: data['sports'],
+                              posterURL: data['posterURL'],
+                              participants: data['participants'],
+                              isOther: data['isOther'],
+                              isGroupEvent: data['isGroupEvent'],
+                            ),
+                          );
+                        },
                       );
                     } else {
-                      return const SliverToBoxAdapter(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 16),
-                            Center(
-                              child: Text('No events at the moment!'),
-                            ),
-                          ],
-                        ),
+                      return const Column(
+                        children: [
+                          SizedBox(height: 16),
+                          Center(
+                            child: Text('No events at the moment!'),
+                          ),
+                        ],
                       );
                     }
                   },
                 );
               } else {
-                return const SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 16),
-                      Center(
-                        child: Text('No events at the moment!'),
-                      ),
-                    ],
-                  ),
+                return const Column(
+                  children: [
+                    SizedBox(height: 16),
+                    Center(
+                      child: Text('No events at the moment!'),
+                    ),
+                  ],
                 );
               }
             },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
