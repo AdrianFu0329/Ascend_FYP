@@ -146,6 +146,33 @@ Stream<QuerySnapshot> getGroupsFromDatabase() {
   return eventsStream;
 }
 
+Future<List<DocumentSnapshot>> sortGroupsByDistance(
+    List<DocumentSnapshot> groups) async {
+  Position userLocation = await GeoLocation().getLocation();
+  List<Map<String, dynamic>> groupsWithDistance = [];
+
+  for (var group in groups) {
+    String address = group['location'];
+    Position? groupPosition =
+        await GeoLocation().getCoordinatesFromAddress(address);
+
+    if (groupPosition != null) {
+      double distance = GeoLocation().calculateDistance(
+        userLocation,
+        groupPosition,
+      );
+      groupsWithDistance.add({
+        'group': group,
+        'distance': distance,
+      });
+    }
+  }
+
+  groupsWithDistance.sort((a, b) => a['distance'].compareTo(b['distance']));
+
+  return groupsWithDistance.map((e) => e['group'] as DocumentSnapshot).toList();
+}
+
 Stream<QuerySnapshot> getMembersForCurrentGroup(String groupId) {
   final DocumentReference grpRef =
       FirebaseFirestore.instance.collection("groups").doc(groupId);

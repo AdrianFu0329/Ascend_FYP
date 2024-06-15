@@ -163,30 +163,66 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                 );
               } else if (snapshot.hasData) {
                 List<DocumentSnapshot> groupsList = snapshot.data!.docs;
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      DocumentSnapshot doc = groupsList[index];
-                      Map<String, dynamic> data =
-                          doc.data() as Map<String, dynamic>;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: GroupCard(
-                          groupId: data['groupId'],
-                          ownerUserId: data['ownerUserId'],
-                          groupTitle: data['name'],
-                          requestList: List<dynamic>.from(data['requestList']),
-                          memberList: List<dynamic>.from(data['memberList']),
-                          groupSport: data['sports'],
-                          posterURL: data['posterURL'],
-                          participants: data['participants'],
-                          isOther: data['isOther'],
+                return FutureBuilder<List<DocumentSnapshot>>(
+                  future: sortGroupsByDistance(groupsList),
+                  builder: (context, sortedSnapshot) {
+                    if (sortedSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const SliverFillRemaining(
+                        child: Center(
+                          child: CustomLoadingAnimation(),
                         ),
                       );
-                    },
-                    childCount: groupsList.length,
-                  ),
+                    } else if (sortedSnapshot.hasError) {
+                      return SliverToBoxAdapter(
+                        child: Center(
+                          child: Text('Error: ${sortedSnapshot.error}'),
+                        ),
+                      );
+                    } else if (sortedSnapshot.hasData) {
+                      List<DocumentSnapshot> sortedGroupsList =
+                          sortedSnapshot.data!;
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            DocumentSnapshot doc = sortedGroupsList[index];
+                            Map<String, dynamic> data =
+                                doc.data() as Map<String, dynamic>;
+
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: GroupCard(
+                                groupId: data['groupId'],
+                                ownerUserId: data['ownerUserId'],
+                                groupTitle: data['name'],
+                                requestList:
+                                    List<dynamic>.from(data['requestList']),
+                                memberList:
+                                    List<dynamic>.from(data['memberList']),
+                                groupSport: data['sports'],
+                                posterURL: data['posterURL'],
+                                participants: data['participants'],
+                                isOther: data['isOther'],
+                              ),
+                            );
+                          },
+                          childCount: groupsList.length,
+                        ),
+                      );
+                    } else {
+                      return const SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            SizedBox(height: 16),
+                            Center(
+                              child: Text('No groups at the moment!'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                 );
               } else {
                 return const SliverToBoxAdapter(
