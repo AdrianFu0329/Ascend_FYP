@@ -6,7 +6,11 @@ import 'package:ascend_fyp/profile/screens/details/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class NavScreen extends StatefulWidget {
-  const NavScreen({super.key});
+  final int? index;
+  const NavScreen({
+    super.key,
+    this.index,
+  });
 
   @override
   State<NavScreen> createState() => _NavScreenState();
@@ -14,6 +18,16 @@ class NavScreen extends StatefulWidget {
 
 class _NavScreenState extends State<NavScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.index != null) {
+      setState(() {
+        _selectedIndex = widget.index!;
+      });
+    }
+  }
 
   void _navigate(int index) {
     setState(() {

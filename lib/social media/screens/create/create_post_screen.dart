@@ -55,6 +55,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
                   Navigator.pushReplacementNamed(context, '/start');
                 },
                 child: Text(

@@ -57,6 +57,7 @@ class FirebaseNotifications {
     String fcmToken,
     String title,
     String body,
+    String? type,
   ) async {
     final String accessToken = await getAccessToken();
     String endpointFCM =
@@ -69,7 +70,10 @@ class FirebaseNotifications {
           'title': title,
           'body': body,
         },
-      }
+        'data': {
+          'type': type ?? "",
+        }
+      },
     };
 
     final http.Response response = await http.post(

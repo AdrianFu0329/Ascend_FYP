@@ -2,7 +2,6 @@ import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/chat/screens/chat_screen.dart';
-import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,6 +28,13 @@ class ChatCard extends StatefulWidget {
 
 class _ChatCardState extends State<ChatCard> {
   final currentUser = FirebaseAuth.instance.currentUser!;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    deleteChatsWithoutMessages();
+    super.initState();
+  }
 
   Future<void> updateIsRead(String chatRoomId) async {
     DocumentReference chatRef =
@@ -83,6 +89,34 @@ class _ChatCardState extends State<ChatCard> {
     }
   }
 
+  Future<void> deleteChatsWithoutMessages() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      QuerySnapshot chatSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('chats')
+          .get();
+      for (DocumentSnapshot chatDoc in chatSnapshot.docs) {
+        CollectionReference messagesRef =
+            chatDoc.reference.collection('messages');
+        QuerySnapshot messagesSnapshot = await messagesRef.get();
+        if (messagesSnapshot.docs.isEmpty) {
+          await chatDoc.reference.delete();
+          debugPrint('Deleted chat document with id: ${chatDoc.id}');
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to delete chat documents without messages: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     TextStyle usernameStyle = TextStyle(
@@ -127,122 +161,128 @@ class _ChatCardState extends State<ChatCard> {
       color: Color.fromRGBO(247, 243, 237, 1),
     );
 
-    return FutureBuilder<Map<String, dynamic>>(
-      future: getUserData(widget.userId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: ContainerLoadingAnimation());
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          final userData = snapshot.data!;
-          final username = userData["username"] ?? "Unknown";
-          final photoUrl = userData["photoURL"] ?? "Unknown";
-          final userFcmToken = userData["fcmToken"] ?? "Unknown";
+    return isLoading
+        ? Container()
+        : FutureBuilder<Map<String, dynamic>>(
+            future: getUserData(widget.userId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                final userData = snapshot.data!;
+                final username = userData["username"] ?? "Unknown";
+                final photoUrl = userData["photoURL"] ?? "Unknown";
+                final userFcmToken = userData["fcmToken"] ?? "Unknown";
 
-          return GestureDetector(
-            onTap: () async {
-              await updateIsRead(widget.chatRoomId);
-              Navigator.of(context).push(
-                SlidingNav(
-                  builder: (context) => ChatScreen(
-                    receiverUserId: widget.userId,
-                    receiverUsername: username,
-                    receiverPhotoUrl: photoUrl,
-                    receiverFcmToken: userFcmToken,
-                    chatRoomId: widget.chatRoomId,
-                  ),
-                ),
-              );
-            },
-            child: StreamBuilder<QuerySnapshot>(
-              stream: getChatData(widget.chatRoomId, currentUser.uid),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CustomLoadingAnimation(),
-                  );
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                } else {
-                  var messageDoc = snapshot.data!.docs.first;
-                  String lastMessage = messageDoc['message'] ?? '';
-                  String shortenedMessage = shortenMessage(lastMessage);
+                return GestureDetector(
+                  onTap: () async {
+                    await updateIsRead(widget.chatRoomId);
+                    Navigator.of(context).push(
+                      SlidingNav(
+                        builder: (context) => ChatScreen(
+                          receiverUserId: widget.userId,
+                          receiverUsername: username,
+                          receiverPhotoUrl: photoUrl,
+                          receiverFcmToken: userFcmToken,
+                          chatRoomId: widget.chatRoomId,
+                        ),
+                      ),
+                    );
+                  },
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: getChatData(widget.chatRoomId, currentUser.uid),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container();
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Error: ${snapshot.error}'),
+                        );
+                      } else if (!snapshot.hasData) {
+                        deleteChatsWithoutMessages();
+                        return Container();
+                      } else {
+                        var messageDoc = snapshot.data!.docs.first;
+                        String lastMessage = messageDoc['message'] ?? '';
+                        String shortenedMessage = shortenMessage(lastMessage);
 
-                  return Card(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: widget.hasRead
-                        ? ListTile(
-                            leading: ProfilePicture(
-                              userId: widget.userId,
-                              photoURL: photoUrl,
-                              radius: 25,
-                              onTap: () async {
-                                await updateIsRead(widget.chatRoomId);
-                                Navigator.of(context).push(
-                                  SlidingNav(
-                                    builder: (context) => ChatScreen(
-                                      receiverUserId: widget.userId,
-                                      receiverUsername: username,
-                                      receiverPhotoUrl: photoUrl,
-                                      receiverFcmToken: userFcmToken,
-                                      chatRoomId: widget.chatRoomId,
+                        return Card(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          child: widget.hasRead
+                              ? ListTile(
+                                  leading: SizedBox(
+                                    width: 50,
+                                    child: ProfilePicture(
+                                      userId: widget.userId,
+                                      photoURL: photoUrl,
+                                      radius: 25,
+                                      onTap: () async {
+                                        await updateIsRead(widget.chatRoomId);
+                                        Navigator.of(context).push(
+                                          SlidingNav(
+                                            builder: (context) => ChatScreen(
+                                              receiverUserId: widget.userId,
+                                              receiverUsername: username,
+                                              receiverPhotoUrl: photoUrl,
+                                              receiverFcmToken: userFcmToken,
+                                              chatRoomId: widget.chatRoomId,
+                                            ),
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ),
-                                );
-                              },
-                            ),
-                            title: Text(
-                              username,
-                              style: usernameStyle,
-                            ),
-                            subtitle: Text(
-                              shortenedMessage,
-                              style: messageStyle,
-                            ),
-                            trailing: Text(
-                              fromDateToString(widget.timestamp),
-                              style: timestampStyle,
-                            ),
-                          )
-                        : ListTile(
-                            leading: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 5.0,
+                                  title: Text(
+                                    username,
+                                    style: usernameStyle,
+                                  ),
+                                  subtitle: Text(
+                                    shortenedMessage,
+                                    style: messageStyle,
+                                  ),
+                                  trailing: Text(
+                                    fromDateToString(widget.timestamp),
+                                    style: timestampStyle,
+                                  ),
+                                )
+                              : ListTile(
+                                  leading: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 3.0,
+                                      ),
+                                    ),
+                                    child: ProfilePicture(
+                                      userId: widget.userId,
+                                      photoURL: photoUrl,
+                                      radius: 25,
+                                      onTap: () {},
+                                    ),
+                                  ),
+                                  title: Text(
+                                    username,
+                                    style: unreadUsernameStyle,
+                                  ),
+                                  subtitle: Text(
+                                    shortenedMessage,
+                                    style: unreadMessageStyle,
+                                  ),
+                                  trailing: Text(
+                                    fromDateToString(widget.timestamp),
+                                    style: unreadTimestampStyle,
+                                  ),
                                 ),
-                              ),
-                              child: ProfilePicture(
-                                userId: widget.userId,
-                                photoURL: photoUrl,
-                                radius: 25,
-                                onTap: () {},
-                              ),
-                            ),
-                            title: Text(
-                              username,
-                              style: unreadUsernameStyle,
-                            ),
-                            subtitle: Text(
-                              shortenedMessage,
-                              style: unreadMessageStyle,
-                            ),
-                            trailing: Text(
-                              fromDateToString(widget.timestamp),
-                              style: unreadTimestampStyle,
-                            ),
-                          ),
-                  );
-                }
-              },
-            ),
+                        );
+                      }
+                    },
+                  ),
+                );
+              }
+            },
           );
-        }
-      },
-    );
   }
 }

@@ -57,6 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
           widget.receiverFcmToken,
           "Message",
           "${currentUser.displayName}: ${messageController.text}",
+          'chat',
         );
         debugPrint("Notification success");
       } catch (e) {
@@ -78,64 +79,96 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> deleteChatsWithoutMessages() async {
+    try {
+      QuerySnapshot chatSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('chats')
+          .get();
+      for (DocumentSnapshot chatDoc in chatSnapshot.docs) {
+        CollectionReference messagesRef =
+            chatDoc.reference.collection('messages');
+        QuerySnapshot messagesSnapshot = await messagesRef.get();
+        if (messagesSnapshot.docs.isEmpty) {
+          await chatDoc.reference.delete();
+          debugPrint('Deleted chat document with id: ${chatDoc.id}');
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to delete chat documents without messages: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Row(
-          children: [
-            ProfilePicture(
-              userId: widget.receiverUserId,
-              photoURL: widget.receiverPhotoUrl,
-              radius: 20,
-              onTap: () {
-                Navigator.of(context).push(
-                  SlidingNav(
-                    builder: (context) => UserProfileScreen(
-                      userId: widget.receiverUserId,
-                      isCurrentUser: false,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: ((didPop) {
+        if (didPop) {
+          return;
+        }
+        deleteChatsWithoutMessages();
+        Navigator.pop(context);
+      }),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Row(
+            children: [
+              ProfilePicture(
+                userId: widget.receiverUserId,
+                photoURL: widget.receiverPhotoUrl,
+                radius: 20,
+                onTap: () {
+                  Navigator.of(context).push(
+                    SlidingNav(
+                      builder: (context) => UserProfileScreen(
+                        userId: widget.receiverUserId,
+                        isCurrentUser: false,
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(width: 16),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  SlidingNav(
-                    builder: (context) => UserProfileScreen(
-                      userId: widget.receiverUserId,
-                      isCurrentUser: false,
-                    ),
-                  ),
-                );
-              },
-              child: Text(
-                widget.receiverUsername,
-                style: Theme.of(context).textTheme.bodyLarge,
+                  );
+                },
               ),
+              const SizedBox(width: 16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    SlidingNav(
+                      builder: (context) => UserProfileScreen(
+                        userId: widget.receiverUserId,
+                        isCurrentUser: false,
+                      ),
+                    ),
+                  );
+                },
+                child: Text(
+                  widget.receiverUsername,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+            ],
+          ),
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Color.fromRGBO(247, 243, 237, 1),
             ),
+            onPressed: () {
+              deleteChatsWithoutMessages();
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: _buildMessageList(),
+            ),
+            _buildMessageInput(),
           ],
         ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Color.fromRGBO(247, 243, 237, 1),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _buildMessageList(),
-          ),
-          _buildMessageInput(),
-        ],
       ),
     );
   }

@@ -216,6 +216,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         userFcmToken,
         "A request has been made to join your sports event!",
         "${currentUser.displayName} has requested to join your sports event '${widget.eventTitle}'. You may contact the user and approve or deny his request below.",
+        null,
       );
       debugPrint("Notification success");
     } catch (e) {

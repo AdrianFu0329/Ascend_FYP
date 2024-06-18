@@ -15,17 +15,26 @@ class MessagesScreen extends StatefulWidget {
   State<MessagesScreen> createState() => _MessagesScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> {
+class _MessagesScreenState extends State<MessagesScreen>
+    with WidgetsBindingObserver {
   final currentUser = FirebaseAuth.instance.currentUser;
-  Future<List<DocumentSnapshot>>? _filteredChatsListFuture;
   bool _notificationsPermissionGranted = false;
+  Stream<List<DocumentSnapshot>>? _filteredChatsListStream;
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     _checkNotificationPermission();
     deleteChatsWithoutMessages();
-    _filteredChatsListFuture = _fetchAndFilterChats();
+    _filteredChatsListStream = _fetchAndFilterChats();
     super.initState();
+  }
+
+  Future<void> _refreshChats() async {
+    setState(() {
+      _filteredChatsListStream = _fetchAndFilterChats();
+      deleteChatsWithoutMessages();
+    });
   }
 
   Future<void> _checkNotificationPermission() async {
@@ -70,21 +79,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
     }
   }
 
-  Future<List<DocumentSnapshot>> _fetchAndFilterChats() async {
-    QuerySnapshot chatSnapshot = await FirebaseFirestore.instance
+  Stream<List<DocumentSnapshot>> _fetchAndFilterChats() {
+    return FirebaseFirestore.instance
         .collection('users')
         .doc(currentUser!.uid)
         .collection('chats')
         .orderBy('timestamp', descending: true)
-        .get();
-    List<DocumentSnapshot> allChatsList = chatSnapshot.docs;
-
-    List<DocumentSnapshot> filteredChatsList = allChatsList.where((doc) {
-      String chatRoomId = doc.id;
-      return chatRoomId.contains(currentUser!.uid);
-    }).toList();
-
-    return filteredChatsList;
+        .snapshots()
+        .map((querySnapshot) => querySnapshot.docs.toList());
   }
 
   Future<bool> onChatDelete(String chatRoomId) async {
@@ -113,12 +115,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
     }
   }
 
-  Future<void> _refreshChats() async {
-    setState(() {
-      _filteredChatsListFuture = _fetchAndFilterChats();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!_notificationsPermissionGranted) {
@@ -133,50 +129,50 @@ class _MessagesScreenState extends State<MessagesScreen> {
         }
         Navigator.pushReplacementNamed(context, '/start');
       }),
-      child: Scaffold(
-        floatingActionButton: GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              SlidingNav(
-                builder: (context) => const UserSearchScreen(),
-              ),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
+      child: RefreshIndicator(
+        onRefresh: _refreshChats,
+        child: Scaffold(
+          floatingActionButton: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                SlidingNav(
+                  builder: (context) => const UserSearchScreen(),
                 ),
-              ],
-            ),
-            child: const Icon(
-              Icons.add,
-              color: Color.fromRGBO(247, 243, 237, 1),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(16.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Color.fromRGBO(247, 243, 237, 1),
+              ),
             ),
           ),
-        ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(
-            'Messages',
-            style: Theme.of(context).textTheme.titleLarge!,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            title: Text(
+              'Messages',
+              style: Theme.of(context).textTheme.titleLarge!,
+            ),
           ),
-        ),
-        body: RefreshIndicator(
-          onRefresh: _refreshChats,
-          child: FutureBuilder<List<DocumentSnapshot>>(
-            future: _filteredChatsListFuture,
+          body: StreamBuilder<List<DocumentSnapshot>>(
+            stream: _filteredChatsListStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CustomLoadingAnimation());
+                return Container();
               } else if (snapshot.hasError) {
                 return Center(
                   child: Text('Error: ${snapshot.error}'),
@@ -192,8 +188,15 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   itemCount: filteredChatsList.length,
                   itemBuilder: (BuildContext context, int index) {
                     DocumentSnapshot doc = filteredChatsList[index];
-                    Map<String, dynamic> data =
-                        doc.data() as Map<String, dynamic>;
+                    Map<String, dynamic>? data =
+                        doc.data() as Map<String, dynamic>?;
+
+                    // Handle the case where data is null
+                    if (data == null) {
+                      debugPrint(
+                          'Chat document with id: ${doc.id} has null data.');
+                      return SizedBox.shrink(); // Or some other fallback UI
+                    }
 
                     String userId = data['senderId'] == currentUser!.uid
                         ? data['receiverId']
