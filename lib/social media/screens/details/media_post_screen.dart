@@ -10,6 +10,7 @@ import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -101,20 +102,17 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
         widget.likes.remove(currentUser.uid);
       }
     });
-
-    DocumentReference postRef =
-        FirebaseFirestore.instance.collection('posts').doc(widget.postId);
-    postRef.update({'likes': widget.likes});
+    DatabaseReference postNew =
+        FirebaseDatabase.instance.ref('posts/${widget.postId}');
+    postNew.update({'likes': widget.likes});
   }
 
   void addComment(String text) {
-    FirebaseFirestore.instance
-        .collection("posts")
-        .doc(widget.postId)
-        .collection("comments")
-        .add({
+    DatabaseReference commentsRef =
+        FirebaseDatabase.instance.ref('posts/${widget.postId}/comments').push();
+    commentsRef.set({
       "comment": text,
-      "timestamp": Timestamp.now(),
+      "timestamp": ServerValue.timestamp,
       "userId": FirebaseAuth.instance.currentUser!.uid,
     });
   }
@@ -137,6 +135,7 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
                 children: [
                   Expanded(
                     child: TextField(
+                      textCapitalization: TextCapitalization.sentences,
                       minLines: 1,
                       maxLines: 5,
                       controller: commentController,
@@ -342,24 +341,14 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     videoController?.play();
   }
 
-  void onLikePressed() {
-    setState(() {
-      isLiked = !isLiked;
-      if (isLiked) {
-        likeCount++;
-        widget.likes.add(currentUser.uid);
-      } else {
-        likeCount--;
-        widget.likes.remove(currentUser.uid);
-      }
-    });
-    DocumentReference postRef =
-        FirebaseFirestore.instance.collection('posts').doc(widget.postId);
-    postRef.update({'likes': widget.likes});
-  }
-
   String fromDateToString(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
+    String formatted = DateFormat('MMM dd, yyyy').format(dateTime);
+    return formatted;
+  }
+
+  String fromServerTimeToString(int milliseconds) {
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(milliseconds);
     String formatted = DateFormat('MMM dd, yyyy').format(dateTime);
     return formatted;
   }
@@ -372,6 +361,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       FirebaseStorage storage = FirebaseStorage.instance;
+      FirebaseDatabase database = FirebaseDatabase.instance;
 
       // Firestore references
       DocumentReference postDocRef =
@@ -379,7 +369,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       CollectionReference commentsCollectionRef =
           postDocRef.collection('comments');
 
-      // Get all comments for the post
+      // Get all comments for the post in Firestore
       QuerySnapshot commentsSnapshot = await commentsCollectionRef.get();
       WriteBatch batch = firestore.batch();
 
@@ -389,6 +379,15 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
 
       await batch.commit();
       await postDocRef.delete();
+
+      // Delete post in Realtime Database
+      DatabaseReference postRefNew = database.ref('posts/${widget.postId}');
+      await postRefNew.remove();
+
+      // Delete comments in Realtime Database
+      DatabaseReference commentsRefNew =
+          database.ref('posts/${widget.postId}/comments');
+      await commentsRefNew.remove();
 
       // Storage reference to the folder containing images
       Reference imagesFolderRef = storage.ref().child('posts/${widget.postId}');
@@ -674,39 +673,46 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                           userId: widget.userId,
                         ),
                         const SizedBox(height: 24),
-                        StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection("posts")
-                              .doc(widget.postId)
-                              .collection("comments")
-                              .orderBy("timestamp", descending: true)
-                              .snapshots(),
+                        StreamBuilder<DatabaseEvent>(
+                          stream: FirebaseDatabase.instance
+                              .ref('posts/${widget.postId}/comments')
+                              .orderByChild("timestamp")
+                              .onValue,
                           builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return const Center(
                                 child: CustomLoadingAnimation(),
                               );
-                            }
+                            } else if (snapshot.data!.snapshot.value == null) {
+                              return Container();
+                            } else {
+                              final commentsData = Map<String, dynamic>.from(
+                                  snapshot.data!.snapshot.value
+                                      as Map<dynamic, dynamic>);
 
-                            return ListView(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: snapshot.data!.docs.map((doc) {
-                                final commentData =
-                                    doc.data() as Map<String, dynamic>;
-                                return CommentPost(
-                                  text: commentData["comment"],
-                                  userId: commentData["userId"],
-                                  postId: widget.postId,
-                                  commentId: doc.id,
-                                  time: fromDateToString(
-                                      commentData["timestamp"]),
-                                );
-                              }).toList(),
-                            );
+                              return ListView(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: commentsData.entries.map((entry) {
+                                  final commentId = entry.key;
+                                  final commentData = Map<String, dynamic>.from(
+                                      entry.value as Map<dynamic, dynamic>);
+                                  return CommentPost(
+                                    text: commentData["comment"],
+                                    userId: commentData["userId"],
+                                    postId: widget.postId,
+                                    commentId: commentId,
+                                    time: fromServerTimeToString(
+                                      commentData["timestamp"],
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            }
                           },
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         const Center(
                           child: Text(
                             "~END~",

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:ascend_fyp/location/service/Geolocation.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/models/video_with_dimension.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -32,16 +33,10 @@ Future<bool> sendPasswordResetLink(String email) async {
   }
 }
 
-Stream<QuerySnapshot> getUserChatsFromDatabase() {
-  final CollectionReference chats =
-      FirebaseFirestore.instance.collection("chats");
-
-  final chatsStream = chats.orderBy('timestamp', descending: true).snapshots();
-  return chatsStream;
-}
-
-Stream<QuerySnapshot> getChatData(String chatRoomId) {
+Stream<QuerySnapshot> getChatData(String chatRoomId, String currentUserId) {
   final CollectionReference chats = FirebaseFirestore.instance
+      .collection('users')
+      .doc(currentUserId)
       .collection("chats")
       .doc(chatRoomId)
       .collection('messages');
@@ -254,13 +249,11 @@ Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
 
   try {
     for (String imageURL in imageURLs) {
-      Image imageWidget = Image.network(
-        imageURL,
-        fit: BoxFit.contain,
-      );
+      CachedNetworkImageProvider imageProvider =
+          CachedNetworkImageProvider(imageURL);
 
       Completer<ImageInfo> completer = Completer<ImageInfo>();
-      imageWidget.image.resolve(const ImageConfiguration()).addListener(
+      imageProvider.resolve(const ImageConfiguration()).addListener(
         ImageStreamListener(
           (ImageInfo info, bool _) {
             completer.complete(info);
@@ -273,7 +266,11 @@ Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
       double imageWidth = imageInfo.image.width.toDouble();
 
       ImageWithDimension imageWithDimension = ImageWithDimension(
-        image: imageWidget,
+        image: Image(
+          image: imageProvider,
+          fit: BoxFit.contain,
+        ),
+        imageURL: imageURL,
         height: imageHeight,
         width: imageWidth,
         aspectRatio: imageWidth / imageHeight,
@@ -284,6 +281,7 @@ Future<List<ImageWithDimension>> getPostImg(List<String> imageURLs) async {
   } catch (e) {
     images.add(ImageWithDimension(
       image: Image.asset("lib/assets/images/default_profile_image.png"),
+      imageURL: "Unknown",
       height: 0,
       width: 0,
       aspectRatio: 0,
@@ -317,6 +315,7 @@ Future<ImageWithDimension> getProfilePic(String userId) async {
 
     return ImageWithDimension(
       image: imageWidget,
+      imageURL: imgDownload,
       height: imageHeight,
       width: imageWidth,
       aspectRatio: imageWidth / imageHeight,
@@ -324,6 +323,7 @@ Future<ImageWithDimension> getProfilePic(String userId) async {
   } catch (e) {
     return ImageWithDimension(
       image: Center(child: Text('Error getting image: $e')),
+      imageURL: "Unknown",
       height: 0,
       width: 0,
       aspectRatio: 0,

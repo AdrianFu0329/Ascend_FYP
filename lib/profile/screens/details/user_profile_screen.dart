@@ -1,14 +1,16 @@
 import 'package:ascend_fyp/database/database_service.dart';
-import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
-import 'package:ascend_fyp/general%20widgets/profile_media_card.dart';
+import 'package:ascend_fyp/general%20widgets/media_card.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:video_player/video_player.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
@@ -35,12 +37,109 @@ class _ProfileScreenState extends State<UserProfileScreen> {
   late List<dynamic> currentFollowing;
   late List<dynamic> following;
   late List<dynamic> followers;
+  Map<String, dynamic>? userData;
+  Map<String, dynamic> postList = {};
+  bool isLoading = true;
+  bool hasError = false;
 
   @override
   void initState() {
     refreshProfileData();
     checkIfFollowed();
+    fetchUserData();
+    fetchPostsFromDatabase();
     super.initState();
+  }
+
+  Future<void> fetchUserData() async {
+    try {
+      final data = await getUserData(FirebaseAuth.instance.currentUser!.uid);
+      setState(() {
+        userData = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        hasError = true;
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> fetchPostsFromDatabase() async {
+    DatabaseReference postsRef = FirebaseDatabase.instance.ref('posts');
+    DatabaseEvent event = await postsRef.orderByChild('timestamp').once();
+
+    Map<String, dynamic> loadedPosts = {};
+
+    if (event.snapshot.value != null) {
+      // Convert data into a Map<String, dynamic>
+      Map<dynamic, dynamic> postsData =
+          event.snapshot.value as Map<dynamic, dynamic>;
+      postsData.forEach((key, value) {
+        loadedPosts[key.toString()] = Map<String, dynamic>.from(value as Map);
+      });
+
+      loadedPosts.removeWhere((key, value) => value['userId'] != widget.userId);
+
+      // Sort the posts by timestamp in descending order
+      List<MapEntry<String, dynamic>> sortedPosts =
+          loadedPosts.entries.toList();
+      sortedPosts
+          .sort((a, b) => b.value['timestamp'].compareTo(a.value['timestamp']));
+
+      loadedPosts = {for (var entry in sortedPosts) entry.key: entry.value};
+    }
+
+    // Preload media for each post
+    List<Future<dynamic>> futures = [];
+    for (var postId in loadedPosts.keys) {
+      var post = loadedPosts[postId]!;
+      if (post['type'] == 'Images') {
+        List<String> photoURLs = List<String>.from(post['imageURLs'] ?? []);
+        futures.add(getPostImg(photoURLs).then((images) {
+          post['images'] = images;
+        }));
+      } else if (post['type'] == 'Video') {
+        futures
+            .add(initializeVideoController(post['videoURL']).then((controller) {
+          post['videoController'] = controller;
+        }));
+      }
+    }
+
+    // Wait for all media to be loaded
+    await Future.wait(futures);
+
+    // Update state with loaded posts and set loading state to false
+    setState(() {
+      postList = loadedPosts;
+      isLoading = false;
+    });
+  }
+
+  Future<VideoPlayerController?> initializeVideoController(
+      String videoURL) async {
+    try {
+      final videoCacheManager = DefaultCacheManager();
+      final fileInfo = await videoCacheManager.getFileFromCache(videoURL);
+
+      VideoPlayerController controller;
+
+      if (fileInfo != null) {
+        controller = VideoPlayerController.file(fileInfo.file);
+      } else {
+        Uri videoUri = Uri.parse(videoURL);
+        controller = VideoPlayerController.networkUrl(videoUri);
+      }
+
+      await controller.initialize();
+
+      return controller;
+    } catch (e) {
+      debugPrint("Error loading video: $e");
+      return null;
+    }
   }
 
   void _showMessage(String message) {
@@ -168,231 +267,153 @@ class _ProfileScreenState extends State<UserProfileScreen> {
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: FutureBuilder(
-                future: getUserData(widget.userId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CustomLoadingAnimation();
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    Map<String, dynamic> userData =
-                        snapshot.data as Map<String, dynamic>;
-                    username = userData["username"] ?? "Unknown";
-                    description = userData["description"] == ""
-                        ? "Empty~~ Add one today!"
-                        : userData["description"];
-                    email = userData['email'] ?? "Unknown";
-                    photoURL = userData['photoURL'] ?? "";
-                    followers = userData['followers'] ?? [];
-                    following = userData['following'] ?? [];
-
-                    return Column(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ProfilePicture(
-                                      userId: widget.userId,
-                                      photoURL: photoURL,
-                                      radius: 40,
-                                      onTap: () {},
-                                    ),
-                                    Row(
-                                      children: [
-                                        Column(
-                                          children: [
-                                            Text(
-                                              followers.length.toString(),
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium,
-                                            ),
-                                            Text(
-                                              "Followers",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium,
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(width: 28),
-                                        Column(
-                                          children: [
-                                            Text(
-                                              following.length.toString(),
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium,
-                                            ),
-                                            Text(
-                                              "Following",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
+                              ProfilePicture(
+                                userId: widget.userId,
+                                photoURL: photoURL,
+                                radius: 40,
+                                onTap: () {},
                               ),
-                              ListTile(
-                                title: Text(
-                                  username,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                trailing: widget.isCurrentUser
-                                    ? const SizedBox(height: 12)
-                                    : ElevatedButton(
-                                        onPressed: onFollowPressed,
-                                        style: getFollowButtonStyle(),
-                                        child: Text(
-                                          followed ? "Unfollow" : "Follow",
-                                        ),
+                              Row(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        (userData?['followers'] ?? [])
+                                            .length
+                                            .toString(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
                                       ),
-                              ),
+                                      Text(
+                                        "Followers",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 28),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        (userData?['following'] ?? [])
+                                            .length
+                                            .toString(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                      Text(
+                                        "Following",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              )
                             ],
                           ),
                         ),
-                        const Divider(
-                          color: Colors.red,
-                          thickness: 4,
+                        ListTile(
+                          title: Text(
+                            userData?['username'] ?? 'Unknown',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          trailing: widget.isCurrentUser
+                              ? const SizedBox(height: 12)
+                              : ElevatedButton(
+                                  onPressed: onFollowPressed,
+                                  style: getFollowButtonStyle(),
+                                  child: Text(
+                                    followed ? "Unfollow" : "Follow",
+                                  ),
+                                ),
                         ),
-                        const SizedBox(height: 24),
                       ],
-                    );
-                  }
-                },
+                    ),
+                  ),
+                  const Divider(
+                    color: Colors.red,
+                    thickness: 4,
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-            StreamBuilder<QuerySnapshot>(
-              stream: getPostsFromDatabase(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SliverFillRemaining(
-                    child: Center(
-                      child: CustomLoadingAnimation(),
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return SliverToBoxAdapter(
-                    child: Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    ),
-                  );
-                } else {
-                  List<DocumentSnapshot> postList = snapshot.data!.docs;
-                  List<DocumentSnapshot> filteredPostsList =
-                      postList.where((doc) {
-                    String ownerUserId = doc['userId'];
-                    return ownerUserId == widget.userId;
-                  }).toList();
-                  return filteredPostsList.isNotEmpty
-                      ? SliverMasonryGrid.count(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 0,
-                          crossAxisSpacing: 0,
-                          itemBuilder: (BuildContext context, int index) {
-                            DocumentSnapshot doc = filteredPostsList[index];
-                            Map<String, dynamic> data =
-                                doc.data() as Map<String, dynamic>;
-                            String postId = data['postId'];
-                            String title = data['title'];
-                            List<String> photoURLs =
-                                List<String>.from(data['imageURLs'] ?? []);
-                            String videoURL = data['videoURL'] ?? "Unknown";
-                            List<String> likes =
-                                List<String>.from(data['likes']);
-                            String userId = data['userId'];
-                            Timestamp timestamp = data['timestamp'];
-                            String description = data['description'];
-                            String location = data['location'];
-                            String type = data['type'];
+            isLoading
+                ? const SliverToBoxAdapter(
+                    child: Center(child: ContainerLoadingAnimation()))
+                : postList.isEmpty
+                    ? const SliverToBoxAdapter(
+                        child: Center(child: Text("No posts available")))
+                    : SliverMasonryGrid.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        itemBuilder: (BuildContext context, int index) {
+                          String postId = postList.keys.elementAt(index);
+                          Map<String, dynamic> data = postList[postId]!;
 
-                            return FutureBuilder<dynamic>(
-                              future: type == "Images"
-                                  ? getPostImg(photoURLs)
-                                  : getPostVideo(videoURL),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const PostLoadingWidget();
-                                } else if (snapshot.hasError) {
-                                  return const Center(
-                                    child: Text(
-                                      "An unexpected error occurred. Try again later...",
-                                    ),
-                                  );
-                                } else {
-                                  return type == "Images"
-                                      ? FutureBuilder<dynamic>(
-                                          future: getPostImg(photoURLs),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return const PostLoadingWidget();
-                                            } else if (snapshot.hasError) {
-                                              return const Center(
-                                                child: Text(
-                                                  "An unexpected error occurred. Try again later...",
-                                                ),
-                                              );
-                                            } else {
-                                              List<ImageWithDimension> images =
-                                                  snapshot.data!;
-                                              return ProfileMediaCard(
-                                                index: index,
-                                                postId: postId,
-                                                media: images,
-                                                title: title,
-                                                userId: userId,
-                                                likes: likes,
-                                                timestamp: timestamp,
-                                                description: description,
-                                                location: location,
-                                                type: type,
-                                              );
-                                            }
-                                          },
-                                        )
-                                      : ProfileMediaCard(
-                                          index: index,
-                                          postId: postId,
-                                          media: videoURL,
-                                          title: title,
-                                          userId: userId,
-                                          likes: likes,
-                                          timestamp: timestamp,
-                                          description: description,
-                                          location: location,
-                                          type: type,
-                                        );
-                                }
-                              },
-                            );
-                          },
-                          childCount: filteredPostsList.length,
-                        )
-                      : const SliverToBoxAdapter(
-                          child: Center(
-                            child: Text(
-                              "No posts from this user yet...",
-                            ),
-                          ),
-                        );
-                }
-              },
-            ),
+                          String title = data['title'];
+                          List<ImageWithDimension> images =
+                              data['images'] ?? [];
+                          VideoPlayerController? videoController =
+                              data['videoController'];
+                          List<String> likes =
+                              List<String>.from(data['likes'] ?? []);
+                          String userId = data['userId'];
+                          int timestamp = data['timestamp'];
+                          String description = data['description'];
+                          String location = data['location'];
+                          String type = data['type'];
+
+                          return type == "Images"
+                              ? MediaCard(
+                                  index: index,
+                                  postId: postId,
+                                  media: images,
+                                  title: title,
+                                  userId: userId,
+                                  likes: likes,
+                                  timestamp:
+                                      Timestamp.fromMillisecondsSinceEpoch(
+                                          timestamp),
+                                  description: description,
+                                  location: location,
+                                  type: type,
+                                )
+                              : MediaCard(
+                                  index: index,
+                                  postId: postId,
+                                  media: videoController,
+                                  title: title,
+                                  userId: userId,
+                                  likes: likes,
+                                  timestamp:
+                                      Timestamp.fromMillisecondsSinceEpoch(
+                                          timestamp),
+                                  description: description,
+                                  location: location,
+                                  type: type,
+                                );
+                        },
+                        childCount: postList.length,
+                      ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),

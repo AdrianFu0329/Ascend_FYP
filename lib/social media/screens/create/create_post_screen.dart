@@ -4,8 +4,8 @@ import 'package:ascend_fyp/location/screens/set_location_screen.dart';
 import 'package:ascend_fyp/general%20widgets/custom_text_field.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/location/widgets/location_list_tile.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -55,7 +55,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.pushReplacementNamed(context, '/start');
                 },
                 child: Text(
                   'OK',
@@ -125,7 +125,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     Future<void> createPost() async {
       if (validatePost()) {
-        final currentUser = FirebaseAuth.instance.currentUser!;
         String location = _locationData['location'] ?? "Unknown";
 
         if (_formKey.currentState!.validate()) {
@@ -134,11 +133,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           });
 
           try {
-            final String postId =
-                FirebaseFirestore.instance.collection('posts').doc().id;
+            // final String postId =
+            //     FirebaseFirestore.instance.collection('posts').doc().id;
+
+            // Id for FirebaseDatabase
+            final String? postId =
+                FirebaseDatabase.instance.ref().child('posts').push().key;
 
             // Upload images to Firebase Storage
-            List<String> imageURLs = await uploadImages(postId);
+            List<String> imageURLs = await uploadImages(postId!);
 
             // Upload video to Firebase Storage
             String videoURL = await uploadVideo(postId);
@@ -148,25 +151,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               'title': titleController.text.trim(),
               'description': descriptionController.text.trim(),
               'userId': FirebaseAuth.instance.currentUser!.uid,
-              'likes': [],
-              'timestamp': Timestamp.now(),
+              'timestamp': ServerValue.timestamp,
               'location': location,
               widget.video != null ? 'videoURL' : 'imageURLs':
                   widget.video != null ? videoURL : imageURLs,
               'type': widget.video != null ? "Video" : "Images",
             };
 
-            // Add the post document to Firestore
-            await FirebaseFirestore.instance
-                .collection('posts')
-                .doc(postId)
-                .set(postData);
-
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(currentUser.uid)
-                .collection('posts')
-                .doc(postId)
+            // Add the post data to Realtime Database
+            await FirebaseDatabase.instance
+                .ref()
+                .child('posts')
+                .child(postId)
                 .set(postData);
 
             showMessage('Post created successfully');

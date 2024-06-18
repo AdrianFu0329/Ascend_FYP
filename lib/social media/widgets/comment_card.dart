@@ -1,7 +1,7 @@
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 
@@ -84,12 +84,14 @@ class _CommentPostState extends State<CommentPost> {
         setState(() {
           isDeletingComment = true;
         });
-        await FirebaseFirestore.instance
-            .collection('posts')
-            .doc(widget.postId)
-            .collection('comments')
-            .doc(widget.commentId)
-            .delete();
+        final DatabaseReference commentRef = FirebaseDatabase.instance
+            .ref()
+            .child('posts')
+            .child(widget.postId)
+            .child('comments')
+            .child(widget.commentId);
+
+        await commentRef.remove();
 
         setState(() {
           isDeletingComment = false;
@@ -168,9 +170,6 @@ class _CommentPostState extends State<CommentPost> {
                                         _showMessage(
                                           "Comment deleted successfully",
                                           false,
-                                          onOKPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
                                         );
                                       } else {
                                         _showMessage(

@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/database/database_service.dart';
+import 'package:ascend_fyp/database/firebase_notifications.dart';
 import 'package:ascend_fyp/location/service/Geolocation.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
@@ -118,7 +119,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     });
   }
 
-  void _showLocationMessage() {
+  void _showLocationMessage(String userFcmToken) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -141,7 +142,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                onRequestPressed();
+                onRequestPressed(userFcmToken);
               },
               child: Text(
                 'OK',
@@ -163,7 +164,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     return address ?? "Unknown";
   }
 
-  Future<void> onRequestPressed() async {
+  Future<void> onRequestPressed(String userFcmToken) async {
     setState(() {
       requestedToJoin = true;
     });
@@ -209,6 +210,17 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         .collection('events')
         .doc(widget.eventId);
     userRef.update({'requestList': widget.requestList});
+
+    try {
+      FirebaseNotifications.sendNotificaionToSelectedDriver(
+        userFcmToken,
+        "A request has been made to join your sports event!",
+        "${currentUser.displayName} has requested to join your sports event '${widget.eventTitle}'. You may contact the user and approve or deny his request below.",
+      );
+      debugPrint("Notification success");
+    } catch (e) {
+      debugPrint("Notification failed: $e");
+    }
   }
 
   @override
@@ -225,6 +237,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           final userData = snapshot.data!;
           final username = userData["username"] ?? "Unknown";
           final photoUrl = userData["photoURL"] ?? "Unknown";
+          final userFcmToken = userData["fcmToken"] ?? "Unknown";
+
           return Scaffold(
             appBar: AppBar(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -529,7 +543,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         ),
                         onPressed: joined
                             ? null
-                            : (requestedToJoin ? null : _showLocationMessage),
+                            : (requestedToJoin
+                                ? null
+                                : () {
+                                    _showLocationMessage(userFcmToken);
+                                  }),
                         child: Text(
                           joined
                               ? "Joined Event"

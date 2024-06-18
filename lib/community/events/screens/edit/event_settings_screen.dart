@@ -257,13 +257,13 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
         child: ElevatedButton(
           onPressed: () {
             _showMessage(
-              "Are you sure you would like to delete your sports event?",
+              "Are you sure you would like to cancel your sports event?",
               true,
               onYesPressed: () async {
                 bool isDeleted = await deleteEvent();
                 if (isDeleted) {
                   _showMessage(
-                    "Event deleted successfully",
+                    "Event cancelled successfully",
                     false,
                     onOKPressed: () {
                       Navigator.of(context).pop();
@@ -272,7 +272,7 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
                   );
                 } else {
                   _showMessage(
-                      "Unable to delete event. Try again later...", false);
+                      "Unable to cancel event. Try again later...", false);
                 }
               },
             );
@@ -289,7 +289,7 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
                     color: Colors.red,
                   ),
                   SizedBox(width: 8),
-                  Text('Delete Event'),
+                  Text('Cancel Event'),
                 ],
               ),
             ],

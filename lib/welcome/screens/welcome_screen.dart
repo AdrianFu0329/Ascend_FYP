@@ -116,9 +116,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       _isLoggingIn = true;
     });
     String googleLoginMsg = await AuthService().signInWithGoogle();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(googleLoginMsg)),
-    );
     if (googleLoginMsg == "Login Successful") {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(googleLoginMsg)));

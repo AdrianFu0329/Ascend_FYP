@@ -11,23 +11,40 @@ class ChatService extends ChangeNotifier {
   final currentUser = FirebaseAuth.instance.currentUser!;
 
   // Update is read status
-  Future<void> updateIsRead(String chatRoomId) async {
-    DocumentReference chatRef =
-        FirebaseFirestore.instance.collection('chats').doc(chatRoomId);
+  Future<void> updateIsRead(String chatRoomId, String receiverUserId) async {
+    DocumentReference currentChatRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('chats')
+        .doc(chatRoomId);
+
+    DocumentReference receiverChatRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(receiverUserId)
+        .collection('chats')
+        .doc(chatRoomId);
 
     try {
-      DocumentSnapshot chatSnapshot = await chatRef.get();
+      DocumentSnapshot currentChatSnapshot = await currentChatRef.get();
+      DocumentSnapshot receiverChatSnapshot = await receiverChatRef.get();
 
-      if (chatSnapshot.exists) {
-        Map<String, dynamic> chatData =
-            chatSnapshot.data() as Map<String, dynamic>;
-        bool isSender = currentUser.uid == chatData["senderId"];
+      if (currentChatSnapshot.exists && receiverChatSnapshot.exists) {
+        Map<String, dynamic> currentChatData =
+            currentChatSnapshot.data() as Map<String, dynamic>;
+        bool isSender = currentUser.uid == currentChatData["senderId"];
+
         if (isSender) {
-          chatRef.update({
+          currentChatRef.update({
+            'receiverRead': false,
+          });
+          receiverChatRef.update({
             'receiverRead': false,
           });
         } else {
-          chatRef.update({
+          currentChatRef.update({
+            'senderRead': false,
+          });
+          receiverChatRef.update({
             'senderRead': false,
           });
         }
@@ -51,16 +68,43 @@ class ChatService extends ChangeNotifier {
         timestamp: timestamp,
       );
 
-      await updateIsRead(chatRoomId);
+      await updateIsRead(chatRoomId, receiverId);
 
+      // Write message to current user doc
       await firestore
+          .collection('users')
+          .doc(currentUserId)
           .collection('chats')
           .doc(chatRoomId)
           .collection('messages')
           .add(newMsg.toMap());
 
-      DocumentReference chatRef = firestore.collection('chats').doc(chatRoomId);
-      await chatRef.update({
+      // Write message to receiver user doc
+      await firestore
+          .collection('users')
+          .doc(receiverId)
+          .collection('chats')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add(newMsg.toMap());
+
+      // Update timestamp for chatroom in current user docs
+      DocumentReference currentChatRef = firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('chats')
+          .doc(chatRoomId);
+      await currentChatRef.update({
+        'timestamp': Timestamp.now(),
+      });
+
+      // Update timestamp for chatroom in receiver user docs
+      DocumentReference receiverChatRef = firestore
+          .collection('users')
+          .doc(receiverId)
+          .collection('chats')
+          .doc(chatRoomId);
+      await receiverChatRef.update({
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
@@ -72,6 +116,8 @@ class ChatService extends ChangeNotifier {
   Stream<QuerySnapshot> getMessages(
       String userId, String senderUserId, String chatRoomId) {
     return firestore
+        .collection('users')
+        .doc(currentUser.uid)
         .collection('chats')
         .doc(chatRoomId)
         .collection('messages')
@@ -100,12 +146,24 @@ class ChatService extends ChangeNotifier {
         'senderRead': true,
       };
 
+      // Create in current user docs
       FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('chats')
+          .doc(chatRoomId)
+          .set(chatRoomData);
+
+      // Create in receiver user docs
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(receiverUserId)
           .collection('chats')
           .doc(chatRoomId)
           .set(chatRoomData);
 
       // Push to chat screen with chosen user
+      Navigator.of(context).pop();
       Navigator.of(context).push(
         SlidingNav(
           builder: (context) => ChatScreen(

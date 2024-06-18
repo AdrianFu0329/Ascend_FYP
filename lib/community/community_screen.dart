@@ -36,39 +36,48 @@ class _CommunityScreenState extends State<CommunityScreen>
       color: Color.fromRGBO(247, 243, 237, 1),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text(
-          'Community',
-          style: Theme.of(context).textTheme.titleLarge!,
-        ),
-      ),
-      body: Column(
-        children: [
-          TabBar(
-            controller: tabController,
-            labelStyle: selectedTabBarStyle,
-            unselectedLabelStyle: unselectedTabBarStyle,
-            indicator: CircleTabIndicator(
-              color: Colors.red,
-              radius: 4,
-            ),
-            tabs: const [
-              Tab(text: 'Events'),
-              Tab(text: 'Groups'),
-            ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: ((didPop) {
+        if (didPop) {
+          return;
+        }
+        Navigator.pushReplacementNamed(context, '/start');
+      }),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(
+            'Community',
+            style: Theme.of(context).textTheme.titleLarge!,
           ),
-          Expanded(
-            child: TabBarView(
+        ),
+        body: Column(
+          children: [
+            TabBar(
               controller: tabController,
-              children: const [
-                EventScreen(),
-                CommunityGroupsScreen(),
+              labelStyle: selectedTabBarStyle,
+              unselectedLabelStyle: unselectedTabBarStyle,
+              indicator: CircleTabIndicator(
+                color: Colors.red,
+                radius: 4,
+              ),
+              tabs: const [
+                Tab(text: 'Events'),
+                Tab(text: 'Groups'),
               ],
             ),
-          ),
-        ],
+            Expanded(
+              child: TabBarView(
+                controller: tabController,
+                children: const [
+                  EventScreen(),
+                  CommunityGroupsScreen(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

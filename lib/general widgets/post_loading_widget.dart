@@ -1,4 +1,3 @@
-import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:flutter/material.dart';
 
 class PostLoadingWidget extends StatelessWidget {
@@ -6,26 +5,22 @@ class PostLoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 135,
-      height: 250,
-      child: Card(
-        elevation: 4.0,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
         color: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 175,
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: const Center(
-                child: ContainerLoadingAnimation(),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
+      ),
+      height: 300,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 175,
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Container(),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }

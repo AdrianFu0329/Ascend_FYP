@@ -87,13 +87,6 @@ class NotificationCard extends StatelessWidget {
     Widget buildCard() {
       String formattedTime = fromDateToString(timestamp);
       return Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-          side: const BorderSide(
-            color: Color.fromRGBO(194, 0, 0, 1),
-            width: 2.0,
-          ),
-        ),
         color: Theme.of(context).scaffoldBackgroundColor,
         elevation: 4.0,
         child: Padding(

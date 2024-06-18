@@ -1,6 +1,6 @@
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
-import 'package:ascend_fyp/general%20widgets/loading.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePicture extends StatelessWidget {
@@ -23,7 +23,7 @@ class ProfilePicture extends StatelessWidget {
       future: getProfilePic(userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const ContainerLoadingAnimation();
+          return Container();
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
@@ -33,7 +33,7 @@ class ProfilePicture extends StatelessWidget {
               child: CircleAvatar(
                 radius: radius,
                 backgroundColor: Colors.transparent,
-                backgroundImage: NetworkImage(photoURL),
+                backgroundImage: CachedNetworkImageProvider(photoURL),
               ),
             );
           } else {

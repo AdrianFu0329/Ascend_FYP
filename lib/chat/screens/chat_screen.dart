@@ -36,6 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final currentUserphotoURL =
       FirebaseAuth.instance.currentUser!.photoURL ?? "Unknown";
   final ScrollController _scrollController = ScrollController();
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
@@ -55,7 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
         FirebaseNotifications.sendNotificaionToSelectedDriver(
           widget.receiverFcmToken,
           "Message",
-          "${widget.receiverUsername}: ${messageController.text}",
+          "${currentUser.displayName}: ${messageController.text}",
         );
         debugPrint("Notification success");
       } catch (e) {
@@ -142,6 +143,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget chatTextField(TextEditingController controller) {
     return Expanded(
       child: TextField(
+        textCapitalization: TextCapitalization.sentences,
         minLines: 1,
         maxLines: 5,
         cursorColor: const Color.fromRGBO(247, 243, 237, 1),
@@ -285,11 +287,19 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           IconButton(
-            onPressed: sendMessage,
-            icon: const Icon(
-              Icons.send_rounded,
-              size: 30,
-              color: Color.fromRGBO(247, 243, 237, 1),
+            onPressed: () {
+              if (messageController.text.isNotEmpty) {
+                sendMessage();
+              }
+            },
+            icon: CircleAvatar(
+              backgroundColor: const Color.fromRGBO(247, 243, 237, 1),
+              radius: 25,
+              child: Icon(
+                Icons.send_rounded,
+                size: 30,
+                color: Theme.of(context).scaffoldBackgroundColor,
+              ),
             ),
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:ascend_fyp/models/image_with_dimension.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ImagePageView extends StatefulWidget {
@@ -41,7 +42,13 @@ class _ImagePageViewState extends State<ImagePageView> {
                           child: Center(
                             child: FittedBox(
                               fit: BoxFit.cover,
-                              child: widget.images[index].image,
+                              child: CachedNetworkImage(
+                                imageUrl: widget.images[index].imageURL,
+                                placeholder: (context, url) =>
+                                    const CircularProgressIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
+                              ),
                             ),
                           ),
                         );

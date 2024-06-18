@@ -1,5 +1,8 @@
+import 'package:ascend_fyp/chat/screens/messages_screen.dart';
 import 'package:ascend_fyp/database/firebase_options.dart';
 import 'package:ascend_fyp/general%20pages/splash_screen.dart';
+import 'package:ascend_fyp/navigation/screens/nav_screen.dart';
+import 'package:ascend_fyp/social%20media/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +27,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        routes: {
+          '/start': (context) => const NavScreen(),
+          '/home': (context) => const HomeScreen(),
+          '/messages': (context) => const MessagesScreen(),
+        },
         home: const SplashScreen(),
         debugShowCheckedModeBanner: false,
         theme: ThemeData(

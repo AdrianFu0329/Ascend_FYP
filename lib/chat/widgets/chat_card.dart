@@ -156,7 +156,7 @@ class _ChatCardState extends State<ChatCard> {
               );
             },
             child: StreamBuilder<QuerySnapshot>(
-              stream: getChatData(widget.chatRoomId),
+              stream: getChatData(widget.chatRoomId, currentUser.uid),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
