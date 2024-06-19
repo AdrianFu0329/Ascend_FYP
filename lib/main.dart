@@ -63,12 +63,10 @@ class _MyAppState extends State<MyApp> {
       final Map<String, dynamic> data = message.data;
 
       // Extract the type from the data payload
-      final String? type = data['type'];
+      final String? type = data['data']['type'];
 
       if (type == 'chat') {
         Navigator.pushNamed(context, '/messages');
-      } else if (type == 'home') {
-        Navigator.pushNamed(context, '/home');
       } else {
         Navigator.pushNamed(context, '/start');
       }

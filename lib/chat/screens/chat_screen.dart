@@ -41,31 +41,81 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    updateIsRead(widget.chatRoomId);
     _scrollToEnd();
   }
 
-  void sendMessage() async {
-    if (messageController.text.isNotEmpty) {
-      await chatService.sendMessage(
-        widget.receiverUserId,
-        messageController.text,
-        widget.chatRoomId,
-      );
+  Future<void> updateIsRead(String chatRoomId) async {
+    DocumentReference currentUserChatRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('chats')
+        .doc(chatRoomId);
 
-      try {
-        FirebaseNotifications.sendNotificaionToSelectedDriver(
-          widget.receiverFcmToken,
-          "Message",
-          "${currentUser.displayName}: ${messageController.text}",
-          'chat',
-        );
-        debugPrint("Notification success");
-      } catch (e) {
-        debugPrint("Notification failed: $e");
+    DocumentReference receiverChatRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.receiverUserId)
+        .collection('chats')
+        .doc(chatRoomId);
+
+    try {
+      DocumentSnapshot currentUserChatSnapshot = await currentUserChatRef.get();
+
+      if (currentUserChatSnapshot.exists) {
+        Map<String, dynamic> chatData =
+            currentUserChatSnapshot.data() as Map<String, dynamic>;
+        bool isSender = currentUser.uid == chatData["senderId"];
+        if (isSender) {
+          currentUserChatRef.update({
+            'senderRead': true,
+          });
+        } else {
+          currentUserChatRef.update({
+            'receiverRead': true,
+          });
+        }
       }
 
-      messageController.clear();
+      DocumentSnapshot receiverChatSnapshot = await receiverChatRef.get();
+
+      if (receiverChatSnapshot.exists) {
+        Map<String, dynamic> chatData =
+            receiverChatSnapshot.data() as Map<String, dynamic>;
+        bool isSender = currentUser.uid == chatData["senderId"];
+        if (isSender) {
+          receiverChatRef.update({
+            'senderRead': true,
+          });
+        } else {
+          receiverChatRef.update({
+            'receiverRead': true,
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Failed to update read status for user: $e");
     }
+  }
+
+  void sendMessage(String message) async {
+    await chatService.sendMessage(
+      widget.receiverUserId,
+      message,
+      widget.chatRoomId,
+    );
+
+    try {
+      FirebaseNotifications.sendNotificaionToSelectedDriver(
+        widget.receiverFcmToken,
+        "Message",
+        "${currentUser.displayName}: $message",
+        'chat',
+      );
+      debugPrint("Notification success");
+    } catch (e) {
+      debugPrint("Notification failed: $e");
+    }
+
     _scrollToEnd();
   }
 
@@ -322,7 +372,9 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
             onPressed: () {
               if (messageController.text.isNotEmpty) {
-                sendMessage();
+                String message = messageController.text;
+                messageController.clear();
+                sendMessage(message);
               }
             },
             icon: CircleAvatar(

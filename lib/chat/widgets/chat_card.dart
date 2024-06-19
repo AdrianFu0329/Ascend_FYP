@@ -36,32 +36,6 @@ class _ChatCardState extends State<ChatCard> {
     super.initState();
   }
 
-  Future<void> updateIsRead(String chatRoomId) async {
-    DocumentReference chatRef =
-        FirebaseFirestore.instance.collection('chats').doc(chatRoomId);
-
-    try {
-      DocumentSnapshot chatSnapshot = await chatRef.get();
-
-      if (chatSnapshot.exists) {
-        Map<String, dynamic> chatData =
-            chatSnapshot.data() as Map<String, dynamic>;
-        bool isSender = currentUser.uid == chatData["senderId"];
-        if (isSender) {
-          chatRef.update({
-            'senderRead': true,
-          });
-        } else {
-          chatRef.update({
-            'receiverRead': true,
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint("Failed to update read status for user: $e");
-    }
-  }
-
   String fromDateToString(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
     DateTime now = DateTime.now();
@@ -178,7 +152,6 @@ class _ChatCardState extends State<ChatCard> {
 
                 return GestureDetector(
                   onTap: () async {
-                    await updateIsRead(widget.chatRoomId);
                     Navigator.of(context).push(
                       SlidingNav(
                         builder: (context) => ChatScreen(
@@ -219,7 +192,6 @@ class _ChatCardState extends State<ChatCard> {
                                       photoURL: photoUrl,
                                       radius: 25,
                                       onTap: () async {
-                                        await updateIsRead(widget.chatRoomId);
                                         Navigator.of(context).push(
                                           SlidingNav(
                                             builder: (context) => ChatScreen(

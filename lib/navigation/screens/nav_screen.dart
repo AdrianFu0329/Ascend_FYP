@@ -3,6 +3,8 @@ import 'package:ascend_fyp/social%20media/screens/create/media_picker_screen.dar
 import 'package:ascend_fyp/social%20media/screens/home_screen.dart';
 import 'package:ascend_fyp/chat/screens/messages_screen.dart';
 import 'package:ascend_fyp/profile/screens/details/profile_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class NavScreen extends StatefulWidget {
@@ -18,6 +20,7 @@ class NavScreen extends StatefulWidget {
 
 class _NavScreenState extends State<NavScreen> {
   int _selectedIndex = 0;
+  final currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -32,6 +35,34 @@ class _NavScreenState extends State<NavScreen> {
   void _navigate(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  Stream<int> _fetchUnreadChatCount() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser!.uid)
+        .collection('chats')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((querySnapshot) {
+      int unreadCount = 0;
+
+      for (var doc in querySnapshot.docs) {
+        var data = doc.data();
+        String receiverId = data['receiverId'] as String;
+        bool receiverRead = data['receiverRead'] as bool;
+        String senderId = data['senderId'] as String;
+        bool senderRead = data['senderRead'] as bool;
+
+        if (currentUser!.uid == receiverId && !receiverRead) {
+          unreadCount++;
+        } else if (currentUser!.uid == senderId && !senderRead) {
+          unreadCount++;
+        }
+      }
+
+      return unreadCount;
     });
   }
 
@@ -94,29 +125,66 @@ class _NavScreenState extends State<NavScreen> {
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
         ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: _selectedIndex,
-          onTap: _navigate,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          items: _navigationItems.map(
-            (item) {
-              return BottomNavigationBarItem(
-                icon: Image.asset(
-                  _selectedIndex == _navigationItems.indexOf(item)
-                      ? item['selected']
-                      : item['unselected'],
-                  width: _iconSizes[item['sizeKey']],
-                  height: _iconSizes[item['sizeKey']],
-                ),
-                label: item['label'],
-              );
-            },
-          ).toList(),
-          selectedItemColor: const Color.fromRGBO(247, 243, 237, 1),
-          unselectedItemColor: const Color.fromRGBO(247, 243, 237, 1),
-          selectedFontSize: 10,
-          unselectedFontSize: 9,
+        child: StreamBuilder<int>(
+          stream: _fetchUnreadChatCount(),
+          builder: (context, snapshot) {
+            int unreadChatCount = snapshot.data ?? 0;
+
+            return BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              currentIndex: _selectedIndex,
+              onTap: _navigate,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              items: _navigationItems.map(
+                (item) {
+                  return BottomNavigationBarItem(
+                    icon: Stack(
+                      children: [
+                        Image.asset(
+                          _selectedIndex == _navigationItems.indexOf(item)
+                              ? item['selected']
+                              : item['unselected'],
+                          width: _iconSizes[item['sizeKey']],
+                          height: _iconSizes[item['sizeKey']],
+                        ),
+                        if (_navigationItems.indexOf(item) == 1 &&
+                            unreadChatCount > 0)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '$unreadChatCount',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    label: item['label'],
+                  );
+                },
+              ).toList(),
+              selectedItemColor: const Color.fromRGBO(247, 243, 237, 1),
+              unselectedItemColor: const Color.fromRGBO(247, 243, 237, 1),
+              selectedFontSize: 10,
+              unselectedFontSize: 9,
+            );
+          },
         ),
       ),
     );
