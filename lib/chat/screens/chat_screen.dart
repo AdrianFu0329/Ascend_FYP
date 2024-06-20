@@ -103,18 +103,12 @@ class _ChatScreenState extends State<ChatScreen> {
       message,
       widget.chatRoomId,
     );
-
-    try {
       FirebaseNotifications.sendNotificaionToSelectedDriver(
         widget.receiverFcmToken,
         "Message",
         "${currentUser.displayName}: $message",
         'chat',
       );
-      debugPrint("Notification success");
-    } catch (e) {
-      debugPrint("Notification failed: $e");
-    }
 
     _scrollToEnd();
   }

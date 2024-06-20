@@ -9,9 +9,11 @@ import 'package:flutter/material.dart';
 
 class NavScreen extends StatefulWidget {
   final int? index;
+  final int? tab;
   const NavScreen({
     super.key,
     this.index,
+    this.tab,
   });
 
   @override
@@ -115,7 +117,7 @@ class _NavScreenState extends State<NavScreen> {
       const HomeScreen(),
       const MessagesScreen(),
       const MediaPickerScreen(),
-      const CommunityScreen(),
+      CommunityScreen(startingTab: widget.tab ?? 0),
       const ProfileScreen(),
     ];
     return Scaffold(

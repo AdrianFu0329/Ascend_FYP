@@ -8,10 +8,14 @@ import 'package:flutter/material.dart';
 class GroupEventsScreen extends StatefulWidget {
   final String groupId;
   final String groupSport;
+  final List<dynamic> groupMembers;
+  final String groupName;
   const GroupEventsScreen({
     super.key,
     required this.groupId,
     required this.groupSport,
+    required this.groupMembers,
+    required this.groupName,
   });
 
   @override
@@ -131,6 +135,8 @@ class _GroupEventsScreenState extends State<GroupEventsScreen> {
                           modalBottomSheet(CreateGroupEventsScreen(
                             groupId: widget.groupId,
                             groupSport: widget.groupSport,
+                            groupMembers: widget.groupMembers,
+                            groupName: widget.groupName,
                           ));
                         },
                         icon: const Icon(Icons.add),

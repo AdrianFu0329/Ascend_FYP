@@ -67,6 +67,8 @@ class _MyAppState extends State<MyApp> {
 
       if (type == 'chat') {
         Navigator.pushNamed(context, '/messages');
+      } else if (type == 'group') {
+        Navigator.pushNamed(context, '/group');
       } else {
         Navigator.pushNamed(context, '/start');
       }
@@ -78,6 +80,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       routes: {
         '/start': (context) => const NavScreen(),
+        '/group': (context) => const NavScreen(index: 3, tab: 1),
         '/messages': (context) => const NavScreen(index: 1),
       },
       home: const SplashScreen(),

@@ -4,7 +4,11 @@ import 'package:ascend_fyp/general%20widgets/circle_tab_indicator.dart';
 import 'package:flutter/material.dart';
 
 class CommunityScreen extends StatefulWidget {
-  const CommunityScreen({super.key});
+  final int startingTab;
+  const CommunityScreen({
+    super.key,
+    required this.startingTab,
+  });
 
   @override
   State<CommunityScreen> createState() => _CommunityScreenState();
@@ -16,7 +20,11 @@ class _CommunityScreenState extends State<CommunityScreen>
 
   @override
   void initState() {
-    tabController = TabController(vsync: this, length: 2);
+    tabController = TabController(
+      vsync: this,
+      length: 2,
+      initialIndex: widget.startingTab,
+    );
     super.initState();
   }
 

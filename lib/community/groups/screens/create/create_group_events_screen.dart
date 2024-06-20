@@ -1,3 +1,5 @@
+import 'package:ascend_fyp/database/firebase_notifications.dart';
+import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/location/screens/set_location_screen.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
@@ -11,11 +13,15 @@ import 'package:intl/intl.dart';
 
 class CreateGroupEventsScreen extends StatefulWidget {
   final String groupId;
+  final String groupName;
   final String groupSport;
+  final List<dynamic> groupMembers;
   const CreateGroupEventsScreen({
     super.key,
     required this.groupId,
     required this.groupSport,
+    required this.groupMembers,
+    required this.groupName,
   });
 
   @override
@@ -305,6 +311,19 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
             "Event Participation Reminder",
             "Event reminder has been set for $eventTitle sports event at $eventLocation at $formattedTime",
           );
+
+          // Send notification to group members
+          for (String members in widget.groupMembers) {
+            final userData = await getUserData(members);
+            final receiverFcmToken = userData['fcmToken'];
+
+            FirebaseNotifications.sendNotificaionToSelectedDriver(
+              receiverFcmToken,
+              "New Community Group Event",
+              "A group event has been created for your community group '${widget.groupName}'.",
+              'group',
+            );
+          }
         } else {
           debugPrint("Group event data not found");
         }
