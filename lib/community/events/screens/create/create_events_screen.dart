@@ -451,7 +451,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
-                      height: 300, // Adjusted height
+                      height: 300,
                       child: CreationSportsList(
                         onSelectionChanged: (selected) {
                           setState(() {
@@ -518,7 +518,8 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Flexible(
+                    SizedBox(
+                      width: double.infinity,
                       child: TextField(
                         controller: dateController,
                         decoration: InputDecoration(
@@ -554,7 +555,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Flexible(
+                        Expanded(
                           child: TextField(
                             controller: startTimeController,
                             decoration: InputDecoration(
@@ -589,7 +590,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                             },
                           ),
                         ),
-                        Flexible(
+                        Expanded(
                           child: TextField(
                             controller: endTimeController,
                             decoration: InputDecoration(

@@ -522,7 +522,8 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Flexible(
+                    SizedBox(
+                      width: double.infinity,
                       child: TextField(
                         controller: dateController,
                         decoration: InputDecoration(
@@ -558,7 +559,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Flexible(
+                        Expanded(
                           child: TextField(
                             controller: startTimeController,
                             decoration: InputDecoration(
@@ -593,7 +594,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
                             },
                           ),
                         ),
-                        Flexible(
+                        Expanded(
                           child: TextField(
                             controller: endTimeController,
                             decoration: InputDecoration(

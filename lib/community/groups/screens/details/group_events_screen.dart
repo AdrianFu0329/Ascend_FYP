@@ -132,12 +132,14 @@ class _GroupEventsScreenState extends State<GroupEventsScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          modalBottomSheet(CreateGroupEventsScreen(
-                            groupId: widget.groupId,
-                            groupSport: widget.groupSport,
-                            groupMembers: widget.groupMembers,
-                            groupName: widget.groupName,
-                          ));
+                          modalBottomSheet(
+                            CreateGroupEventsScreen(
+                              groupId: widget.groupId,
+                              groupSport: widget.groupSport,
+                              groupMembers: widget.groupMembers,
+                              groupName: widget.groupName,
+                            ),
+                          );
                         },
                         icon: const Icon(Icons.add),
                         color: Colors.red,
