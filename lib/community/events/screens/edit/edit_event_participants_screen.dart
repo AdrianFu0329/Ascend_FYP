@@ -3,6 +3,7 @@ import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/user_details_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class EditEventParticipantsScreen extends StatefulWidget {
@@ -26,14 +27,17 @@ class _EditEventParticipantsScreenState
     extends State<EditEventParticipantsScreen> {
   late List<dynamic> acceptedList;
   bool isUpdating = false;
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
     super.initState();
     acceptedList = List.from(widget.acceptedList);
+    acceptedList.remove(currentUser.uid);
   }
 
-  void _showMessage(String message) {
+  void _showMessage(String message, bool confirm,
+      {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -47,12 +51,32 @@ class _EditEventParticipantsScreenState
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                if (confirm) {
+                  if (onYesPressed != null) {
+                    onYesPressed();
+                  }
+                } else {
+                  if (onOKPressed != null) {
+                    onOKPressed();
+                  }
+                }
               },
               child: Text(
-                'OK',
+                confirm ? 'Yes' : 'OK',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
+            confirm
+                ? TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'No',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  )
+                : Container(),
           ],
         );
       },
@@ -79,13 +103,14 @@ class _EditEventParticipantsScreenState
       setState(() {
         isUpdating = false;
       });
-      _showMessage('Event participants updated successfully!');
+      _showMessage('Event participants updated successfully!', false);
     } catch (error) {
       setState(() {
         isUpdating = false;
       });
       _showMessage(
-          'An error occurred. Failed to update event participants: $error');
+          'An error occurred. Failed to update event participants: $error',
+          false);
     }
   }
 
@@ -104,6 +129,7 @@ class _EditEventParticipantsScreenState
             if (didPop) {
               return;
             }
+            acceptedList.add(currentUser.uid);
             Navigator.of(context).pop(
               {
                 'acceptedList': acceptedList,
@@ -116,6 +142,7 @@ class _EditEventParticipantsScreenState
               color: Color.fromRGBO(247, 243, 237, 1),
             ),
             onPressed: () {
+              acceptedList.add(currentUser.uid);
               Navigator.of(context).pop(
                 {
                   'acceptedList': acceptedList,
@@ -177,11 +204,15 @@ class _EditEventParticipantsScreenState
                               color: Colors.red,
                             ),
                             onPressed: () {
-                              setState(() {
-                                participantsList.remove(userId);
-                                acceptedList = participantsList;
+                              _showMessage(
+                                  "Are you sure you want to remove ${userData['username']} from your event?",
+                                  true, onYesPressed: () {
+                                setState(() {
+                                  participantsList.remove(userId);
+                                  acceptedList = participantsList;
+                                });
+                                updateFields();
                               });
-                              updateFields();
                             },
                           ),
                         );
