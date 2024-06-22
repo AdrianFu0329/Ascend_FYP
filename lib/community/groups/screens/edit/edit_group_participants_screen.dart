@@ -3,6 +3,7 @@ import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/user_details_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class EditGroupParticipantsScreen extends StatefulWidget {
@@ -24,14 +25,17 @@ class _EditGroupParticipantsScreenState
     extends State<EditGroupParticipantsScreen> {
   late List<dynamic> memberList;
   bool isUpdating = false;
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
     super.initState();
     memberList = List.from(widget.memberList);
+    memberList.remove(currentUser.uid);
   }
 
-  void _showMessage(String message) {
+  void _showMessage(String message, bool confirm,
+      {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -45,12 +49,32 @@ class _EditGroupParticipantsScreenState
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                if (confirm) {
+                  if (onYesPressed != null) {
+                    onYesPressed();
+                  }
+                } else {
+                  if (onOKPressed != null) {
+                    onOKPressed();
+                  }
+                }
               },
               child: Text(
-                'OK',
+                confirm ? 'Yes' : 'OK',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
+            confirm
+                ? TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'No',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  )
+                : Container(),
           ],
         );
       },
@@ -76,13 +100,14 @@ class _EditGroupParticipantsScreenState
       setState(() {
         isUpdating = false;
       });
-      _showMessage('Group participants updated successfully!');
+      _showMessage('Group participants updated successfully!', false);
     } catch (error) {
       setState(() {
         isUpdating = false;
       });
       _showMessage(
-          'An error occurred. Failed to update group participants: $error');
+          'An error occurred. Failed to update group participants: $error',
+          false);
     }
   }
 
@@ -92,7 +117,7 @@ class _EditGroupParticipantsScreenState
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
-          'Event Participants',
+          'Group Participants',
           style: Theme.of(context).textTheme.titleLarge!,
         ),
         leading: PopScope(
@@ -101,6 +126,7 @@ class _EditGroupParticipantsScreenState
             if (didPop) {
               return;
             }
+            memberList.add(currentUser.uid);
             Navigator.of(context).pop(
               {
                 'memberList': memberList,
@@ -113,6 +139,7 @@ class _EditGroupParticipantsScreenState
               color: Color.fromRGBO(247, 243, 237, 1),
             ),
             onPressed: () {
+              memberList.add(currentUser.uid);
               Navigator.of(context).pop(
                 {
                   'memberList': memberList,
@@ -138,6 +165,7 @@ class _EditGroupParticipantsScreenState
                 }
 
                 final List<dynamic> membersList = snapshot.data!['memberList'];
+                membersList.remove(currentUser.uid);
 
                 if (membersList.isEmpty) {
                   return const Center(child: Text('No members found.'));
@@ -172,11 +200,15 @@ class _EditGroupParticipantsScreenState
                               color: Colors.red,
                             ),
                             onPressed: () {
-                              setState(() {
-                                membersList.remove(userId);
-                                memberList = membersList;
+                              _showMessage(
+                                  "Are you sure you want to remove ${userData['username']} from your group?",
+                                  true, onYesPressed: () {
+                                setState(() {
+                                  membersList.remove(userId);
+                                  memberList = membersList;
+                                });
+                                updateFields(userId);
                               });
-                              updateFields(userId);
                             },
                           ),
                         );
