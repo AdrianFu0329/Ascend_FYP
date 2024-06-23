@@ -359,39 +359,17 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     });
 
     try {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
       FirebaseStorage storage = FirebaseStorage.instance;
       FirebaseDatabase database = FirebaseDatabase.instance;
 
-      // Firestore references
-      DocumentReference postDocRef =
-          firestore.collection('posts').doc(widget.postId);
-      CollectionReference commentsCollectionRef =
-          postDocRef.collection('comments');
-
-      // Get all comments for the post in Firestore
-      QuerySnapshot commentsSnapshot = await commentsCollectionRef.get();
-      WriteBatch batch = firestore.batch();
-
-      for (DocumentSnapshot doc in commentsSnapshot.docs) {
-        batch.delete(doc.reference);
-      }
-
-      await batch.commit();
-      await postDocRef.delete();
-
       // Delete post in Realtime Database
-      DatabaseReference postRefNew = database.ref('posts/${widget.postId}');
-      await postRefNew.remove();
-
-      // Delete comments in Realtime Database
-      DatabaseReference commentsRefNew =
-          database.ref('posts/${widget.postId}/comments');
-      await commentsRefNew.remove();
+      DatabaseReference postRef = database.ref('posts/${widget.postId}');
+      await postRef.remove();
 
       // Storage reference to the folder containing images
       Reference imagesFolderRef = storage.ref().child('posts/${widget.postId}');
 
+      // List all files in the images folder and delete them
       ListResult result = await imagesFolderRef.listAll();
       for (Reference fileRef in result.items) {
         await fileRef.delete();
@@ -399,6 +377,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
 
       return true;
     } catch (error) {
+      debugPrint('Error deleting post: $error');
       return false;
     } finally {
       setState(() {

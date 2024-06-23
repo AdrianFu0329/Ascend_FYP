@@ -199,11 +199,7 @@ class _EventScreenState extends State<EventScreen> {
           child: StreamBuilder<QuerySnapshot>(
             stream: eventsStream,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CustomLoadingAnimation(),
-                );
-              } else if (snapshot.hasError) {
+              if (snapshot.hasError) {
                 return Center(
                   child: Text('Error: ${snapshot.error}'),
                 );
