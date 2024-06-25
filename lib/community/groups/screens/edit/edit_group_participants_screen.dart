@@ -168,7 +168,8 @@ class _EditGroupParticipantsScreenState
                 membersList.remove(currentUser.uid);
 
                 if (membersList.isEmpty) {
-                  return const Center(child: Text('No members found.'));
+                  return const Center(
+                      child: Text('No members in this group yet.'));
                 }
 
                 return ListView.builder(

@@ -170,9 +170,11 @@ class _EditEventParticipantsScreenState
 
                 final List<dynamic> participantsList =
                     snapshot.data!['acceptedList'];
+                participantsList.remove(currentUser.uid);
 
                 if (participantsList.isEmpty) {
-                  return const Center(child: Text('No participants found.'));
+                  return const Center(
+                      child: Text('No participants in this event yet.'));
                 }
 
                 return ListView.builder(

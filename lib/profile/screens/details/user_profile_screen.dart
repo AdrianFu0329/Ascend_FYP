@@ -374,6 +374,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                               data['images'] ?? [];
                           VideoPlayerController? videoController =
                               data['videoController'];
+                          String videoURL = data['videoURL'] ?? "Unknown";
                           List<String> likes =
                               List<String>.from(data['likes'] ?? []);
                           String userId = data['userId'];
@@ -396,6 +397,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                   description: description,
                                   location: location,
                                   type: type,
+                                  videoURL: videoURL,
                                 )
                               : MediaCard(
                                   index: index,
@@ -410,6 +412,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                   description: description,
                                   location: location,
                                   type: type,
+                                  videoURL: videoURL,
                                 );
                         },
                         childCount: postList.length,

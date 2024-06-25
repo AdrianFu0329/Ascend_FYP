@@ -18,7 +18,7 @@ class EditEventDetailsScreen extends StatefulWidget {
   final String eventFees;
   final String eventSport;
   final String eventLocation;
-  final String participants;
+  final int participants;
   final String posterURL;
   final bool isOther;
   final bool isGroupEvent;
@@ -71,7 +71,7 @@ class _EditEventDetailsScreenState extends State<EditEventDetailsScreen> {
     eventSportController = TextEditingController(text: widget.eventSport);
     eventLocationController = TextEditingController(text: widget.eventLocation);
     eventParticipantsController =
-        TextEditingController(text: widget.participants);
+        TextEditingController(text: widget.participants.toString());
     eventDateController = TextEditingController(text: widget.eventDate);
     eventStartTimeController =
         TextEditingController(text: widget.eventStartTime);
@@ -149,12 +149,17 @@ class _EditEventDetailsScreenState extends State<EditEventDetailsScreen> {
   }
 
   bool isEditButtonEnabled() {
+    // Check if eventParticipantsController text is a valid integer
+    final int? participantCount =
+        int.tryParse(eventParticipantsController.text.trim());
+
     return eventTitleController.text.isNotEmpty ||
         eventDateController.text.isNotEmpty ||
         eventEndTimeController.text.isNotEmpty ||
         eventFeesController.text.isNotEmpty ||
         eventLocationController.text.isNotEmpty ||
-        eventParticipantsController.text.isNotEmpty ||
+        (eventParticipantsController.text.isNotEmpty &&
+            participantCount != null) ||
         eventSportController.text.isNotEmpty ||
         eventStartTimeController.text.isNotEmpty ||
         eventTitleController.text.isNotEmpty;

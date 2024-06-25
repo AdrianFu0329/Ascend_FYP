@@ -12,7 +12,7 @@ class GroupCard extends StatelessWidget {
   final List<dynamic> memberList;
   final String groupSport;
   final String posterURL;
-  final String participants;
+  final int participants;
   final bool isOther;
 
   const GroupCard({

@@ -199,13 +199,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             if (isLoading)
-              SliverFillRemaining(
+              const SliverFillRemaining(
                 child: Center(
                   child: ContainerLoadingAnimation(),
                 ),
               )
             else if (postList.isEmpty)
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Center(child: Text("No posts available")),
               )
             else
@@ -223,6 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     List<ImageWithDimension> images = data['images'] ?? [];
                     VideoPlayerController? videoController =
                         data['videoController'];
+                    String videoURL = data['videoURL'] ?? "Unknown";
                     List<String> likes = List<String>.from(data['likes'] ?? []);
                     String userId = data['userId'];
                     int timestamp = data['timestamp'];
@@ -243,6 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             description: description,
                             location: location,
                             type: type,
+                            videoURL: videoURL,
                           )
                         : MediaCard(
                             index: index,
@@ -256,6 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             description: description,
                             location: location,
                             type: type,
+                            videoURL: videoURL,
                           );
                   },
                   childCount: postList.length,

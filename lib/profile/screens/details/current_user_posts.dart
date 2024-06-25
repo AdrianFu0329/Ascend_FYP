@@ -125,6 +125,7 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
                   List<ImageWithDimension> images = data['images'] ?? [];
                   VideoPlayerController? videoController =
                       data['videoController'];
+                  String videoURL = data['videoURL'] ?? "Unknown";
                   List<String> likes = List<String>.from(data['likes'] ?? []);
                   String userId = data['userId'];
                   int timestamp = data['timestamp'];
@@ -145,6 +146,7 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
                           description: description,
                           location: location,
                           type: type,
+                          videoURL: videoURL,
                         )
                       : MediaCard(
                           index: index,
@@ -158,6 +160,7 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
                           description: description,
                           location: location,
                           type: type,
+                          videoURL: videoURL,
                         );
                 },
                 childCount: postList.length,

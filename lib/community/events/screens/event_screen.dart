@@ -2,7 +2,6 @@ import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/community/events/screens/create/create_events_screen.dart';
 import 'package:ascend_fyp/general%20pages/filter_options_screen.dart';
 import 'package:ascend_fyp/community/events/widgets/event_card.dart';
-import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -212,12 +211,7 @@ class _EventScreenState extends State<EventScreen> {
                 return FutureBuilder<List<DocumentSnapshot>>(
                   future: sortEventsByDistance(eventsList),
                   builder: (context, sortedSnapshot) {
-                    if (sortedSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return const Center(
-                        child: CustomLoadingAnimation(),
-                      );
-                    } else if (sortedSnapshot.hasError) {
+                    if (sortedSnapshot.hasError) {
                       return Center(
                         child: Text('Error: ${sortedSnapshot.error}'),
                       );

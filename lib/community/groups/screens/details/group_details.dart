@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class GroupDetails extends StatefulWidget {
   final String groupId;
   final List<dynamic> memberList;
-  final String participants;
+  final int participants;
 
   const GroupDetails({
     super.key,

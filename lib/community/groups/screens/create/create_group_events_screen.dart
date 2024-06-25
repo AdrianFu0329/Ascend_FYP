@@ -104,6 +104,15 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
       if (participantsController.text.trim().isEmpty) {
         _showMessage('Please enter a participant count.');
         return false;
+      } else {
+        // Check if participants count is an integer
+        final int? participantCount =
+            int.tryParse(participantsController.text.trim());
+        if (participantCount == null) {
+          _showMessage(
+              'Please enter a valid number for the participant count.');
+          return false;
+        }
       }
 
       if (feesController.text.trim().isEmpty) {
@@ -360,7 +369,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
               'eventId': eventId,
               'groupId': widget.groupId,
               'title': titleController.text.trim(),
-              'participants': participantsController.text.trim(),
+              'participants': int.parse(participantsController.text.trim()),
               'fees': feesController.text.trim(),
               'userId': FirebaseAuth.instance.currentUser!.uid,
               'date': dateController.text.trim(),

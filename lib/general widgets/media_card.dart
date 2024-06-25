@@ -20,6 +20,7 @@ class MediaCard extends StatefulWidget {
   final String description;
   final String location;
   final String type;
+  final String videoURL;
 
   const MediaCard({
     super.key,
@@ -33,6 +34,7 @@ class MediaCard extends StatefulWidget {
     required this.description,
     required this.location,
     required this.type,
+    required this.videoURL,
   });
 
   @override
@@ -221,7 +223,7 @@ class MediaCardState extends State<MediaCard> {
       SlidingNav(
         builder: (context) => MediaPostScreen(
           postId: widget.postId,
-          media: widget.media,
+          media: widget.type == "Video" ? widget.videoURL : widget.media,
           title: widget.title,
           userId: widget.userId,
           likes: widget.likes,

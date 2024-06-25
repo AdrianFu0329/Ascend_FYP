@@ -19,7 +19,7 @@ class EventCard extends StatelessWidget {
   final String eventSport;
   final String eventLocation;
   final String posterURL;
-  final String participants;
+  final int participants;
   final bool isOther;
   final bool isGroupEvent;
 
@@ -46,7 +46,7 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void _navigateToEventDetailsScreen() {
+    void navigateToEventDetailsScreen() {
       Navigator.of(context).push(
         SlidingNav(
           builder: (context) => EventDetailsScreen(
@@ -155,7 +155,7 @@ class EventCard extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: _navigateToEventDetailsScreen,
+      onTap: navigateToEventDetailsScreen,
       child: buildCard(),
     );
   }

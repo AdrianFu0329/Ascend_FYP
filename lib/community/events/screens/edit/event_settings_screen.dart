@@ -15,7 +15,7 @@ class EventSettingsScreen extends StatefulWidget {
   final String eventFees;
   final String eventSport;
   final String eventLocation;
-  final String participants;
+  final int participants;
   final String posterURL;
   final List<dynamic> acceptedList;
   final List<dynamic> attendanceList;
@@ -53,7 +53,7 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
   late String eventSport;
   late String eventStartTime;
   late String eventTitle;
-  late String participants;
+  late int participants;
   late String posterURL;
   late List<dynamic> acceptedList;
   late bool isOther;

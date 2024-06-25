@@ -20,7 +20,7 @@ class GroupDetailsScreen extends StatefulWidget {
   final List<dynamic> memberList;
   final String groupSport;
   final String posterURL;
-  final String participants;
+  final int participants;
   final bool isOther;
 
   const GroupDetailsScreen({
@@ -48,7 +48,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
   final currentUser = FirebaseAuth.instance.currentUser!;
   late String groupSport;
   late String groupTitle;
-  late String participants;
+  late int participants;
   late String posterURL;
   late List<dynamic> memberList;
   late bool isOther;

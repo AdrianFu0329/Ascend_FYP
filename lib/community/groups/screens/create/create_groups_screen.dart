@@ -60,6 +60,14 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
       if (participantsController.text.trim().isEmpty) {
         showMessage('Please enter a desired group member count.');
         return false;
+      } else {
+        // Check if participants count is an integer
+        final int? participantCount =
+            int.tryParse(participantsController.text.trim());
+        if (participantCount == null) {
+          showMessage('Please enter a valid number for the participant count.');
+          return false;
+        }
       }
 
       if (selectedSports == null && otherController.text.trim().isEmpty) {
@@ -131,7 +139,7 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
             final Map<String, dynamic> groupData = {
               'groupId': groupId,
               'name': nameController.text.trim(),
-              'participants': participantsController.text.trim(),
+              'participants': int.parse(participantsController.text.trim()),
               'ownerUserId': FirebaseAuth.instance.currentUser!.uid,
               'sports': selectedSports,
               'timestamp': Timestamp.now(),

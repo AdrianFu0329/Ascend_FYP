@@ -10,7 +10,7 @@ class EditGroupDetailsScreen extends StatefulWidget {
   final String groupId;
   final String groupTitle;
   final String groupSport;
-  final String participants;
+  final int participants;
   final String posterURL;
   final bool isOther;
 
@@ -46,7 +46,7 @@ class _EditGroupDetailsScreenState extends State<EditGroupDetailsScreen> {
     super.initState();
     groupTitleController = TextEditingController(text: widget.groupTitle);
     groupParticipantsController =
-        TextEditingController(text: widget.participants);
+        TextEditingController(text: widget.participants.toString());
     groupSportController = TextEditingController(text: widget.groupSport);
     isOtherGroup = widget.isOther;
     otherController = widget.isOther
@@ -120,8 +120,13 @@ class _EditGroupDetailsScreenState extends State<EditGroupDetailsScreen> {
   }
 
   bool isEditButtonEnabled() {
+    // Check if eventParticipantsController text is a valid integer
+    final int? participantCount =
+        int.tryParse(groupParticipantsController.text.trim());
+
     return groupTitleController.text.isNotEmpty ||
-        groupParticipantsController.text.isNotEmpty ||
+        (groupParticipantsController.text.isNotEmpty &&
+            participantCount != null) ||
         groupSportController.text.isNotEmpty;
   }
 

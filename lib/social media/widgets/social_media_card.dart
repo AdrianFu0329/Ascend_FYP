@@ -20,6 +20,7 @@ class SocialMediaCard extends StatefulWidget {
   final String description;
   final String location;
   final String type;
+  final String videoURL;
 
   const SocialMediaCard({
     super.key,
@@ -33,6 +34,7 @@ class SocialMediaCard extends StatefulWidget {
     required this.description,
     required this.location,
     required this.type,
+    required this.videoURL,
   });
 
   @override
@@ -238,7 +240,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
     final isVideoPlaying = await MediaPostScreen.show(
       context,
       postId: widget.postId,
-      media: widget.media,
+      media: widget.videoURL,
       title: widget.title,
       userId: widget.userId,
       likes: widget.likes,

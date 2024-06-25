@@ -8,7 +8,7 @@ class GroupSettingsScreen extends StatefulWidget {
   final String groupId;
   final String groupTitle;
   final String groupSport;
-  final String participants;
+  final int participants;
   final String posterURL;
   final List<dynamic> memberList;
   final bool isOther;
@@ -31,7 +31,7 @@ class GroupSettingsScreen extends StatefulWidget {
 class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
   late String groupSport;
   late String groupTitle;
-  late String participants;
+  late int participants;
   late String posterURL;
   late List<dynamic> memberList;
   late bool isOther;
