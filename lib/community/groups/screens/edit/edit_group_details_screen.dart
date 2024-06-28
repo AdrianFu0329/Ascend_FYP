@@ -273,7 +273,7 @@ class _EditGroupDetailsScreenState extends State<EditGroupDetailsScreen> {
                           }
                         },
                         child: Text(
-                          'Update Event',
+                          'Update Group',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
