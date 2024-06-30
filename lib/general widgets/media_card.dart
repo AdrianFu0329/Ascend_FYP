@@ -79,7 +79,6 @@ class MediaCardState extends State<MediaCard> {
   void dispose() {
     if (widget.type == 'Video' && videoController != null) {
       videoController!.pause();
-      videoController!.dispose();
     }
     super.dispose();
   }
