@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/general%20widgets/post_loading_widget.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
@@ -108,7 +109,7 @@ class MediaCardState extends State<MediaCard> {
       future: getUserData(widget.userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container();
+          return const PostLoadingWidget();
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {

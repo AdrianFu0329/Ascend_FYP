@@ -199,16 +199,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             if (isLoading)
-              const SliverFillRemaining(
-                child: Center(
-                  child: ContainerLoadingAnimation(),
+              SliverFillRemaining(
+                child: Container(
+                  color: Colors.black.withOpacity(0.7),
+                  child: const Center(
+                    child: ContainerLoadingAnimation(),
+                  ),
                 ),
               )
             else if (postList.isEmpty)
               const SliverToBoxAdapter(
                 child: Center(child: Text("No posts available")),
               )
-            else
+            else if (postList.length >= 5)
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 sliver: SliverMasonryGrid.count(
@@ -262,6 +265,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                   },
                   childCount: postList.length,
+                ),
+              )
+            else
+              const SliverToBoxAdapter(
+                child: Center(
+                  child: Text(
+                    "Loading more posts...",
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
