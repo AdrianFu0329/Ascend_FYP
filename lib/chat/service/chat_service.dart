@@ -1,24 +1,27 @@
+import 'dart:io';
 import 'package:ascend_fyp/models/message.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/chat/screens/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ChatService extends ChangeNotifier {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
   final currentUser = FirebaseAuth.instance.currentUser!;
 
   // Update is read status
   Future<void> updateIsRead(String chatRoomId, String receiverUserId) async {
-    DocumentReference currentChatRef = FirebaseFirestore.instance
+    DocumentReference currentChatRef = firestore
         .collection('users')
         .doc(currentUser.uid)
         .collection('chats')
         .doc(chatRoomId);
 
-    DocumentReference receiverChatRef = FirebaseFirestore.instance
+    DocumentReference receiverChatRef = firestore
         .collection('users')
         .doc(receiverUserId)
         .collection('chats')
@@ -54,7 +57,7 @@ class ChatService extends ChangeNotifier {
     }
   }
 
-  //Send Messages
+  // Send Messages
   Future<void> sendMessage(
       String receiverId, String message, String chatRoomId) async {
     try {
@@ -66,6 +69,7 @@ class ChatService extends ChangeNotifier {
         receiverId: receiverId,
         message: message,
         timestamp: timestamp,
+        type: "text",
       );
 
       await updateIsRead(chatRoomId, receiverId);
@@ -112,7 +116,75 @@ class ChatService extends ChangeNotifier {
     }
   }
 
-  //Get Messages
+  // Send Image Message
+  Future<void> sendImageMessage(
+      String receiverId, String imageUrl, String chatRoomId) async {
+    try {
+      final String currentUserId = firebaseAuth.currentUser!.uid;
+      final Timestamp timestamp = Timestamp.now();
+
+      Message newMsg = Message(
+        senderId: currentUserId,
+        receiverId: receiverId,
+        message: imageUrl,
+        timestamp: timestamp,
+        type: 'image',
+      );
+
+      await updateIsRead(chatRoomId, receiverId);
+
+      // Write image message to current user doc
+      await firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('chats')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add(newMsg.toMap());
+
+      // Write image message to receiver user doc
+      await firestore
+          .collection('users')
+          .doc(receiverId)
+          .collection('chats')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add(newMsg.toMap());
+
+      // Update timestamp for chatroom in current user docs
+      DocumentReference currentChatRef = firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('chats')
+          .doc(chatRoomId);
+      await currentChatRef.update({
+        'timestamp': Timestamp.now(),
+      });
+
+      // Update timestamp for chatroom in receiver user docs
+      DocumentReference receiverChatRef = firestore
+          .collection('users')
+          .doc(receiverId)
+          .collection('chats')
+          .doc(chatRoomId);
+      await receiverChatRef.update({
+        'timestamp': Timestamp.now(),
+      });
+    } catch (e) {
+      debugPrint("Error sending image message: $e");
+    }
+  }
+
+  // Upload Image
+  Future<String> uploadImage(File imageFile) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    Reference reference = storage.ref().child('chatImages').child(fileName);
+    UploadTask uploadTask = reference.putFile(imageFile);
+    TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
+    return await snapshot.ref.getDownloadURL();
+  }
+
+  // Get Messages
   Stream<QuerySnapshot> getMessages(
       String userId, String senderUserId, String chatRoomId) {
     return firestore
@@ -147,7 +219,7 @@ class ChatService extends ChangeNotifier {
       };
 
       // Create in current user docs
-      FirebaseFirestore.instance
+      firestore
           .collection('users')
           .doc(currentUser.uid)
           .collection('chats')
@@ -155,7 +227,7 @@ class ChatService extends ChangeNotifier {
           .set(chatRoomData);
 
       // Create in receiver user docs
-      FirebaseFirestore.instance
+      firestore
           .collection('users')
           .doc(receiverUserId)
           .collection('chats')
@@ -176,7 +248,7 @@ class ChatService extends ChangeNotifier {
         ),
       );
     } catch (e) {
-      debugPrint('Error obtaining creating chat with user: $e');
+      debugPrint('Error creating chat with user: $e');
     }
   }
 }

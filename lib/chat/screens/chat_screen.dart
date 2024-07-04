@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ascend_fyp/chat/service/chat_service.dart';
 import 'package:ascend_fyp/chat/widgets/chat_bubble.dart';
 import 'package:ascend_fyp/database/firebase_notifications.dart';
@@ -7,6 +9,7 @@ import 'package:ascend_fyp/profile/screens/details/user_profile_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -37,6 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
       FirebaseAuth.instance.currentUser!.photoURL ?? "Unknown";
   final ScrollController _scrollController = ScrollController();
   final currentUser = FirebaseAuth.instance.currentUser!;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -103,12 +107,29 @@ class _ChatScreenState extends State<ChatScreen> {
       message,
       widget.chatRoomId,
     );
-      FirebaseNotifications.sendNotificaionToSelectedDriver(
-        widget.receiverFcmToken,
-        "Message",
-        "${currentUser.displayName}: $message",
-        'chat',
-      );
+    FirebaseNotifications.sendNotificaionToSelectedDriver(
+      widget.receiverFcmToken,
+      "Message",
+      "${currentUser.displayName}: $message",
+      'chat',
+    );
+
+    _scrollToEnd();
+  }
+
+  void sendImageMessage(File imageFile) async {
+    String imageUrl = await chatService.uploadImage(imageFile);
+    await chatService.sendImageMessage(
+      widget.receiverUserId,
+      imageUrl,
+      widget.chatRoomId,
+    );
+    FirebaseNotifications.sendNotificaionToSelectedDriver(
+      widget.receiverFcmToken,
+      "Image",
+      "${currentUser.displayName} sent an image",
+      'chat',
+    );
 
     _scrollToEnd();
   }
@@ -142,6 +163,84 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       debugPrint('Failed to delete chat documents without messages: $e');
     }
+  }
+
+  Future<void> pickImage() async {
+    final pickedFile = await showModalBottomSheet<XFile>(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(
+                Icons.photo_library,
+                color: Color.fromRGBO(247, 243, 237, 1),
+              ),
+              title: Text(
+                'Pick from Gallery',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              onTap: () async {
+                final galleryFile =
+                    await _picker.pickImage(source: ImageSource.gallery);
+                Navigator.pop(context, galleryFile);
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.camera_alt,
+                color: Color.fromRGBO(247, 243, 237, 1),
+              ),
+              title: Text(
+                'Take a Photo',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              onTap: () async {
+                final cameraFile =
+                    await _picker.pickImage(source: ImageSource.camera);
+                Navigator.pop(context, cameraFile);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      sendImageMessage(imageFile);
+    }
+  }
+
+  void showFullScreenImage(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(10),
+          child: Stack(
+            children: [
+              Center(
+                child: Image.network(imageUrl),
+              ),
+              Positioned(
+                top: 16,
+                right: 16,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -296,17 +395,42 @@ class _ChatScreenState extends State<ChatScreen> {
         padding: const EdgeInsets.all(8.0),
         child: (data['senderId'] == firebaseAuth.currentUser!.uid)
             ? Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      ChatBubble(
-                        message: data['message'],
-                        isCurrentUser:
-                            (data['senderId'] == firebaseAuth.currentUser!.uid),
-                      ),
+                      if (data['type'] == 'text')
+                        ChatBubble(
+                          message: data['message'],
+                          isCurrentUser: (data['senderId'] ==
+                              firebaseAuth.currentUser!.uid),
+                        )
+                      else if (data['type'] == 'image')
+                        GestureDetector(
+                          onTap: () {
+                            showFullScreenImage(data['message']);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                            constraints: const BoxConstraints(
+                              maxWidth: 200,
+                              maxHeight: 250,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: Image.network(
+                                data['message'],
+                                width: 200,
+                                height: 250,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
                       Text(
                         fromDateToString(data['timestamp']),
                         style: Theme.of(context).textTheme.labelSmall,
@@ -326,21 +450,51 @@ class _ChatScreenState extends State<ChatScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  ProfilePicture(
-                    userId: widget.receiverUserId,
-                    photoURL: widget.receiverPhotoUrl,
-                    radius: 18,
-                    onTap: () {},
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      ProfilePicture(
+                        userId: widget.receiverUserId,
+                        photoURL: widget.receiverPhotoUrl,
+                        radius: 18,
+                        onTap: () {},
+                      ),
+                    ],
                   ),
                   const SizedBox(width: 5),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ChatBubble(
-                        message: data['message'],
-                        isCurrentUser:
-                            (data['senderId'] == firebaseAuth.currentUser!.uid),
-                      ),
+                      if (data['type'] == 'text')
+                        ChatBubble(
+                          message: data['message'],
+                          isCurrentUser: (data['senderId'] ==
+                              firebaseAuth.currentUser!.uid),
+                        )
+                      else if (data['type'] == 'image')
+                        GestureDetector(
+                          onTap: () {
+                            showFullScreenImage(data['message']);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                            constraints: const BoxConstraints(
+                              maxWidth: 200,
+                              maxHeight: 250,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: Image.network(
+                                data['message'],
+                                width: 200,
+                                height: 250,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
                       Text(
                         fromDateToString(data['timestamp']),
                         style: Theme.of(context).textTheme.labelSmall,
@@ -358,6 +512,14 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: const EdgeInsets.all(12.0),
       child: Row(
         children: [
+          IconButton(
+            icon: const Icon(
+              Icons.add_photo_alternate,
+              size: 30,
+              color: Color.fromRGBO(247, 243, 237, 1),
+            ),
+            onPressed: pickImage,
+          ),
           Expanded(
             child: chatTextField(
               messageController,
@@ -376,7 +538,7 @@ class _ChatScreenState extends State<ChatScreen> {
               radius: 25,
               child: Icon(
                 Icons.send_rounded,
-                size: 30,
+                size: 25,
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
             ),

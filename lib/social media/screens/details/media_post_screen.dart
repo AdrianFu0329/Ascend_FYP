@@ -588,63 +588,79 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                                       child: ValueListenableBuilder<bool>(
                                         valueListenable: isPlaying,
                                         builder: (context, isPlaying, child) {
-                                          return AspectRatio(
-                                            aspectRatio: videoController!
-                                                .value.aspectRatio,
-                                            child: Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                VideoPlayer(videoController!),
-                                                if (!isPlaying)
-                                                  const Icon(
-                                                    Icons.play_arrow_rounded,
-                                                    size: 70,
-                                                    color: Colors.white,
+                                          return Stack(
+                                            children: [
+                                              AspectRatio(
+                                                aspectRatio: videoController!
+                                                    .value.aspectRatio,
+                                                child: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    VideoPlayer(
+                                                        videoController!),
+                                                    if (!isPlaying)
+                                                      const Icon(
+                                                        Icons
+                                                            .play_arrow_rounded,
+                                                        size: 70,
+                                                        color: Colors.white,
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Positioned(
+                                                left: 0,
+                                                right: 0,
+                                                bottom: 0,
+                                                child: VideoProgressIndicator(
+                                                  videoController!,
+                                                  allowScrubbing: true,
+                                                  colors: VideoProgressColors(
+                                                    playedColor: Colors.red,
+                                                    bufferedColor:
+                                                        Colors.grey.shade300,
+                                                    backgroundColor:
+                                                        Colors.grey.shade600,
                                                   ),
-                                              ],
-                                            ),
+                                                ),
+                                              ),
+                                            ],
                                           );
                                         },
                                       ),
                                     ),
                                   )
                                 : const CustomLoadingAnimation()
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ImagePageView(
-                                    images: widget.media,
-                                    maxHeight: maxHeight,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        16, 12, 16, 4),
-                                    child: Text(
-                                      widget.title,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                                    child: Text(
-                                      widget.description,
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                    child: Text(
-                                      "$formatted \n$city",
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                  ),
-                                ],
+                            : ImagePageView(
+                                images: widget.media,
+                                maxHeight: maxHeight,
                               ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                              child: Text(
+                                widget.title,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                              child: Text(
+                                widget.description,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                              child: Text(
+                                "$formatted \n$city",
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 24),
                         PostInteractionBar(
                           likes: widget.likes,

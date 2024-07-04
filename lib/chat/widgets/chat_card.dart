@@ -54,12 +54,16 @@ class _ChatCardState extends State<ChatCard> {
     }
   }
 
-  String shortenMessage(String message) {
-    List<String> words = message.split(' ');
-    if (words.length <= 5) {
-      return message;
+  String shortenMessage(String message, String type) {
+    if (type == "image") {
+      return "Image";
     } else {
-      return '${words.sublist(0, 5).join(' ')}...';
+      List<String> words = message.split(' ');
+      if (words.length <= 5) {
+        return message;
+      } else {
+        return '${words.sublist(0, 5).join(' ')}...';
+      }
     }
   }
 
@@ -179,7 +183,10 @@ class _ChatCardState extends State<ChatCard> {
                       } else {
                         var messageDoc = snapshot.data!.docs.first;
                         String lastMessage = messageDoc['message'] ?? '';
-                        String shortenedMessage = shortenMessage(lastMessage);
+                        String shortenedMessage = shortenMessage(
+                          lastMessage,
+                          messageDoc['type'],
+                        );
 
                         return Card(
                           color: Theme.of(context).scaffoldBackgroundColor,
@@ -210,9 +217,20 @@ class _ChatCardState extends State<ChatCard> {
                                     username,
                                     style: usernameStyle,
                                   ),
-                                  subtitle: Text(
-                                    shortenedMessage,
-                                    style: messageStyle,
+                                  subtitle: Row(
+                                    children: [
+                                      (messageDoc['type'] == "image")
+                                          ? Icon(
+                                              Icons.image,
+                                              color: Colors.grey[400],
+                                            )
+                                          : Container(),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        shortenedMessage,
+                                        style: messageStyle,
+                                      ),
+                                    ],
                                   ),
                                   trailing: Text(
                                     fromDateToString(widget.timestamp),
@@ -239,9 +257,21 @@ class _ChatCardState extends State<ChatCard> {
                                     username,
                                     style: unreadUsernameStyle,
                                   ),
-                                  subtitle: Text(
-                                    shortenedMessage,
-                                    style: unreadMessageStyle,
+                                  subtitle: Row(
+                                    children: [
+                                      (messageDoc['type'] == "image")
+                                          ? const Icon(
+                                              Icons.image,
+                                              color: Color.fromRGBO(
+                                                  247, 243, 237, 1),
+                                            )
+                                          : Container(),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        shortenedMessage,
+                                        style: unreadMessageStyle,
+                                      ),
+                                    ],
                                   ),
                                   trailing: Text(
                                     fromDateToString(widget.timestamp),
