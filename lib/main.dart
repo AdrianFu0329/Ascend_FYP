@@ -26,6 +26,8 @@ void main() async {
   runApp(const MyApp());
 }
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -60,17 +62,14 @@ class _MyAppState extends State<MyApp> {
 
   void _handleMessageNavigation(RemoteMessage message) {
     if (message.data.isNotEmpty) {
-      final Map<String, dynamic> data = message.data;
-
-      // Extract the type from the data payload
-      final String? type = data['data']['type'];
+      final String? type = message.data['type'];
 
       if (type == 'chat') {
-        Navigator.pushNamed(context, '/messages');
+        navigatorKey.currentState?.pushNamed('/messages');
       } else if (type == 'group') {
-        Navigator.pushNamed(context, '/group');
+        navigatorKey.currentState?.pushNamed('/group');
       } else {
-        Navigator.pushNamed(context, '/start');
+        navigatorKey.currentState?.pushNamed('/start');
       }
     }
   }
@@ -78,6 +77,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       routes: {
         '/start': (context) => const NavScreen(),
         '/group': (context) => const NavScreen(index: 3, tab: 1),

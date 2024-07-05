@@ -3,6 +3,7 @@ import 'package:ascend_fyp/community/groups/screens/create/create_group_events_s
 import 'package:ascend_fyp/community/events/widgets/event_card.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class GroupEventsScreen extends StatefulWidget {
@@ -115,6 +116,7 @@ class _GroupEventsScreenState extends State<GroupEventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: Theme.of(context).cardColor,
       body: CustomScrollView(
@@ -130,21 +132,23 @@ class _GroupEventsScreenState extends State<GroupEventsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      IconButton(
-                        onPressed: () {
-                          modalBottomSheet(
-                            CreateGroupEventsScreen(
-                              groupId: widget.groupId,
-                              groupSport: widget.groupSport,
-                              groupMembers: widget.groupMembers,
-                              groupName: widget.groupName,
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.add),
-                        color: Colors.red,
-                        iconSize: 24,
-                      ),
+                      (widget.groupMembers.contains(currentUser!.uid))
+                          ? IconButton(
+                              onPressed: () {
+                                modalBottomSheet(
+                                  CreateGroupEventsScreen(
+                                    groupId: widget.groupId,
+                                    groupSport: widget.groupSport,
+                                    groupMembers: widget.groupMembers,
+                                    groupName: widget.groupName,
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.add),
+                              color: Colors.red,
+                              iconSize: 24,
+                            )
+                          : Container(),
                     ],
                   ),
                 ),
