@@ -131,7 +131,8 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
         scaffoldBackgroundColor: const Color.fromRGBO(20, 23, 26, 1),
-        cardColor: const Color.fromRGBO(32, 47, 57, 1),
+        canvasColor: const Color.fromRGBO(32, 47, 57, 1),
+        cardColor: const Color.fromRGBO(40, 46, 52, 1),
       ),
     );
   }

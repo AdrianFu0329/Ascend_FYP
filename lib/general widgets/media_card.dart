@@ -88,7 +88,9 @@ class MediaCardState extends State<MediaCard> {
     try {
       setState(() {
         videoController = widget.media;
-        videoHeight = videoController!.value.size.height;
+        videoHeight = videoController!.value.size.height > 200
+            ? 200
+            : videoController!.value.size.height;
         videoAspectRatio = videoController!.value.aspectRatio;
       });
 
@@ -129,39 +131,39 @@ class MediaCardState extends State<MediaCard> {
   Widget _buildCard(String username, String photoUrl) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(10),
         color: Theme.of(context).cardColor,
       ),
-      height: 300,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: SizedBox(
-                    height: widget.type == 'Video' ? videoHeight : imageHeight,
-                    child: widget.type == 'Images'
-                        ? (firstImage != null
-                            ? CachedNetworkImage(
-                                imageUrl: firstImage!.imageURL,
-                                placeholder: (context, url) =>
-                                    const CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
-                              )
-                            : Container())
-                        : videoController != null &&
-                                videoController!.value.isInitialized
-                            ? AspectRatio(
-                                aspectRatio: videoAspectRatio!,
-                                child: VideoPlayer(videoController!),
-                              )
-                            : Container(),
-                  ),
+          Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Center(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(10)),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: widget.type == 'Images'
+                      ? (firstImage != null
+                          ? CachedNetworkImage(
+                              imageUrl: firstImage!.imageURL,
+                              placeholder: (context, url) =>
+                                  const CircularProgressIndicator(),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                              fit: BoxFit.cover,
+                              height: imageHeight,
+                            )
+                          : Container())
+                      : videoController != null &&
+                              videoController!.value.isInitialized
+                          ? AspectRatio(
+                              aspectRatio: videoAspectRatio!,
+                              child: VideoPlayer(videoController!),
+                            )
+                          : Container(),
                 ),
               ),
             ),
