@@ -366,77 +366,86 @@ class _MediaPickerScreenState extends State<MediaPickerScreen>
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text(
-          'Create Post',
-          style: Theme.of(context).textTheme.titleLarge!,
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: ElevatedButton(
-              onPressed: () {
-                if (hasMedia()) {
-                  Navigator.of(context).push(
-                    SlidingNav(
-                      builder: (context) => CreatePostScreen(
-                        images: _images,
-                        video: _video,
-                      ),
-                    ),
-                  );
-                }
-              },
-              style: buttonStyle,
-              child: const Text('Next'),
-            ),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: ((didPop) {
+        if (didPop) {
+          return;
+        }
+        Navigator.pushReplacementNamed(context, '/start');
+      }),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(
+            'Create Post',
+            style: Theme.of(context).textTheme.titleLarge!,
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "Selected Media",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Tab Bar
-            TabBar(
-              controller: _tabController,
-              labelStyle: selectedTabBarStyle,
-              unselectedLabelStyle: unselectedTabBarStyle,
-              indicator: CircleTabIndicator(
-                color: Colors.red,
-                radius: 4,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (hasMedia()) {
+                    Navigator.of(context).push(
+                      SlidingNav(
+                        builder: (context) => CreatePostScreen(
+                          images: _images,
+                          video: _video,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                style: buttonStyle,
+                child: const Text('Next'),
               ),
-              tabs: const [
-                Tab(text: "Images"),
-                Tab(text: "Video"),
-              ],
             ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  // Tab 1: Images
-                  imageTab(),
-                  // Tab 2: Video
-                  videoTab(),
+                  Text(
+                    "Selected Media",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 12),
-          ],
+              const SizedBox(height: 8),
+              // Tab Bar
+              TabBar(
+                controller: _tabController,
+                labelStyle: selectedTabBarStyle,
+                unselectedLabelStyle: unselectedTabBarStyle,
+                indicator: CircleTabIndicator(
+                  color: Colors.red,
+                  radius: 4,
+                ),
+                tabs: const [
+                  Tab(text: "Images"),
+                  Tab(text: "Video"),
+                ],
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Tab 1: Images
+                    imageTab(),
+                    // Tab 2: Video
+                    videoTab(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       ),
     );

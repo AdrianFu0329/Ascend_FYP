@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CreatePostScreen extends StatefulWidget {
   final List<File> images;
@@ -32,11 +33,23 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isCreatingPost = false;
 
+  final ValueNotifier<int> titleCharCount = ValueNotifier<int>(0);
+  final int titleMaxLength = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    titleController.addListener(() {
+      titleCharCount.value = titleController.text.length;
+    });
+  }
+
   @override
   void dispose() {
     titleController.dispose();
     descriptionController.dispose();
     locationController.dispose();
+    titleCharCount.dispose();
     super.dispose();
   }
 
@@ -98,7 +111,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         return downloadURL;
       } catch (error) {
         showMessage('Error uploading video: $error');
-        throw error;
+        rethrow;
       }
     }
 
@@ -286,9 +299,20 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 12),
-                    CustomTextField(
-                      controller: titleController,
-                      hintText: "Title",
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomTextField(
+                            controller: titleController,
+                            hintText: "Title",
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(titleMaxLength),
+                            ],
+                            charCountNotifier: titleCharCount,
+                            maxLength: titleMaxLength,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 36.0),
                     SingleChildScrollView(

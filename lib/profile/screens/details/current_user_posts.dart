@@ -11,7 +11,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:video_player/video_player.dart';
 
 class CurrentUserPosts extends StatefulWidget {
-  const CurrentUserPosts({Key? key}) : super(key: key);
+  const CurrentUserPosts({super.key});
 
   @override
   State<CurrentUserPosts> createState() => _CurrentUserPostsState();
@@ -147,6 +147,7 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
                           location: location,
                           type: type,
                           videoURL: videoURL,
+                          page: "Profile",
                         )
                       : MediaCard(
                           index: index,
@@ -161,6 +162,7 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
                           location: location,
                           type: type,
                           videoURL: videoURL,
+                          page: "Profile",
                         );
                 },
                 childCount: postList.length,

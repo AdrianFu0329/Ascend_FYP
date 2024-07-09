@@ -231,7 +231,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
           ? "Empty~~ Add one today!"
           : userData["description"];
       email = userData['email'] ?? "Unknown";
-      photoURL = userData["photoURL"] ?? "";
+      photoURL = userData["photoURL"] ?? "Unknown";
       following = userData['following'] ?? [];
       followers = userData['followers'] ?? [];
       checkIfFollowed();
@@ -398,6 +398,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                   location: location,
                                   type: type,
                                   videoURL: videoURL,
+                                  page: "Profile",
                                 )
                               : MediaCard(
                                   index: index,
@@ -413,10 +414,22 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                   location: location,
                                   type: type,
                                   videoURL: videoURL,
+                                  page: "Profile",
                                 );
                         },
                         childCount: postList.length,
                       ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            isLoading
+                ? Container()
+                : SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(
+                        "~ No more posts for now ~",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),

@@ -199,12 +199,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             if (isLoading)
-              SliverFillRemaining(
-                child: Container(
-                  color: Colors.black.withOpacity(0.7),
-                  child: const Center(
-                    child: ContainerLoadingAnimation(),
-                  ),
+              const SliverFillRemaining(
+                child: Center(
+                  child: CustomLoadingAnimation(),
                 ),
               )
             else if (postList.isEmpty)
@@ -248,6 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             location: location,
                             type: type,
                             videoURL: videoURL,
+                            page: "Home",
                           )
                         : MediaCard(
                             index: index,
@@ -262,6 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             location: location,
                             type: type,
                             videoURL: videoURL,
+                            page: "Home",
                           );
                   },
                   childCount: postList.length,
@@ -276,6 +275,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            SliverToBoxAdapter(
+              child: Center(
+                child: Text(
+                  "~ No more posts for now ~",
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),

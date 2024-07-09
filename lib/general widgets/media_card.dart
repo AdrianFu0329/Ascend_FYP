@@ -22,6 +22,7 @@ class MediaCard extends StatefulWidget {
   final String location;
   final String type;
   final String videoURL;
+  final String page;
 
   const MediaCard({
     super.key,
@@ -36,6 +37,7 @@ class MediaCard extends StatefulWidget {
     required this.location,
     required this.type,
     required this.videoURL,
+    required this.page,
   });
 
   @override
@@ -59,7 +61,9 @@ class MediaCardState extends State<MediaCard> {
     likes = widget.likes;
     if (widget.type == 'Images') {
       firstImage = widget.media[0];
-      imageHeight = firstImage!.height > 250 ? 250 : firstImage?.height;
+      imageHeight = widget.page == "Profile"
+          ? (firstImage!.height > 200 ? 200 : firstImage?.height)
+          : (firstImage!.height > 250 ? 250 : firstImage?.height);
     } else if (widget.type == 'Video') {
       initializeVideoController();
     }
@@ -70,7 +74,9 @@ class MediaCardState extends State<MediaCard> {
     super.didChangeDependencies();
     if (widget.type == 'Images') {
       firstImage = widget.media[0];
-      imageHeight = firstImage!.height > 250 ? 250 : firstImage?.height;
+      imageHeight = widget.page == "Profile"
+          ? (firstImage!.height > 200 ? 200 : firstImage?.height)
+          : (firstImage!.height > 250 ? 250 : firstImage?.height);
     } else if (widget.type == 'Video') {
       initializeVideoController();
     }
@@ -130,6 +136,7 @@ class MediaCardState extends State<MediaCard> {
 
   Widget _buildCard(String username, String photoUrl) {
     return Container(
+      height: widget.page == 'Profile' ? 290 : null,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Theme.of(context).cardColor,
@@ -145,6 +152,7 @@ class MediaCardState extends State<MediaCard> {
                     const BorderRadius.vertical(top: Radius.circular(10)),
                 child: SizedBox(
                   width: double.infinity,
+                  height: widget.page == "Profile" ? 200 : null,
                   child: widget.type == 'Images'
                       ? (firstImage != null
                           ? CachedNetworkImage(
@@ -159,62 +167,74 @@ class MediaCardState extends State<MediaCard> {
                           : Container())
                       : videoController != null &&
                               videoController!.value.isInitialized
-                          ? AspectRatio(
-                              aspectRatio: videoAspectRatio!,
-                              child: VideoPlayer(videoController!),
+                          ? FittedBox(
+                              fit: BoxFit.fitWidth,
+                              child: SizedBox(
+                                width: videoController!.value.size.width,
+                                height: videoController!.value.size.height,
+                                child: VideoPlayer(videoController!),
+                              ),
                             )
                           : Container(),
                 ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              widget.title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
+          SizedBox(
+            height: 90,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    ProfilePicture(
-                      userId: widget.userId,
-                      photoURL: photoUrl,
-                      radius: 12,
-                      onTap: () {},
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      username,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    widget.title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      likes.length.toString(),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(width: 2),
-                    const Icon(
-                      Icons.favorite,
-                      color: Color.fromRGBO(247, 243, 237, 1),
-                      size: 15,
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          ProfilePicture(
+                            userId: widget.userId,
+                            photoURL: photoUrl,
+                            radius: 12,
+                            onTap: () {},
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            username,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            likes.length.toString(),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(
+                            Icons.favorite,
+                            color: Color.fromRGBO(247, 243, 237, 1),
+                            size: 15,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 4),
         ],
       ),
     );

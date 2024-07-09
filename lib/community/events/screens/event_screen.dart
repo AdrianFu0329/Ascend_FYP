@@ -2,8 +2,10 @@ import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/community/events/screens/create/create_events_screen.dart';
 import 'package:ascend_fyp/general%20pages/filter_options_screen.dart';
 import 'package:ascend_fyp/community/events/widgets/event_card.dart';
+import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
@@ -13,46 +15,43 @@ class EventScreen extends StatefulWidget {
 }
 
 class _EventScreenState extends State<EventScreen> {
-  Stream<QuerySnapshot>? eventsStream;
+  Future<List<DocumentSnapshot>>? eventsFuture;
   Map<String, bool> filterOptions = {};
+  Position? currentPosition;
 
   @override
   void initState() {
-    deleteOutdatedEvents();
-    eventsStream = getEventsFromDatabase();
     super.initState();
+    deleteOutdatedEvents();
+    getCurrentLocation().then((position) {
+      setState(() {
+        currentPosition = position;
+        eventsFuture = fetchAndSortEvents();
+      });
+    });
+  }
+
+  Future<Position> getCurrentLocation() async {
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 
   Future<void> deleteOutdatedEvents() async {
     try {
-      // Get the current date and time
       DateTime now = DateTime.now();
-
-      // Reference to the events collection
       CollectionReference eventsRef =
           FirebaseFirestore.instance.collection('events');
-
-      // Get all events
       QuerySnapshot snapshot = await eventsRef.get();
-
-      // Batch for deleting documents
       WriteBatch batch = FirebaseFirestore.instance.batch();
 
-      // Iterate through each event document
       for (DocumentSnapshot doc in snapshot.docs) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-        // Parse event date and time
         DateTime eventDate = DateTime.parse(data['date'] as String);
-
-        // Parse event end time with AM/PM consideration
         final timeString = data['endTime'] as String;
         final timeParts = timeString.split(":");
         int hour = int.parse(timeParts[0]);
-        int minute =
-            int.parse(timeParts[1].substring(0, 2)); // get first two characters
+        int minute = int.parse(timeParts[1].substring(0, 2));
 
-        // Check for AM/PM and adjust hour accordingly
         if (timeString.contains("PM") && hour != 12) {
           hour += 12;
         } else if (timeString.contains("AM") && hour == 12) {
@@ -60,8 +59,6 @@ class _EventScreenState extends State<EventScreen> {
         }
         DateTime eventEndTime = DateTime(
             eventDate.year, eventDate.month, eventDate.day, hour, minute);
-
-        // Combine event date and time to create DateTime object
         DateTime eventDateTime = DateTime(
           eventDate.year,
           eventDate.month,
@@ -70,25 +67,28 @@ class _EventScreenState extends State<EventScreen> {
           eventEndTime.minute,
         );
 
-        // Check if the event is outdated
         if (eventDateTime.isBefore(now)) {
-          // Add the event document to the batch for deletion
           batch.delete(doc.reference);
         }
       }
 
-      // Commit the batch
       await batch.commit();
-
       debugPrint('Outdated events deleted successfully.');
     } catch (e) {
       debugPrint('Error deleting outdated events: $e');
     }
   }
 
-  Future<void> refreshPosts() async {
+  Future<List<DocumentSnapshot>> fetchAndSortEvents() async {
+    var eventsSnapshot =
+        await FirebaseFirestore.instance.collection('events').get();
+    var eventsList = eventsSnapshot.docs;
+    return sortEventsByDistance(eventsList);
+  }
+
+  void refreshPosts() {
     setState(() {
-      eventsStream = getEventsFromDatabase();
+      eventsFuture = fetchAndSortEvents();
     });
   }
 
@@ -112,7 +112,7 @@ class _EventScreenState extends State<EventScreen> {
     if (selectedFilters != null) {
       setState(() {
         filterOptions = selectedFilters;
-        eventsStream = getFilteredEventsFromDatabase(filterOptions);
+        eventsFuture = fetchAndSortEvents();
       });
     }
   }
@@ -195,86 +195,59 @@ class _EventScreenState extends State<EventScreen> {
           ),
         ),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: eventsStream,
+          child: FutureBuilder<List<DocumentSnapshot>>(
+            future: eventsFuture,
             builder: (context, snapshot) {
-              if (snapshot.hasError) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CustomLoadingAnimation(),
+                );
+              } else if (snapshot.hasError) {
                 return Center(
                   child: Text('Error: ${snapshot.error}'),
                 );
-              } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+              } else if (snapshot.hasData && snapshot.data!.isEmpty) {
                 return const Center(
                   child: Text('No Events Found.'),
                 );
               } else if (snapshot.hasData) {
-                List<DocumentSnapshot> eventsList = snapshot.data!.docs;
-                return FutureBuilder<List<DocumentSnapshot>>(
-                  future: sortEventsByDistance(eventsList),
-                  builder: (context, sortedSnapshot) {
-                    if (sortedSnapshot.hasError) {
-                      return Center(
-                        child: Text('Error: ${sortedSnapshot.error}'),
-                      );
-                    } else if (sortedSnapshot.hasData) {
-                      List<DocumentSnapshot> sortedEventsList =
-                          sortedSnapshot.data!;
-                      return ListView.builder(
-                        itemCount: sortedEventsList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          DocumentSnapshot doc = sortedEventsList[index];
-                          Map<String, dynamic> data =
-                              doc.data() as Map<String, dynamic>;
+                List<DocumentSnapshot> sortedEventsList = snapshot.data!;
+                return ListView.builder(
+                  itemCount: sortedEventsList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    DocumentSnapshot doc = sortedEventsList[index];
+                    Map<String, dynamic> data =
+                        doc.data() as Map<String, dynamic>;
 
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: EventCard(
-                              eventId: data['eventId'],
-                              groupId: data['isGroupEvent']
-                                  ? data['groupId']
-                                  : "Unknown",
-                              userId: data['userId'],
-                              eventTitle: data['title'],
-                              requestList:
-                                  List<String>.from(data['requestList']),
-                              acceptedList:
-                                  List<String>.from(data['acceptedList']),
-                              attendanceList:
-                                  List<String>.from(data['attendanceList']),
-                              eventDate: data['date'],
-                              eventStartTime: data['startTime'],
-                              eventEndTime: data['endTime'],
-                              eventFees: data['fees'],
-                              eventLocation: data['location'],
-                              eventSport: data['sports'],
-                              posterURL: data['posterURL'],
-                              participants: data['participants'],
-                              isOther: data['isOther'],
-                              isGroupEvent: data['isGroupEvent'],
-                            ),
-                          );
-                        },
-                      );
-                    } else {
-                      return const Column(
-                        children: [
-                          SizedBox(height: 16),
-                          Center(
-                            child: Text('No events at the moment!'),
-                          ),
-                        ],
-                      );
-                    }
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: EventCard(
+                        eventId: data['eventId'],
+                        groupId:
+                            data['isGroupEvent'] ? data['groupId'] : "Unknown",
+                        userId: data['userId'],
+                        eventTitle: data['title'],
+                        requestList: List<String>.from(data['requestList']),
+                        acceptedList: List<String>.from(data['acceptedList']),
+                        attendanceList:
+                            List<String>.from(data['attendanceList']),
+                        eventDate: data['date'],
+                        eventStartTime: data['startTime'],
+                        eventEndTime: data['endTime'],
+                        eventFees: data['fees'],
+                        eventLocation: data['location'],
+                        eventSport: data['sports'],
+                        posterURL: data['posterURL'],
+                        participants: data['participants'],
+                        isOther: data['isOther'],
+                        isGroupEvent: data['isGroupEvent'],
+                      ),
+                    );
                   },
                 );
               } else {
-                return const Column(
-                  children: [
-                    SizedBox(height: 16),
-                    Center(
-                      child: Text('No events at the moment!'),
-                    ),
-                  ],
+                return const Center(
+                  child: Text('No events at the moment!'),
                 );
               }
             },

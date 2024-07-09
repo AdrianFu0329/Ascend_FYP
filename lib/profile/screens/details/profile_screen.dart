@@ -60,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     ButtonStyle buttonStyle = ButtonStyle(
       textStyle: WidgetStateProperty.all<TextStyle>(
@@ -97,13 +97,13 @@ class _ProfileScreenState extends State<ProfileScreen>
       child: RefreshIndicator(
         onRefresh: refreshProfileData,
         child: Scaffold(
-          key: _scaffoldKey,
+          key: scaffoldKey,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             leading: IconButton(
               onPressed: () {
-                _scaffoldKey.currentState?.openDrawer();
+                scaffoldKey.currentState?.openDrawer();
               },
               icon: const Icon(Icons.menu),
               color: const Color.fromRGBO(247, 243, 237, 1),
