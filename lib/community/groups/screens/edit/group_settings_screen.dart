@@ -255,7 +255,7 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
                     color: Colors.red,
                   ),
                   SizedBox(width: 8),
-                  Text('Delete Group'),
+                  Text('Close Group'),
                 ],
               ),
             ],
