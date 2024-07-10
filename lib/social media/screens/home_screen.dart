@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:ascend_fyp/database/firebase_notifications.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/media_card.dart';
+import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/notifications/screens/notification_modal.dart';
+import 'package:ascend_fyp/notifications/service/local_notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -34,18 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     FirebaseNotifications.getFirebaseMessagingToken();
 
     // Listen for notifications
-    notificationsSubscription = getNotiForCurrentUser(currentUser.uid).listen(
-      (snapshot) {
-        if (snapshot.docs.isNotEmpty) {
-          setState(() {
-            hasNewNotifications = true;
-          });
-        }
-      },
-      onError: (error) {
-        debugPrint("Error in notification stream: $error");
-      },
-    );
+    listenForNotifications();
 
     debugPrint("Notification subscription started");
 
@@ -60,10 +51,40 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  void listenForNotifications() {
+    notificationsSubscription = getNotiForCurrentUser(currentUser.uid).listen(
+      (snapshot) async {
+        List<DocumentSnapshot> notificationList = snapshot.docs;
+        for (var doc in notificationList) {
+          // Example of using null-aware operators
+          String title = doc['title'] ?? 'Default Title';
+          String message = doc['message'] ?? 'Default Message';
+
+          setState(() {
+            hasNewNotifications = true;
+          });
+
+          await NotificationService.showInstantNotification(
+            1,
+            title,
+            message,
+          );
+        }
+      },
+      onError: (error) {
+        debugPrint("Error in notification stream: $error");
+      },
+    );
+  }
+
   Future<void> fetchPostsFromDatabase() async {
     setState(() {
       isLoading = true;
     });
+
+    Map<String, dynamic> currentUserData = await getUserData(currentUser.uid);
+    List<String> followingList =
+        List<String>.from(currentUserData['following'] ?? []);
 
     DatabaseReference postsRef = FirebaseDatabase.instance.ref('posts');
     DatabaseEvent event = await postsRef.orderByChild('timestamp').once();
@@ -79,8 +100,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
       List<MapEntry<String, dynamic>> sortedPosts =
           loadedPosts.entries.toList();
+
+      // Sort by timestamp
       sortedPosts
           .sort((a, b) => b.value['timestamp'].compareTo(a.value['timestamp']));
+
+      // Sort by whether the post's user id is in the following list
+      sortedPosts.sort((a, b) {
+        bool aIsFollowing = followingList.contains(a.value['userId']);
+        bool bIsFollowing = followingList.contains(b.value['userId']);
+
+        if (aIsFollowing && !bIsFollowing) {
+          return -1;
+        } else if (!aIsFollowing && bIsFollowing) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
 
       loadedPosts = {for (var entry in sortedPosts) entry.key: entry.value};
     }

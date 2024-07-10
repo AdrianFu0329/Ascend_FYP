@@ -46,8 +46,17 @@ class _ImagePageViewState extends State<ImagePageView> {
                                 imageUrl: widget.images[index].imageURL,
                                 placeholder: (context, url) =>
                                     const CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
+                                errorWidget: (context, url, error) => Row(
+                                  children: [
                                     const Icon(Icons.error),
+                                    Text(
+                                      "Oops, failed to load the post!",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),

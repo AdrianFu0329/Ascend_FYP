@@ -284,6 +284,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   VideoPlayerController? videoController;
   ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
   VideoWithDimension? video;
+  bool videoLoadFailed = false;
 
   @override
   void initState() {
@@ -322,6 +323,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       if (mounted) {
         setState(() {
           video = videoWithDimension;
+          videoLoadFailed = false;
         });
       }
 
@@ -333,6 +335,9 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       });
     } catch (e) {
       debugPrint("Error loading video: $e");
+      setState(() {
+        videoLoadFailed = true;
+      });
     }
   }
 
@@ -574,63 +579,78 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         widget.type == "Video"
-                            ? videoController != null &&
-                                    videoController!.value.isInitialized
+                            ? videoLoadFailed
                                 ? Center(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        if (videoController!.value.isPlaying) {
-                                          videoController!.pause();
-                                        } else {
-                                          videoController!.play();
-                                        }
-                                      },
-                                      child: ValueListenableBuilder<bool>(
-                                        valueListenable: isPlaying,
-                                        builder: (context, isPlaying, child) {
-                                          return Stack(
-                                            children: [
-                                              AspectRatio(
-                                                aspectRatio: videoController!
-                                                    .value.aspectRatio,
-                                                child: Stack(
-                                                  alignment: Alignment.center,
-                                                  children: [
-                                                    VideoPlayer(
-                                                        videoController!),
-                                                    if (!isPlaying)
-                                                      const Icon(
-                                                        Icons
-                                                            .play_arrow_rounded,
-                                                        size: 70,
-                                                        color: Colors.white,
-                                                      ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Positioned(
-                                                left: 0,
-                                                right: 0,
-                                                bottom: 0,
-                                                child: VideoProgressIndicator(
-                                                  videoController!,
-                                                  allowScrubbing: true,
-                                                  colors: VideoProgressColors(
-                                                    playedColor: Colors.red,
-                                                    bufferedColor:
-                                                        Colors.grey.shade300,
-                                                    backgroundColor:
-                                                        Colors.grey.shade600,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ),
+                                    child: Text(
+                                      "Oops, failed to load the post!",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
                                     ),
                                   )
-                                : const CustomLoadingAnimation()
+                                : videoController != null &&
+                                        videoController!.value.isInitialized
+                                    ? Center(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            if (videoController!
+                                                .value.isPlaying) {
+                                              videoController!.pause();
+                                            } else {
+                                              videoController!.play();
+                                            }
+                                          },
+                                          child: ValueListenableBuilder<bool>(
+                                            valueListenable: isPlaying,
+                                            builder:
+                                                (context, isPlaying, child) {
+                                              return Stack(
+                                                children: [
+                                                  AspectRatio(
+                                                    aspectRatio:
+                                                        videoController!
+                                                            .value.aspectRatio,
+                                                    child: Stack(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      children: [
+                                                        VideoPlayer(
+                                                            videoController!),
+                                                        if (!isPlaying)
+                                                          const Icon(
+                                                            Icons
+                                                                .play_arrow_rounded,
+                                                            size: 70,
+                                                            color: Colors.white,
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    left: 0,
+                                                    right: 0,
+                                                    bottom: 0,
+                                                    child:
+                                                        VideoProgressIndicator(
+                                                      videoController!,
+                                                      allowScrubbing: true,
+                                                      colors:
+                                                          VideoProgressColors(
+                                                        playedColor: Colors.red,
+                                                        bufferedColor: Colors
+                                                            .grey.shade300,
+                                                        backgroundColor: Colors
+                                                            .grey.shade600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      )
+                                    : const CustomLoadingAnimation()
                             : ImagePageView(
                                 images: widget.media,
                                 maxHeight: maxHeight,
