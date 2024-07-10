@@ -20,6 +20,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _isLoggingIn = false;
+  final ValueNotifier<bool> isLoginBtnEnabled = ValueNotifier<bool>(false);
+
+  @override
+  void initState() {
+    super.initState();
+    passwordController.addListener(() {
+      isLoginBtnEnabled.value = enableLoginBtn();
+    });
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    isLoginBtnEnabled.dispose();
+    super.dispose();
+  }
 
   void _showMessage(String message, bool confirm,
       {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
@@ -66,6 +83,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         );
       },
     );
+  }
+
+  bool enableLoginBtn() {
+    return passwordController.text.isNotEmpty &&
+        emailController.text.isNotEmpty;
   }
 
   Future<void> signInWithPwd() async {
@@ -233,16 +255,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 25),
-                    SizedBox(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: signInWithPwd,
-                        style: buttonStyle,
-                        child: Text(
-                          'Login',
-                          style: style,
-                        ),
-                      ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isLoginBtnEnabled,
+                      builder: (context, isEnabled, child) {
+                        return SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: isEnabled ? signInWithPwd : null,
+                            style: buttonStyle,
+                            child: Text(
+                              'Login',
+                              style: style,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24.0),
                     const Center(child: Text('Or Login with')),

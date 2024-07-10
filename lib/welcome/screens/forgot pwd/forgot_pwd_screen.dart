@@ -11,6 +11,10 @@ class ForgotPwdScreen extends StatefulWidget {
 }
 
 class _ForgotPwdScreenState extends State<ForgotPwdScreen> {
+  bool isSending = false;
+  TextEditingController forgotPwdController = TextEditingController();
+  ValueNotifier<bool> isButtonEnabled = ValueNotifier<bool>(false);
+
   void _showMessage(String message, bool confirm,
       {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
     showDialog(
@@ -59,10 +63,25 @@ class _ForgotPwdScreenState extends State<ForgotPwdScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    bool isSending = false;
-    TextEditingController forgotPwdController = TextEditingController();
+  void initState() {
+    super.initState();
+    forgotPwdController.addListener(_updateButtonState);
+  }
 
+  @override
+  void dispose() {
+    forgotPwdController.removeListener(_updateButtonState);
+    forgotPwdController.dispose();
+    isButtonEnabled.dispose();
+    super.dispose();
+  }
+
+  void _updateButtonState() {
+    isButtonEnabled.value = forgotPwdController.text.isNotEmpty;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ButtonStyle sendEmailBtnStyle = ButtonStyle(
       textStyle: WidgetStateProperty.all<TextStyle>(
         const TextStyle(
@@ -72,7 +91,8 @@ class _ForgotPwdScreenState extends State<ForgotPwdScreen> {
         ),
       ),
       foregroundColor: WidgetStateProperty.all<Color>(
-          const Color.fromRGBO(247, 243, 237, 1)),
+        const Color.fromRGBO(247, 243, 237, 1),
+      ),
       backgroundColor: WidgetStateProperty.all<Color>(
         Theme.of(context).scaffoldBackgroundColor,
       ),
@@ -80,7 +100,9 @@ class _ForgotPwdScreenState extends State<ForgotPwdScreen> {
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0),
           side: const BorderSide(
-              color: Color.fromRGBO(247, 243, 237, 1), width: 1.5),
+            color: Color.fromRGBO(247, 243, 237, 1),
+            width: 1.5,
+          ),
         ),
       ),
     );
@@ -104,7 +126,7 @@ class _ForgotPwdScreenState extends State<ForgotPwdScreen> {
       ),
       body: Stack(
         children: [
-          Padding(
+          SingleChildScrollView(
             padding: const EdgeInsets.all(32.0),
             child: Column(
               children: [
@@ -114,37 +136,50 @@ class _ForgotPwdScreenState extends State<ForgotPwdScreen> {
                   hintText: "Account Email",
                 ),
                 const SizedBox(height: 35),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      setState(() {
-                        isSending = true;
-                      });
-                      final result =
-                          await sendPasswordResetLink(forgotPwdController.text);
+                ValueListenableBuilder<bool>(
+                  valueListenable: isButtonEnabled,
+                  builder: (context, isEnabled, child) {
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: isEnabled
+                            ? () async {
+                                setState(() {
+                                  isSending = true;
+                                });
+                                final result = await sendPasswordResetLink(
+                                  forgotPwdController.text,
+                                );
 
-                      if (result) {
-                        _showMessage(
-                          "Password Reset Email has been sent! Please follow the instructions in the sent email!",
-                          false,
-                        );
-                        setState(() {
-                          isSending = false;
-                        });
-                        Navigator.of(context).pop();
-                      } else {
-                        _showMessage(
-                          "Password Reset Email was not sent due to an error. Please try again...",
-                          false,
-                        );
-                      }
-                    },
-                    style: sendEmailBtnStyle,
-                    icon: const Icon(Icons.mail_outline),
-                    label: const Text("Send Reset Password Email"),
-                  ),
-                )
+                                debugPrint("Result: $result");
+
+                                if (result) {
+                                  _showMessage(
+                                    "Password Reset Email has been sent! Please follow the instructions in the sent email!",
+                                    false,
+                                    onOKPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  );
+                                } else {
+                                  _showMessage(
+                                    "Password Reset Email was not sent due to an error. Please try again...",
+                                    false,
+                                  );
+                                }
+
+                                setState(() {
+                                  isSending = false;
+                                });
+                              }
+                            : null,
+                        style: sendEmailBtnStyle,
+                        icon: const Icon(Icons.mail_outline),
+                        label: const Text("Send Reset Password Email"),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),

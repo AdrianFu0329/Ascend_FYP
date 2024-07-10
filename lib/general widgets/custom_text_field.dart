@@ -42,18 +42,20 @@ class CustomTextField extends StatelessWidget {
             width: 2.5,
           ),
         ),
-        suffix: ValueListenableBuilder<int>(
-          valueListenable: charCountNotifier!,
-          builder: (context, value, child) {
-            return Text(
-              '$value / $maxLength',
-              style: textStyle,
-            );
-          },
-        ),
+        suffix: charCountNotifier != null && maxLength != null
+            ? ValueListenableBuilder<int>(
+                valueListenable: charCountNotifier!,
+                builder: (context, value, child) {
+                  return Text(
+                    '$value / $maxLength',
+                    style: textStyle,
+                  );
+                },
+              )
+            : null,
       ),
       cursorColor: const Color.fromRGBO(247, 243, 237, 1),
-      inputFormatters: inputFormatters,
+      inputFormatters: inputFormatters ?? [],
     );
   }
 }

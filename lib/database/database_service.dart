@@ -34,20 +34,15 @@ Future<bool> sendPasswordResetLink(String email) async {
 }
 
 Stream<QuerySnapshot>? getChatData(String chatRoomId, String currentUserId) {
-  final CollectionReference? chats = FirebaseFirestore.instance
+  final CollectionReference chats = FirebaseFirestore.instance
       .collection('users')
       .doc(currentUserId)
       .collection("chats")
       .doc(chatRoomId)
       .collection('messages');
 
-  if (chats != null) {
-    final chatsStream =
-        chats.orderBy('timestamp', descending: true).snapshots();
-    return chatsStream;
-  } else {
-    return null;
-  }
+  final chatsStream = chats.orderBy('timestamp', descending: true).snapshots();
+  return chatsStream;
 }
 
 Stream<QuerySnapshot> getPostsFromDatabase() {
