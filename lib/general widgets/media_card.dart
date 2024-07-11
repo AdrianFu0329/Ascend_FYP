@@ -167,13 +167,26 @@ class MediaCardState extends State<MediaCard> {
                           : Container())
                       : videoController != null &&
                               videoController!.value.isInitialized
-                          ? FittedBox(
-                              fit: BoxFit.fitWidth,
-                              child: SizedBox(
-                                width: videoController!.value.size.width,
-                                height: videoController!.value.size.height,
-                                child: VideoPlayer(videoController!),
-                              ),
+                          ? Stack(
+                              children: [
+                                FittedBox(
+                                  fit: BoxFit.fitWidth,
+                                  child: SizedBox(
+                                    width: videoController!.value.size.width,
+                                    height: videoController!.value.size.height,
+                                    child: VideoPlayer(videoController!),
+                                  ),
+                                ),
+                                const Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: Icon(
+                                    Icons.play_circle,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ],
                             )
                           : Container(),
                 ),
