@@ -45,6 +45,8 @@
 	<string>Need permission to access the photo library</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Need permission to access user's device location</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>We need your permission to send notifications</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -6,10 +6,9 @@ class NotificationPermissionScreen extends StatelessWidget {
   const NotificationPermissionScreen({super.key});
 
   Future<bool> requestNotificationPermission() async {
-    PermissionStatus oriStatus = await Permission.notification.request();
-    debugPrint(oriStatus.toString());
     try {
-      if (oriStatus == PermissionStatus.denied) {
+      PermissionStatus oriStatus = await Permission.notification.status;
+      if (oriStatus != PermissionStatus.granted) {
         PermissionStatus status = await Permission.notification.request();
         debugPrint(status.toString());
         return status == PermissionStatus.granted;
@@ -19,6 +18,18 @@ class NotificationPermissionScreen extends StatelessWidget {
     } catch (e) {
       debugPrint("error: $e");
       return false;
+    }
+  }
+
+  Future<void> openAppSetting(BuildContext context) async {
+    bool opened = await openAppSettings();
+    if (!opened) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Failed to open app settings. Please enable notifications manually.'),
+        ),
+      );
     }
   }
 
@@ -87,6 +98,8 @@ class NotificationPermissionScreen extends StatelessWidget {
                     if (granted) {
                       FirebaseNotifications.getFirebaseMessagingToken();
                       Navigator.pop(context, true);
+                    } else {
+                      await openAppSetting(context);
                     }
                   },
                   style: buttonStyle,

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({Key? key}) : super(key: key);
+  const MessagesScreen({super.key});
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
@@ -195,7 +195,7 @@ class _MessagesScreenState extends State<MessagesScreen>
                     if (data == null) {
                       debugPrint(
                           'Chat document with id: ${doc.id} has null data.');
-                      return SizedBox.shrink(); // Or some other fallback UI
+                      return const SizedBox.shrink();
                     }
 
                     String userId = data['senderId'] == currentUser!.uid
