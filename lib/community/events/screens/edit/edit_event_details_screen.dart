@@ -248,22 +248,23 @@ class _EditEventDetailsScreenState extends State<EditEventDetailsScreen> {
         'sports': selectedSports,
         'fees': eventFeesController.text.trim(),
         'location': location ?? eventLocationController.text.trim(),
-        'participants': eventParticipantsController.text.trim(),
+        'participants': int.parse(eventParticipantsController.text.trim()),
         'date': eventDateController.text.trim(),
         'startTime': eventStartTimeController.text.trim(),
         'endTime': eventEndTimeController.text.trim(),
         'isOther': isOtherEvent,
         'posterURL': getPosterURL(selectedSports!),
       });
-      setState(() {
-        isUpdating = false;
-      });
       _showMessage('Event details updated successfully!');
-    } catch (error) {
       setState(() {
         isUpdating = false;
       });
-      _showMessage('An error occurred. Failed to update event details: $error');
+    } catch (error) {
+      _showMessage('An error occurred. Failed to update event details');
+      debugPrint('An error occurred. Failed to update event details: $error');
+      setState(() {
+        isUpdating = false;
+      });
     }
   }
 
@@ -540,8 +541,8 @@ class _EditEventDetailsScreenState extends State<EditEventDetailsScreen> {
                                 'fees': eventFeesController.text.trim(),
                                 'location': location ??
                                     eventLocationController.text.trim(),
-                                'participants':
-                                    eventParticipantsController.text.trim(),
+                                'participants': int.parse(
+                                    eventParticipantsController.text.trim()),
                                 'date': eventDateController.text.trim(),
                                 'startTime':
                                     eventStartTimeController.text.trim(),

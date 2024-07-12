@@ -287,7 +287,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 ],
               ),
               actions: [
-                currentUser.uid == widget.userId
+                currentUser.uid == widget.userId &&
+                        widget.acceptedList.contains(currentUser.uid)
                     ? IconButton(
                         onPressed: () async {
                           final changeResult = await Navigator.of(context).push(
@@ -295,18 +296,18 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               builder: (context) => EventSettingsScreen(
                                 eventId: widget.eventId,
                                 groupId: widget.groupId,
-                                eventDate: widget.eventDate,
-                                eventEndTime: widget.eventEndTime,
-                                eventFees: widget.eventFees,
-                                eventLocation: widget.eventLocation,
-                                eventSport: widget.eventSport,
-                                eventStartTime: widget.eventStartTime,
-                                eventTitle: widget.eventTitle,
-                                participants: widget.participants,
-                                posterURL: widget.posterURL,
-                                acceptedList: widget.acceptedList,
+                                eventDate: eventDate,
+                                eventEndTime: eventEndTime,
+                                eventFees: eventFees,
+                                eventLocation: eventLocation,
+                                eventSport: eventSport,
+                                eventStartTime: eventStartTime,
+                                eventTitle: eventTitle,
+                                participants: participants,
+                                posterURL: posterURL,
+                                acceptedList: acceptedList,
                                 attendanceList: widget.attendanceList,
-                                isOther: widget.isOther,
+                                isOther: isOther,
                                 isGroupEvent: widget.isGroupEvent,
                               ),
                             ),

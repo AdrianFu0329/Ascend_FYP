@@ -58,7 +58,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       ),
     );
 
-    void _showMessage(String message) {
+    void showMessage(String message) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -86,51 +86,59 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
 
     bool validateEvent() {
       if (titleController.text.trim().isEmpty) {
-        _showMessage('Please enter a title.');
+        showMessage('Please enter a title.');
         return false;
       }
 
       if (participantsController.text.trim().isEmpty) {
-        _showMessage('Please enter a participant count.');
+        showMessage('Please enter a participant count.');
         return false;
       } else {
         // Check if participants count is an integer
         final int? participantCount =
             int.tryParse(participantsController.text.trim());
         if (participantCount == null) {
-          _showMessage(
-              'Please enter a valid number for the participant count.');
+          showMessage('Please enter a valid number for the participant count.');
           return false;
         }
       }
 
       if (feesController.text.trim().isEmpty) {
-        _showMessage('Please enter a fee amount for each participant.');
+        showMessage('Please enter a fee amount for each participant.');
         return false;
       }
 
-      if (selectedSports == null && otherController.text.trim().isEmpty) {
-        _showMessage('Please choose a sport for your event.');
+      if (selectedSports == null) {
+        showMessage('Please choose a sport for your event.');
+        return false;
+      }
+
+      if (selectedSports != null) {
+        if (selectedSports == "Other" && otherController.text.trim().isEmpty) {
+          showMessage('Please enter a sport for your event');
+          return false;
+        }
+        showMessage('Please choose a sport for your event.');
         return false;
       }
 
       if (dateController.text.trim().isEmpty) {
-        _showMessage('Please enter the date of the event.');
+        showMessage('Please enter the date of the event.');
         return false;
       }
 
       if (startTimeController.text.trim().isEmpty) {
-        _showMessage('Please enter a start time for the event.');
+        showMessage('Please enter a start time for the event.');
         return false;
       }
 
       if (endTimeController.text.trim().isEmpty) {
-        _showMessage('Please enter an end time for the event.');
+        showMessage('Please enter an end time for the event.');
         return false;
       }
 
       if (_locationData.isEmpty) {
-        _showMessage('Please set a location.');
+        showMessage('Please set a location.');
         return false;
       }
 
@@ -370,7 +378,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                 .set(eventData);
 
             applyEventScheduleNotification(eventId);
-            _showMessage('Event created successfully');
+            showMessage('Event created successfully');
 
             titleController.clear();
             participantsController.clear();
@@ -388,7 +396,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
             resetNotifierParticipation.value =
                 !resetNotifierParticipation.value;
           } catch (error) {
-            _showMessage('Error creating event: $error');
+            showMessage('Error creating event: $error');
             setState(() {
               isCreating = false;
             });

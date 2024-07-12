@@ -131,6 +131,8 @@ class _MessagesScreenState extends State<MessagesScreen>
       }),
       child: RefreshIndicator(
         onRefresh: _refreshChats,
+        backgroundColor: Theme.of(context).cardColor,
+        color: Colors.red,
         child: Scaffold(
           floatingActionButton: GestureDetector(
             onTap: () {

@@ -101,15 +101,16 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
         'attendanceList': attendanceList,
       });
       await updateLeaderboard(userId);
-      setState(() {
-        isUpdating = false;
-      });
       _showMessage('Attendance updated successfully!');
-    } catch (error) {
       setState(() {
         isUpdating = false;
       });
-      _showMessage(
+    } catch (error) {
+      _showMessage('An error occurred. Failed to update event attendance');
+      setState(() {
+        isUpdating = false;
+      });
+      debugPrint(
           'An error occurred. Failed to update event attendance: $error');
     }
   }

@@ -250,6 +250,8 @@ class _ProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: refreshProfileData,
+      backgroundColor: Theme.of(context).cardColor,
+      color: Colors.red,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(

@@ -178,7 +178,7 @@ class NotificationModal extends StatelessWidget {
           .doc(notificationId)
           .delete();
     } catch (e) {
-      print("Error deleting notification: $e");
+      debugPrint("Error deleting notification: $e");
       // Handle error as needed
     }
   }

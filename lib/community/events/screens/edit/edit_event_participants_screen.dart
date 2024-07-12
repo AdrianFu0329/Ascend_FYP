@@ -100,17 +100,23 @@ class _EditEventParticipantsScreenState
       await eventRef.update({
         'acceptedList': acceptedList,
       });
-      setState(() {
-        isUpdating = false;
-      });
-      _showMessage('Event participants updated successfully!', false);
-    } catch (error) {
-      setState(() {
-        isUpdating = false;
-      });
       _showMessage(
-          'An error occurred. Failed to update event participants: $error',
-          false);
+        'Event participants updated successfully!',
+        false,
+      );
+      setState(() {
+        isUpdating = false;
+      });
+    } catch (error) {
+      _showMessage(
+        'An error occurred. Failed to update event participants',
+        false,
+      );
+      setState(() {
+        isUpdating = false;
+      });
+      debugPrint(
+          'An error occurred. Failed to update event participants: $error');
     }
   }
 

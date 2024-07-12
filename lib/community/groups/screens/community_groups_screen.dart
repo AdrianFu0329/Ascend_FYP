@@ -23,7 +23,7 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
     super.initState();
   }
 
-  Future<void> refreshPosts() async {
+  Future<void> refreshGroups() async {
     setState(() {
       groupsStream = getGroupsFromDatabase();
     });
@@ -96,97 +96,105 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                onPressed: filterGroups,
-                icon: Row(
-                  children: [
-                    Text(
-                      'Filter Options',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const Icon(
-                      Icons.filter_alt_rounded,
-                      color: Color.fromRGBO(247, 243, 237, 1),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  modalBottomSheet(const CreateGroupsScreen());
-                },
-                icon: const Icon(Icons.add),
-                color: Colors.red,
-                iconSize: 24,
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: groupsStream,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CustomLoadingAnimation(),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-                return const Center(
-                  child: Text('No Groups Found.'),
-                );
-              } else if (snapshot.hasData) {
-                List<DocumentSnapshot> groupsList = snapshot.data!.docs;
-
-                return ListView.builder(
-                  itemCount: groupsList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    DocumentSnapshot doc = groupsList[index];
-                    Map<String, dynamic> data =
-                        doc.data() as Map<String, dynamic>;
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: GroupCard(
-                        groupId: data['groupId'],
-                        ownerUserId: data['ownerUserId'],
-                        groupTitle: data['name'],
-                        requestList: List<dynamic>.from(data['requestList']),
-                        memberList: List<dynamic>.from(data['memberList']),
-                        groupSport: data['sports'],
-                        posterURL: data['posterURL'],
-                        participants: data['participants'],
-                        isOther: data['isOther'],
+    return RefreshIndicator(
+      onRefresh: () async {
+        refreshGroups();
+      },
+      backgroundColor: Theme.of(context).cardColor,
+      color: Colors.red,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: filterGroups,
+                  icon: Row(
+                    children: [
+                      Text(
+                        'Filter Options',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                    );
+                      const Icon(
+                        Icons.filter_alt_rounded,
+                        color: Color.fromRGBO(247, 243, 237, 1),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    modalBottomSheet(const CreateGroupsScreen());
                   },
-                );
-              } else {
-                return const Column(
-                  children: [
-                    SizedBox(height: 16),
-                    Center(
-                      child: Text('No groups at the moment!'),
-                    ),
-                  ],
-                );
-              }
-            },
+                  icon: const Icon(Icons.add),
+                  color: Colors.red,
+                  iconSize: 24,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: groupsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CustomLoadingAnimation(),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text('No Groups Found.'),
+                  );
+                } else if (snapshot.hasData) {
+                  List<DocumentSnapshot> groupsList = snapshot.data!.docs;
+
+                  return ListView.builder(
+                    itemCount: groupsList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      DocumentSnapshot doc = groupsList[index];
+                      Map<String, dynamic> data =
+                          doc.data() as Map<String, dynamic>;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: GroupCard(
+                          groupId: data['groupId'],
+                          ownerUserId: data['ownerUserId'],
+                          groupTitle: data['name'],
+                          requestList: List<dynamic>.from(data['requestList']),
+                          memberList: List<dynamic>.from(data['memberList']),
+                          groupSport: data['sports'],
+                          posterURL: data['posterURL'],
+                          participants: data['participants'],
+                          isOther: data['isOther'],
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return const Column(
+                    children: [
+                      SizedBox(height: 16),
+                      Center(
+                        child: Text('No groups at the moment!'),
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 class EventNotificationDetailsScreen extends StatefulWidget {
   final String notificationId;
   final String eventId;
-  final String? groupId;
+  final String groupId;
   final String ownerUserId;
   final String requestUserId;
   final Timestamp timestamp;
@@ -30,7 +30,7 @@ class EventNotificationDetailsScreen extends StatefulWidget {
     required this.message,
     required this.type,
     required this.requestUserLocation,
-    this.groupId,
+    required this.groupId,
   });
 
   @override
@@ -59,7 +59,7 @@ class _EventNotificationDetailsScreenState
     DocumentSnapshot eventRef;
     if (widget.groupId != "Unknown") {
       eventRef = await getSpecificGroupEventFromDatabase(
-          widget.groupId!, widget.eventId);
+          widget.groupId, widget.eventId);
     } else {
       eventRef = await getEventData(widget.eventId);
     }
@@ -71,7 +71,7 @@ class _EventNotificationDetailsScreenState
       eventSport = eventData['sports'];
       eventDate = eventData['date'];
       eventLocation = eventData['location'];
-      participants = eventData['participants'];
+      participants = eventData['participants'].toString();
       requestList = List<dynamic>.from(eventData['requestList']);
       acceptedList = List<dynamic>.from(eventData['acceptedList']);
     });
@@ -201,7 +201,7 @@ class _EventNotificationDetailsScreenState
       final Map<String, dynamic> notificationData = {
         'notificationId': notificationId,
         'eventId': widget.eventId,
-        'groupId': widget.groupId ?? "Unknown",
+        'groupId': widget.groupId,
         'ownerUserId': currentUser.uid,
         'title': "Request to join sport event approved!",
         'message':

@@ -96,6 +96,8 @@ class _ProfileScreenState extends State<ProfileScreen>
       }),
       child: RefreshIndicator(
         onRefresh: refreshProfileData,
+        backgroundColor: Theme.of(context).cardColor,
+        color: Colors.red,
         child: Scaffold(
           key: scaffoldKey,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,

@@ -191,6 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return RefreshIndicator(
       onRefresh: refreshPosts,
+      backgroundColor: Theme.of(context).cardColor,
+      color: Colors.red,
       child: Scaffold(
         body: CustomScrollView(
           slivers: [

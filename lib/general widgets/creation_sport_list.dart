@@ -65,6 +65,7 @@ class _CreationSportsListState extends State<CreationSportsList> {
             itemCount: sports.length,
             itemBuilder: (context, index) {
               return CheckboxListTile(
+                activeColor: Colors.red,
                 title: Text(
                   sports[index],
                   style: Theme.of(context).textTheme.titleMedium,
