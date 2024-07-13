@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   StreamSubscription<QuerySnapshot>? notificationsSubscription;
   bool hasNewNotifications = false;
+  bool showRedDot = false;
   Map<String, dynamic> postList = {};
   bool isLoading = true;
 
@@ -62,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           setState(() {
             hasNewNotifications = true;
+            showRedDot = true;
           });
 
           await NotificationService.showInstantNotification(
@@ -180,13 +182,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    void modalBottomSheet(Widget screen) {
-      showModalBottomSheet(
+    void modalBottomSheet(Widget screen) async {
+      final bool show = await showModalBottomSheet(
         context: context,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         isScrollControlled: true,
         builder: (context) => screen,
       );
+
+      setState(() {
+        showRedDot = show;
+      });
     }
 
     return RefreshIndicator(
@@ -217,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                       iconSize: 24,
                     ),
-                    if (hasNewNotifications)
+                    if (showRedDot)
                       Positioned(
                         right: 11,
                         top: 11,

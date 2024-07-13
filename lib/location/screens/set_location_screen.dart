@@ -23,6 +23,7 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
   TextEditingController locationController = TextEditingController();
   List<AutocompletePrediction> placePredictions = [];
   GeoLocation geoLocation = GeoLocation();
+  bool noResultsFound = false; // Flag to check if no results were found
 
   void placeAutocomplete(String query) async {
     Uri uri = Uri.https(
@@ -38,11 +39,15 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
     if (response != null) {
       PlaceAutocompleteResponse result =
           PlaceAutocompleteResponse.parseAutocompleteResults(response);
-      if (result.predictions != null) {
-        setState(() {
+      setState(() {
+        if (result.predictions != null && result.predictions!.isNotEmpty) {
           placePredictions = result.predictions!;
-        });
-      }
+          noResultsFound = false; // Reset the flag if predictions are found
+        } else {
+          placePredictions = [];
+          noResultsFound = true; // Set the flag if no predictions are found
+        }
+      });
     }
   }
 
@@ -179,19 +184,26 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
                   )
                 : Container(),
             const SizedBox(height: 24),
-            Expanded(
-              child: ListView.builder(
-                itemCount: placePredictions.length,
-                itemBuilder: (context, index) => LocationListTile(
-                  onPress: (selectedLocation) {
-                    setState(() {
-                      selectLocation(selectedLocation);
-                    });
-                  },
-                  location: placePredictions[index].description!,
-                ),
-              ),
-            )
+            noResultsFound
+                ? Center(
+                    child: Text(
+                      "Oops! No Results Found...",
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      itemCount: placePredictions.length,
+                      itemBuilder: (context, index) => LocationListTile(
+                        onPress: (selectedLocation) {
+                          setState(() {
+                            selectLocation(selectedLocation);
+                          });
+                        },
+                        location: placePredictions[index].description!,
+                      ),
+                    ),
+                  )
           ],
         ),
       ),

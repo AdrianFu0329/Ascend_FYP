@@ -11,10 +11,11 @@ class NotificationModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser!;
+    bool showRedDot = true;
 
     Widget makeDismissible({required Widget child}) => GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => Navigator.of(context).pop(),
+          onTap: () => Navigator.of(context).pop(showRedDot),
           child: GestureDetector(
             onTap: () {},
             child: child,
@@ -68,6 +69,7 @@ class NotificationModal extends StatelessWidget {
                       );
                     } else if (!snapshot.hasData ||
                         snapshot.data!.docs.isEmpty) {
+                      showRedDot = false;
                       return const Center(
                         child: Text('No notifications at the moment!'),
                       );
