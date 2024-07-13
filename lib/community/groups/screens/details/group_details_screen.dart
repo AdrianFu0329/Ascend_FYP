@@ -64,11 +64,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     isOther = widget.isOther;
 
     _tabController = TabController(length: 3, vsync: this);
-    if (widget.requestList.contains(currentUser.uid)) {
-      requestedToJoin = true;
-    }
     if (widget.memberList.contains(currentUser.uid)) {
       joined = true;
+    }
+    if (widget.requestList.contains(currentUser.uid)) {
+      requestedToJoin = true;
     }
   }
 

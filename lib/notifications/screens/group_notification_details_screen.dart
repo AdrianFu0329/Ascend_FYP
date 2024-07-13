@@ -56,7 +56,7 @@ class _GroupNotificationDetailsScreenState
     setState(() {
       groupTitle = groupData['name'];
       groupSport = groupData['sports'];
-      participants = groupData['participants'];
+      participants = groupData['participants'].toString();
       requestList = List<dynamic>.from(groupData['requestList']);
       memberList = List<dynamic>.from(groupData['memberList']);
     });

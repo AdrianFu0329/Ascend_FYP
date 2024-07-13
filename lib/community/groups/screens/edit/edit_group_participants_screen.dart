@@ -126,7 +126,6 @@ class _EditGroupParticipantsScreenState
             if (didPop) {
               return;
             }
-            memberList.add(currentUser.uid);
             Navigator.of(context).pop(
               {
                 'memberList': memberList,
@@ -139,7 +138,6 @@ class _EditGroupParticipantsScreenState
               color: Color.fromRGBO(247, 243, 237, 1),
             ),
             onPressed: () {
-              memberList.add(currentUser.uid);
               Navigator.of(context).pop(
                 {
                   'memberList': memberList,
@@ -206,6 +204,7 @@ class _EditGroupParticipantsScreenState
                                   true, onYesPressed: () {
                                 setState(() {
                                   membersList.remove(userId);
+                                  membersList.insert(0, currentUser.uid);
                                   memberList = membersList;
                                 });
                                 updateFields(userId);
