@@ -80,8 +80,6 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
           showMessage('Please enter a focus sport for your group');
           return false;
         }
-        showMessage('Please choose a focus sport for your group.');
-        return false;
       }
 
       return true;

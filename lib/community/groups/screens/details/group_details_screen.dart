@@ -200,11 +200,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                       SlidingNav(
                         builder: (context) => GroupSettingsScreen(
                           groupId: widget.groupId,
-                          groupSport: widget.groupSport,
-                          groupTitle: widget.groupTitle,
-                          participants: widget.participants,
-                          posterURL: widget.posterURL,
-                          memberList: widget.memberList,
+                          groupSport: groupSport,
+                          groupTitle: groupTitle,
+                          participants: participants,
+                          posterURL: posterURL,
+                          memberList: memberList,
                           isOther: widget.isOther,
                         ),
                       ),
@@ -388,8 +388,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                         GroupEventsScreen(
                           groupId: widget.groupId,
                           groupSport: groupSport,
-                          groupMembers: widget.memberList,
-                          groupName: widget.groupTitle,
+                          groupMembers: memberList,
+                          groupName: groupTitle,
                         ),
                       ],
                     ),

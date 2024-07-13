@@ -146,7 +146,7 @@ class _EditGroupDetailsScreenState extends State<EditGroupDetailsScreen> {
       await eventRef.update({
         'name': groupTitleController.text.trim(),
         'sports': selectedSports,
-        'participants': groupParticipantsController.text.trim(),
+        'participants': int.parse(groupParticipantsController.text.trim()),
         'isOther': isOtherGroup,
         'posterURL': getPosterURL(selectedSports!),
       });
@@ -264,8 +264,8 @@ class _EditGroupDetailsScreenState extends State<EditGroupDetailsScreen> {
                               {
                                 'title': groupTitleController.text.trim(),
                                 'sports': selectedSports,
-                                'participants':
-                                    groupParticipantsController.text.trim(),
+                                'participants': int.parse(
+                                    groupParticipantsController.text.trim()),
                                 'isOther': isOtherGroup,
                                 'posterURL': getPosterURL(selectedSports!),
                               },

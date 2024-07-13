@@ -118,8 +118,6 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
           showMessage('Please enter a sport for your event');
           return false;
         }
-        showMessage('Please choose a sport for your event.');
-        return false;
       }
 
       if (dateController.text.trim().isEmpty) {
@@ -493,6 +491,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                           ownerParticipation = false;
                         }
                         return CheckboxListTile(
+                          activeColor: Colors.red,
                           title: Text(
                             "I am participating in this event",
                             style: Theme.of(context).textTheme.titleMedium,

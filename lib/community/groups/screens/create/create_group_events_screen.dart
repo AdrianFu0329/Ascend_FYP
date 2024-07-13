@@ -69,7 +69,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
       ),
     );
 
-    void _showMessage(String message) {
+    void showMessage(String message) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -97,46 +97,45 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
 
     bool validateEvent() {
       if (titleController.text.trim().isEmpty) {
-        _showMessage('Please enter a title.');
+        showMessage('Please enter a title.');
         return false;
       }
 
       if (participantsController.text.trim().isEmpty) {
-        _showMessage('Please enter a participant count.');
+        showMessage('Please enter a participant count.');
         return false;
       } else {
         // Check if participants count is an integer
         final int? participantCount =
             int.tryParse(participantsController.text.trim());
         if (participantCount == null) {
-          _showMessage(
-              'Please enter a valid number for the participant count.');
+          showMessage('Please enter a valid number for the participant count.');
           return false;
         }
       }
 
       if (feesController.text.trim().isEmpty) {
-        _showMessage('Please enter a fee amount for each participant.');
+        showMessage('Please enter a fee amount for each participant.');
         return false;
       }
 
       if (dateController.text.trim().isEmpty) {
-        _showMessage('Please enter the date of the event.');
+        showMessage('Please enter the date of the event.');
         return false;
       }
 
       if (startTimeController.text.trim().isEmpty) {
-        _showMessage('Please enter a start time for the event.');
+        showMessage('Please enter a start time for the event.');
         return false;
       }
 
       if (endTimeController.text.trim().isEmpty) {
-        _showMessage('Please enter an end time for the event.');
+        showMessage('Please enter an end time for the event.');
         return false;
       }
 
       if (_locationData.isEmpty) {
-        _showMessage('Please set a location.');
+        showMessage('Please set a location.');
         return false;
       }
 
@@ -395,7 +394,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
                 .set(eventData);
 
             applyEventScheduleNotification(eventId);
-            _showMessage('Group Event created successfully');
+            showMessage('Group Event created successfully');
 
             titleController.clear();
             participantsController.clear();
@@ -411,7 +410,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
             resetNotifierParticipation.value =
                 !resetNotifierParticipation.value;
           } catch (error) {
-            _showMessage('Error creating group event: $error');
+            showMessage('Error creating group event: $error');
             setState(() {
               isCreating = false;
             });
@@ -489,6 +488,7 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen> {
                           ownerParticipation = false;
                         }
                         return CheckboxListTile(
+                          activeColor: Colors.red,
                           title: Text(
                             "I am participating in this event",
                             style: Theme.of(context).textTheme.titleMedium,
