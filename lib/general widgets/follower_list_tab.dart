@@ -1,3 +1,4 @@
+import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/user_details_tile.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
@@ -27,7 +28,7 @@ class _FollowerListTabState extends State<FollowerListTab> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
-                  child: CircularProgressIndicator(),
+                  child: CustomLoadingAnimation(),
                 );
               } else if (snapshot.hasError) {
                 return Center(
