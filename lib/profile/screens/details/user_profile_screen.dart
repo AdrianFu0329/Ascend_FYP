@@ -1,9 +1,11 @@
 import 'package:ascend_fyp/database/database_service.dart';
+import 'package:ascend_fyp/general%20widgets/follow_details_screen.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/image_with_dimension.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/media_card.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -53,7 +55,7 @@ class _ProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> fetchUserData() async {
     try {
-      final data = await getUserData(FirebaseAuth.instance.currentUser!.uid);
+      final data = await getUserData(widget.userId);
       setState(() {
         userData = data;
         isLoading = false;
@@ -291,38 +293,98 @@ class _ProfileScreenState extends State<UserProfileScreen> {
                                 children: [
                                   Column(
                                     children: [
-                                      Text(
-                                        (userData?['followers'] ?? [])
-                                            .length
-                                            .toString(),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            SlidingNav(
+                                              builder: (context) =>
+                                                  FollowDetailsScreen(
+                                                followerList:
+                                                    userData?['followers'],
+                                                followingList:
+                                                    userData?['following'],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          (userData?['followers'] ?? [])
+                                              .length
+                                              .toString(),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                        ),
                                       ),
-                                      Text(
-                                        "Followers",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium,
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            SlidingNav(
+                                              builder: (context) =>
+                                                  FollowDetailsScreen(
+                                                followerList:
+                                                    userData?['followers'],
+                                                followingList:
+                                                    userData?['following'],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          "Followers",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(width: 28),
                                   Column(
                                     children: [
-                                      Text(
-                                        (userData?['following'] ?? [])
-                                            .length
-                                            .toString(),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            SlidingNav(
+                                              builder: (context) =>
+                                                  FollowDetailsScreen(
+                                                followerList:
+                                                    userData?['followers'],
+                                                followingList:
+                                                    userData?['following'],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          (userData?['following'] ?? [])
+                                              .length
+                                              .toString(),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                        ),
                                       ),
-                                      Text(
-                                        "Following",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium,
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            SlidingNav(
+                                              builder: (context) =>
+                                                  FollowDetailsScreen(
+                                                followerList:
+                                                    userData?['followers'],
+                                                followingList:
+                                                    userData?['following'],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          "Following",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
                                       ),
                                     ],
                                   ),
