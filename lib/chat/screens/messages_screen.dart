@@ -180,8 +180,23 @@ class _MessagesScreenState extends State<MessagesScreen>
                   child: Text('Error: ${snapshot.error}'),
                 );
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(
-                  child: Text('You have no chats at the moment!'),
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        "lib/assets/images/empty_chats.png",
+                        width: 250,
+                        height: 250,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'You have no chats at the moment!',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
                 );
               } else {
                 List<DocumentSnapshot> filteredChatsList = snapshot.data!;

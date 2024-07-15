@@ -118,6 +118,10 @@ flutter:
     - lib/assets/images/third_place.png
     - lib/assets/images/groups.png
     - lib/assets/images/notifications_permission.png
+    - lib/assets/images/empty_chats.png
+    - lib/assets/images/empty_events.png
+    - lib/assets/images/empty_groups.png
+    - lib/assets/images/empty_posts.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

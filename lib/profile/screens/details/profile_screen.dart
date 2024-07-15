@@ -320,6 +320,17 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                         const CurrentUserPosts(),
                         const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                        isLoading
+                            ? Container()
+                            : SliverToBoxAdapter(
+                                child: Center(
+                                  child: Text(
+                                    "~ No more posts for now ~",
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                ),
+                              ),
                       ],
                     ),
         ),

@@ -250,8 +250,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               )
             else if (postList.isEmpty)
-              const SliverToBoxAdapter(
-                child: Center(child: Text("No posts available")),
+              SliverToBoxAdapter(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        "lib/assets/images/empty_posts.png",
+                        width: 250,
+                        height: 250,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "No posts available...",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
               )
             else if (postList.length >= 5)
               SliverPadding(
@@ -321,14 +338,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            SliverToBoxAdapter(
-              child: Center(
-                child: Text(
-                  "~ No more posts for now ~",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-            ),
+            postList.isNotEmpty
+                ? SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(
+                        "~ No more posts for now ~",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  )
+                : SliverToBoxAdapter(child: Container()),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),

@@ -151,8 +151,23 @@ class _CommunityGroupsScreenState extends State<CommunityGroupsScreen> {
                     child: Text('Error: ${snapshot.error}'),
                   );
                 } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text('No Groups Found.'),
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          "lib/assets/images/empty_groups.png",
+                          width: 250,
+                          height: 250,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'No Groups Found...',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
                   );
                 } else if (snapshot.hasData) {
                   List<DocumentSnapshot> groupsList = snapshot.data!.docs;

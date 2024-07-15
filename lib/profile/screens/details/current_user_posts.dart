@@ -111,8 +111,26 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
         ? const SliverToBoxAdapter(
             child: Center(child: ContainerLoadingAnimation()))
         : postList.isEmpty
-            ? const SliverToBoxAdapter(
-                child: Center(child: Text("No posts available")))
+            ? SliverToBoxAdapter(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        "lib/assets/images/empty_posts.png",
+                        width: 250,
+                        height: 250,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "You don't have any posts! Start creating now!",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              )
             : SliverMasonryGrid.count(
                 crossAxisCount: 2,
                 mainAxisSpacing: 8,

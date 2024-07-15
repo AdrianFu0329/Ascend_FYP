@@ -214,8 +214,23 @@ class _EventScreenState extends State<EventScreen> {
                     child: Text('Error: ${snapshot.error}'),
                   );
                 } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text('No Events Found.'),
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          "lib/assets/images/empty_events.png",
+                          width: 250,
+                          height: 250,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'No Events Found...',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
                   );
                 } else if (snapshot.hasData) {
                   List<DocumentSnapshot> sortedEventsList = snapshot.data!;
