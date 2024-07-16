@@ -246,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (isLoading)
               const SliverFillRemaining(
                 child: Center(
-                  child: CustomLoadingAnimation(),
+                  child: CustomLoadingAnimation(page: "posts"),
                 ),
               )
             else if (postList.isEmpty)
