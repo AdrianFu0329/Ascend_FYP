@@ -23,7 +23,7 @@ class _CurrentUserJoinedEventsState extends State<CurrentUserJoinedEvents> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-            child: CustomLoadingAnimation(),
+            child: CustomLoadingAnimation(page: "events"),
           );
         } else if (snapshot.hasError) {
           return Center(

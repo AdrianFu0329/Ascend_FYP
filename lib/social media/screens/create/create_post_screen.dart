@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:ascend_fyp/location/screens/set_location_screen.dart';
@@ -9,6 +10,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 
 class CreatePostScreen extends StatefulWidget {
   final List<File> images;
@@ -23,12 +25,14 @@ class CreatePostScreen extends StatefulWidget {
   _CreatePostScreenState createState() => _CreatePostScreenState();
 }
 
-class _CreatePostScreenState extends State<CreatePostScreen> {
+class _CreatePostScreenState extends State<CreatePostScreen>
+    with SingleTickerProviderStateMixin {
   Map<String, dynamic> _locationData = {};
   String? location;
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
+  late AnimationController animationController;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isCreatingPost = false;
@@ -42,6 +46,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     titleController.addListener(() {
       titleCharCount.value = titleController.text.length;
     });
+    animationController = AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          animationController.stop();
+          animationController.animateTo(0.8);
+        }
+      });
   }
 
   @override
@@ -50,27 +61,54 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     descriptionController.dispose();
     locationController.dispose();
     titleCharCount.dispose();
+    animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    void showMessage(String message) {
+    void showMessage(String message, bool completed) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            content: Text(
-              message,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            content: completed == true
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Lottie.asset(
+                        "lib/assets/lottie/check.json",
+                        width: 150,
+                        height: 150,
+                        controller: animationController,
+                        onLoaded: (composition) {
+                          animationController.duration = composition.duration;
+                          animationController.forward(from: 0.0);
+                          final durationToStop = composition.duration * 0.8;
+                          Timer(durationToStop, () {
+                            animationController.stop();
+                            animationController.value = 0.8;
+                          });
+                        },
+                      ),
+                      Text(
+                        message,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ],
+                  )
+                : Text(
+                    message,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context, '/start');
+                  if (completed) {
+                    Navigator.pushReplacementNamed(context, '/start');
+                  }
                 },
                 child: Text(
                   'OK',
@@ -85,12 +123,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     bool validatePost() {
       if (titleController.text.trim().isEmpty) {
-        showMessage('Please enter a title.');
+        showMessage('Please enter a title.', true);
         return false;
       }
 
       if (_locationData.isEmpty) {
-        showMessage('Please set a location.');
+        showMessage('Please set a location.', false);
         return false;
       }
 
@@ -110,7 +148,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
         return downloadURL;
       } catch (error) {
-        showMessage('Error uploading video: $error');
+        debugPrint('Error uploading video: $error');
+        showMessage(
+            'There was an error uploading your video, try again!', false);
         rethrow;
       }
     }
@@ -131,8 +171,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           imageURLs.add(downloadURL);
         }
       } catch (error) {
-        // Handle error while uploading images
-        showMessage('Error uploading images: $error');
+        debugPrint('Error uploading images: $error');
+        showMessage(
+            'There was an error uploading the images, try again!', false);
       }
 
       return imageURLs;
@@ -180,7 +221,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 .child(postId)
                 .set(postData);
 
-            showMessage('Post created successfully');
+            showMessage('Post created successfully', true);
 
             titleController.clear();
             descriptionController.clear();
@@ -189,7 +230,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               _isCreatingPost = false;
             });
           } catch (error) {
-            showMessage('Error creating post: $error');
+            debugPrint('Error creating post: $error');
+            showMessage(
+                'There was an error creating your post, try again!', false);
             setState(() {
               _isCreatingPost = false;
             });
@@ -375,7 +418,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             if (_isCreatingPost)
               const Positioned.fill(
                 child: Center(
-                  child: ContainerLoadingAnimation(),
+                  child: CustomLoadingAnimation(),
                 ),
               ),
           ],

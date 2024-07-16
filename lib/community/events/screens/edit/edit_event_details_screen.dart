@@ -569,7 +569,7 @@ class _EditEventDetailsScreenState extends State<EditEventDetailsScreen> {
                 child: Container(
                   color: Colors.black.withOpacity(0),
                   child: const Center(
-                    child: ContainerLoadingAnimation(),
+                    child: CustomLoadingAnimation(),
                   ),
                 ),
               ),

@@ -161,7 +161,7 @@ class _GroupEventsScreenState extends State<GroupEventsScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SliverFillRemaining(
                   child: Center(
-                    child: CustomLoadingAnimation(),
+                    child: CustomLoadingAnimation(page: "events"),
                   ),
                 );
               } else if (snapshot.hasError) {

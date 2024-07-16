@@ -109,7 +109,7 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
   Widget build(BuildContext context) {
     return isLoading
         ? const SliverToBoxAdapter(
-            child: Center(child: ContainerLoadingAnimation()))
+            child: Center(child: CustomLoadingAnimation(page: "profile")))
         : postList.isEmpty
             ? SliverToBoxAdapter(
                 child: Center(

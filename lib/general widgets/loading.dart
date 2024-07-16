@@ -1,61 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
-class ContainerLoadingAnimation extends StatelessWidget {
-  const ContainerLoadingAnimation({super.key});
+class CustomLoadingAnimation extends StatelessWidget {
+  final String? page;
+  const CustomLoadingAnimation({super.key, this.page});
 
   @override
   Widget build(BuildContext context) {
+    final loading = {
+      "normal": "lib/assets/lottie/loading_circle.json",
+      "events": "lib/assets/lottie/events_loading.json",
+      "profile": "lib/assets/lottie/profile_loading.json",
+      "groups": "lib/assets/lottie/groups_loading.json",
+      "chats": "lib/assets/lottie/chats_loading.json",
+    };
+
+    final currentPage = page ?? "normal";
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: BorderRadius.circular(100.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: const SizedBox(
-            width: 16.0,
-            height: 16.0,
-            child: ClipOval(
-              child: Material(
-                color: Colors.transparent,
-                child: CircularProgressIndicator(
-                  color: Color.fromRGBO(194, 0, 0, 1),
-                  backgroundColor: Color.fromRGBO(247, 243, 237, 1),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class CustomLoadingAnimation extends StatelessWidget {
-  const CustomLoadingAnimation({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Center(
-        child: SizedBox(
-          width: 24.0,
-          height: 24.0,
-          child: CircularProgressIndicator(
-            color: Color.fromRGBO(194, 0, 0, 1),
-            backgroundColor: Color.fromRGBO(247, 243, 237, 1),
-          ),
+        child: Lottie.asset(
+          loading[currentPage]!,
+          width: currentPage != "normal" ? 200 : 100,
+          height: currentPage != "normal" ? 200 : 100,
         ),
       ),
     );

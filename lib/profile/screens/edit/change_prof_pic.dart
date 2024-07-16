@@ -167,7 +167,7 @@ class _ChangeProfPicState extends State<ChangeProfPic> {
                     child: Container(
                       color: Colors.black.withOpacity(0.5),
                       child: const Center(
-                        child: ContainerLoadingAnimation(),
+                        child: CustomLoadingAnimation(),
                       ),
                     ),
                   ),

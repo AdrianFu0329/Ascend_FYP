@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/location/screens/set_location_screen.dart';
 import 'package:ascend_fyp/general%20widgets/creation_sport_list.dart';
@@ -9,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/general%20widgets/custom_text_field.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 
 class CreateEventsScreen extends StatefulWidget {
   const CreateEventsScreen({super.key});
@@ -17,7 +20,8 @@ class CreateEventsScreen extends StatefulWidget {
   State<CreateEventsScreen> createState() => _CreateEventsScreenState();
 }
 
-class _CreateEventsScreenState extends State<CreateEventsScreen> {
+class _CreateEventsScreenState extends State<CreateEventsScreen>
+    with SingleTickerProviderStateMixin {
   TextEditingController titleController = TextEditingController();
   TextEditingController participantsController = TextEditingController();
   TextEditingController feesController = TextEditingController();
@@ -33,6 +37,25 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
   bool ownerParticipation = false;
   final ValueNotifier<bool> resetNotifierSportList = ValueNotifier(false);
   final ValueNotifier<bool> resetNotifierParticipation = ValueNotifier(false);
+  late AnimationController animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          animationController.stop();
+          animationController.animateTo(0.8);
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,16 +81,41 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
       ),
     );
 
-    void showMessage(String message) {
+    void showMessage(String message, bool completed) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            content: Text(
-              message,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            content: completed == true
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Lottie.asset(
+                        "lib/assets/lottie/check.json",
+                        width: 150,
+                        height: 150,
+                        controller: animationController,
+                        onLoaded: (composition) {
+                          animationController.duration = composition.duration;
+                          animationController.forward(from: 0.0);
+                          final durationToStop = composition.duration * 0.8;
+                          Timer(durationToStop, () {
+                            animationController.stop();
+                            animationController.value = 0.8;
+                          });
+                        },
+                      ),
+                      Text(
+                        message,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ],
+                  )
+                : Text(
+                    message,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
@@ -86,57 +134,58 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
 
     bool validateEvent() {
       if (titleController.text.trim().isEmpty) {
-        showMessage('Please enter a title.');
+        showMessage('Please enter a title.', false);
         return false;
       }
 
       if (participantsController.text.trim().isEmpty) {
-        showMessage('Please enter a participant count.');
+        showMessage('Please enter a participant count.', false);
         return false;
       } else {
         // Check if participants count is an integer
         final int? participantCount =
             int.tryParse(participantsController.text.trim());
         if (participantCount == null) {
-          showMessage('Please enter a valid number for the participant count.');
+          showMessage(
+              'Please enter a valid number for the participant count.', false);
           return false;
         }
       }
 
       if (feesController.text.trim().isEmpty) {
-        showMessage('Please enter a fee amount for each participant.');
+        showMessage('Please enter a fee amount for each participant.', false);
         return false;
       }
 
       if (selectedSports == null) {
-        showMessage('Please choose a sport for your event.');
+        showMessage('Please choose a sport for your event.', false);
         return false;
       }
 
       if (selectedSports != null) {
         if (selectedSports == "Other" && otherController.text.trim().isEmpty) {
-          showMessage('Please enter a sport for your event');
+          showMessage('Please enter a sport for your event', false);
           return false;
         }
       }
 
       if (dateController.text.trim().isEmpty) {
-        showMessage('Please enter the date of the event.');
+        showMessage('Please enter the date of the event.', false);
         return false;
       }
 
       if (startTimeController.text.trim().isEmpty) {
-        showMessage('Please enter a start time for the event.');
+        showMessage('Please enter a start time for the event.', false);
         return false;
       }
 
       if (endTimeController.text.trim().isEmpty) {
-        showMessage('Please enter an end time for the event.');
+        showMessage('Please enter an end time for the event.', false);
         return false;
       }
 
       if (_locationData.isEmpty) {
-        showMessage('Please set a location.');
+        showMessage('Please set a location.', false);
         return false;
       }
 
@@ -376,7 +425,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                 .set(eventData);
 
             applyEventScheduleNotification(eventId);
-            showMessage('Event created successfully');
+            showMessage('Event created successfully', true);
 
             titleController.clear();
             participantsController.clear();
@@ -394,7 +443,10 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
             resetNotifierParticipation.value =
                 !resetNotifierParticipation.value;
           } catch (error) {
-            showMessage('Error creating event: $error');
+            debugPrint('Error creating event: $error');
+            showMessage(
+                'Oops! There was an error creating your event, try again!',
+                false);
             setState(() {
               isCreating = false;
             });
@@ -679,7 +731,7 @@ class _CreateEventsScreenState extends State<CreateEventsScreen> {
                   child: Container(
                     color: Colors.black.withOpacity(0),
                     child: const Center(
-                      child: ContainerLoadingAnimation(),
+                      child: CustomLoadingAnimation(),
                     ),
                   ),
                 ),

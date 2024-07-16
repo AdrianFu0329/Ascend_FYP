@@ -236,7 +236,7 @@ class _EditEventParticipantsScreenState
               child: Container(
                 color: Colors.black.withOpacity(0),
                 child: const Center(
-                  child: ContainerLoadingAnimation(),
+                  child: CustomLoadingAnimation(),
                 ),
               ),
             ),

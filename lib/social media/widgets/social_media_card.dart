@@ -127,7 +127,7 @@ class _SocialMediaCardState extends State<SocialMediaCard> {
       future: getUserData(widget.userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: ContainerLoadingAnimation());
+          return const Center(child: CustomLoadingAnimation());
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {

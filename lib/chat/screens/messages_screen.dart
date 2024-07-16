@@ -118,7 +118,11 @@ class _MessagesScreenState extends State<MessagesScreen>
   @override
   Widget build(BuildContext context) {
     if (!_notificationsPermissionGranted) {
-      return const Scaffold(body: Center(child: CustomLoadingAnimation()));
+      return const Scaffold(
+        body: Center(
+          child: CustomLoadingAnimation(page: "chats"),
+        ),
+      );
     }
 
     return PopScope(
@@ -174,7 +178,9 @@ class _MessagesScreenState extends State<MessagesScreen>
             stream: _filteredChatsListStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container();
+                return const Center(
+                  child: CustomLoadingAnimation(page: "chats"),
+                );
               } else if (snapshot.hasError) {
                 return Center(
                   child: Text('Error: ${snapshot.error}'),

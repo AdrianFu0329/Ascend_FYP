@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/general%20widgets/creation_sport_list.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
@@ -5,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ascend_fyp/general%20widgets/custom_text_field.dart';
+import 'package:lottie/lottie.dart';
 
 class CreateGroupsScreen extends StatefulWidget {
   const CreateGroupsScreen({super.key});
@@ -13,7 +16,8 @@ class CreateGroupsScreen extends StatefulWidget {
   State<CreateGroupsScreen> createState() => _CreateGroupsScreenState();
 }
 
-class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
+class _CreateGroupsScreenState extends State<CreateGroupsScreen>
+    with SingleTickerProviderStateMixin {
   TextEditingController nameController = TextEditingController();
   TextEditingController participantsController = TextEditingController();
   TextEditingController otherController = TextEditingController();
@@ -22,19 +26,63 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
   bool isCreating = false;
   final ValueNotifier<bool> resetNotifierSportList = ValueNotifier(false);
   final ValueNotifier<bool> resetNotifierParticipation = ValueNotifier(false);
+  late AnimationController animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          animationController.stop();
+          animationController.animateTo(0.8);
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    void showMessage(String message) {
+    void showMessage(String message, bool completed) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            content: Text(
-              message,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            content: completed == true
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Lottie.asset(
+                        "lib/assets/lottie/check.json",
+                        width: 150,
+                        height: 150,
+                        controller: animationController,
+                        onLoaded: (composition) {
+                          animationController.duration = composition.duration;
+                          animationController.forward(from: 0.0);
+                          final durationToStop = composition.duration * 0.8;
+                          Timer(durationToStop, () {
+                            animationController.stop();
+                            animationController.value = 0.8;
+                          });
+                        },
+                      ),
+                      Text(
+                        message,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ],
+                  )
+                : Text(
+                    message,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
@@ -53,31 +101,32 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
 
     bool validateGroup() {
       if (nameController.text.trim().isEmpty) {
-        showMessage('Please enter a group name.');
+        showMessage('Please enter a group name.', false);
         return false;
       }
 
       if (participantsController.text.trim().isEmpty) {
-        showMessage('Please enter a desired group member count.');
+        showMessage('Please enter a desired group member count.', false);
         return false;
       } else {
         // Check if participants count is an integer
         final int? participantCount =
             int.tryParse(participantsController.text.trim());
         if (participantCount == null) {
-          showMessage('Please enter a valid number for the participant count.');
+          showMessage(
+              'Please enter a valid number for the participant count.', false);
           return false;
         }
       }
 
       if (selectedSports == null && otherController.text.trim().isEmpty) {
-        showMessage('Please choose a focus sport for your group.');
+        showMessage('Please choose a focus sport for your group.', false);
         return false;
       }
 
       if (selectedSports != null) {
         if (selectedSports == "Other" && otherController.text.trim().isEmpty) {
-          showMessage('Please enter a focus sport for your group');
+          showMessage('Please enter a focus sport for your group', false);
           return false;
         }
       }
@@ -178,7 +227,7 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
                 .doc(currentUser.uid)
                 .set(userLeaderboardData);
 
-            showMessage('Group created successfully');
+            showMessage('Group created successfully', true);
 
             nameController.clear();
             participantsController.clear();
@@ -191,7 +240,10 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
             resetNotifierParticipation.value =
                 !resetNotifierParticipation.value;
           } catch (error) {
-            showMessage('Error creating group: $error');
+            debugPrint('Error creating group: $error');
+            showMessage(
+                'Oops! There was an error creating your group, try again!',
+                false);
             setState(() {
               isCreating = false;
             });
@@ -312,7 +364,7 @@ class _CreateGroupsScreenState extends State<CreateGroupsScreen> {
                   child: Container(
                     color: Colors.black.withOpacity(0),
                     child: const Center(
-                      child: ContainerLoadingAnimation(),
+                      child: CustomLoadingAnimation(),
                     ),
                   ),
                 ),

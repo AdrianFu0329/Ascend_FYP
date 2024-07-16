@@ -188,7 +188,7 @@ class _ForgotPwdScreenState extends State<ForgotPwdScreen> {
               child: Container(
                 color: Colors.black.withOpacity(0.5),
                 child: const Center(
-                  child: ContainerLoadingAnimation(),
+                  child: CustomLoadingAnimation(),
                 ),
               ),
             ),

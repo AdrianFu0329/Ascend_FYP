@@ -32,7 +32,7 @@ class _CommentPostState extends State<CommentPost> {
     bool isCurrentUser = currentUser.uid == widget.userId;
     bool isDeletingComment = false;
 
-    void _showMessage(String message, bool confirm,
+    void showMessage(String message, bool confirm,
         {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
       showDialog(
         context: context,
@@ -159,7 +159,7 @@ class _CommentPostState extends State<CommentPost> {
                                   )
                                 ],
                                 onSelected: (value) {
-                                  _showMessage(
+                                  showMessage(
                                     "Are you sure you want to delete your comment?",
                                     true,
                                     onYesPressed: () async {
@@ -167,12 +167,12 @@ class _CommentPostState extends State<CommentPost> {
                                           await onDeleteCommentPressed();
 
                                       if (isDeleted) {
-                                        _showMessage(
+                                        showMessage(
                                           "Comment deleted successfully",
                                           false,
                                         );
                                       } else {
-                                        _showMessage(
+                                        showMessage(
                                           "Unable to delete comment. Try again later...",
                                           false,
                                         );
@@ -216,7 +216,7 @@ class _CommentPostState extends State<CommentPost> {
             child: Container(
               color: Colors.black.withOpacity(0.5),
               child: const Center(
-                child: ContainerLoadingAnimation(),
+                child: CustomLoadingAnimation(),
               ),
             ),
           ),

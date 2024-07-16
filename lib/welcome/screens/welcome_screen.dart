@@ -308,7 +308,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               if (_isLoggingIn)
                 const Positioned.fill(
                   child: Center(
-                    child: ContainerLoadingAnimation(),
+                    child: CustomLoadingAnimation(),
                   ),
                 ),
             ],

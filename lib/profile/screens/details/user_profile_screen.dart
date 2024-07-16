@@ -421,7 +421,8 @@ class _ProfileScreenState extends State<UserProfileScreen> {
             ),
             isLoading
                 ? const SliverToBoxAdapter(
-                    child: Center(child: ContainerLoadingAnimation()))
+                    child:
+                        Center(child: CustomLoadingAnimation(page: "profile")))
                 : postList.isEmpty
                     ? SliverToBoxAdapter(
                         child: Center(

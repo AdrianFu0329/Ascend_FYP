@@ -207,7 +207,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
               child: Container(
                 color: Colors.black.withOpacity(0),
                 child: const Center(
-                  child: ContainerLoadingAnimation(),
+                  child: CustomLoadingAnimation(),
                 ),
               ),
             ),

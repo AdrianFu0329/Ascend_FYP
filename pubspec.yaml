@@ -64,6 +64,7 @@ dependencies:
   provider: ^6.1.2
   cached_network_image: ^3.3.1
   flutter_cache_manager: ^3.3.2
+  lottie: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -122,6 +123,13 @@ flutter:
     - lib/assets/images/empty_events.png
     - lib/assets/images/empty_groups.png
     - lib/assets/images/empty_posts.png
+    - lib/assets/images/error_loading_posts.png
+    - lib/assets/lottie/loading_circle.json
+    - lib/assets/lottie/events_loading.json
+    - lib/assets/lottie/profile_loading.json
+    - lib/assets/lottie/chats_loading.json
+    - lib/assets/lottie/groups_loading.json
+    - lib/assets/lottie/check.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

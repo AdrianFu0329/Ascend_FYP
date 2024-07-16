@@ -4,7 +4,6 @@ import 'package:ascend_fyp/profile/screens/side%20menu/view/side_menu.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/profile/screens/details/current_user_posts.dart';
 import 'package:ascend_fyp/profile/screens/edit/edit_profile_screen.dart';
-import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:ascend_fyp/general%20widgets/profile_pic.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -118,7 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: const SideMenu(),
           ),
           body: isLoading
-              ? const Center(child: CustomLoadingAnimation())
+              ? Container()
               : hasError
                   ? const Center(child: Text('Error fetching user data'))
                   : CustomScrollView(

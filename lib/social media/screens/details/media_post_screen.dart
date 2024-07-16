@@ -581,11 +581,26 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                         widget.type == "Video"
                             ? videoLoadFailed
                                 ? Center(
-                                    child: Text(
-                                      "Oops, failed to load the post!",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          "lib/assets/images/error_loading_posts.png",
+                                          width: 250,
+                                          height: 250,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          "Oops, failed to load the post!",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
+                                        const SizedBox(height: 24),
+                                      ],
                                     ),
                                   )
                                 : videoController != null &&
@@ -747,7 +762,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                         child: Container(
                           color: Colors.black.withOpacity(0.5),
                           child: const Center(
-                            child: ContainerLoadingAnimation(),
+                            child: CustomLoadingAnimation(),
                           ),
                         ),
                       ),

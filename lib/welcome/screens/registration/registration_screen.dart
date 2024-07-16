@@ -237,7 +237,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               child: Container(
                 color: Colors.black.withOpacity(0),
                 child: const Center(
-                  child: ContainerLoadingAnimation(),
+                  child: CustomLoadingAnimation(),
                 ),
               ),
             ),
