@@ -205,6 +205,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ),
                         ),
                       ),
+                      cursorColor: const Color.fromRGBO(247, 243, 237, 1),
                     ),
                     const SizedBox(height: 32.0),
                     TextField(
@@ -234,6 +235,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ),
                         ),
                       ),
+                      cursorColor: const Color.fromRGBO(247, 243, 237, 1),
                     ),
                     const SizedBox(height: 15),
                     Row(
