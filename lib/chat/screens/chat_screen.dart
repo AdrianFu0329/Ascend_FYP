@@ -427,6 +427,25 @@ class _ChatScreenState extends State<ChatScreen> {
                                 width: 200,
                                 height: 250,
                                 fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      backgroundColor:
+                                          Theme.of(context).cardColor,
+                                      color: Colors.red,
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
