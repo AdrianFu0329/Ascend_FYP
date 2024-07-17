@@ -431,18 +431,22 @@ class _ChatScreenState extends State<ChatScreen> {
                                     (context, child, loadingProgress) {
                                   if (loadingProgress == null) return child;
                                   return Center(
-                                    child: CircularProgressIndicator(
-                                      backgroundColor:
-                                          Theme.of(context).cardColor,
-                                      color: Colors.red,
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
+                                    child: SizedBox(
+                                      width: 25,
+                                      height: 25,
+                                      child: CircularProgressIndicator(
+                                        backgroundColor:
+                                            Theme.of(context).cardColor,
+                                        color: Colors.red,
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
+                                      ),
                                     ),
                                   );
                                 },

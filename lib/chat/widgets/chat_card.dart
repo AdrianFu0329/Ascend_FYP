@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ChatCard extends StatefulWidget {
   final String userId;
@@ -95,6 +96,32 @@ class _ChatCardState extends State<ChatCard> {
     }
   }
 
+  Widget chatCardLoading() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Shimmer.fromColors(
+        baseColor: Theme.of(context).cardColor,
+        highlightColor: Colors.grey,
+        child: ListTile(
+          leading: const CircleAvatar(
+            radius: 25,
+            backgroundColor: Colors.grey,
+          ),
+          title: Container(
+            width: 100,
+            height: 10,
+            color: Colors.grey,
+          ),
+          trailing: Container(
+            width: 50,
+            height: 10,
+            color: Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     TextStyle usernameStyle = TextStyle(
@@ -140,12 +167,12 @@ class _ChatCardState extends State<ChatCard> {
     );
 
     return isLoading
-        ? Container()
+        ? chatCardLoading()
         : FutureBuilder<Map<String, dynamic>>(
             future: getUserData(widget.userId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container();
+                return chatCardLoading();
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
