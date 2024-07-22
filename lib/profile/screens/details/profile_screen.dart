@@ -317,7 +317,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                             ],
                           ),
                         ),
-                        const CurrentUserPosts(),
+                        CurrentUserPosts(
+                          isDeleted: (isDeleted) {
+                            if (isDeleted) {
+                              refreshProfileData();
+                            }
+                          },
+                        ),
                         const SliverToBoxAdapter(child: SizedBox(height: 24)),
                         isLoading
                             ? Container()

@@ -18,6 +18,7 @@ import 'package:video_player/video_player.dart';
 
 class PostInteractionBar extends StatefulWidget {
   final List<String> likes;
+  final Function(int) onLikeCountChanged;
   final String postId;
   final String userId;
   const PostInteractionBar({
@@ -25,6 +26,7 @@ class PostInteractionBar extends StatefulWidget {
     required this.likes,
     required this.postId,
     required this.userId,
+    required this.onLikeCountChanged,
   });
 
   @override
@@ -97,9 +99,11 @@ class _PostInteractionBarState extends State<PostInteractionBar> {
       if (isLiked == true) {
         likeCount++;
         widget.likes.add(currentUser.uid);
+        widget.onLikeCountChanged(likeCount);
       } else {
         likeCount--;
         widget.likes.remove(currentUser.uid);
+        widget.onLikeCountChanged(likeCount);
       }
     });
     DatabaseReference postNew =
@@ -222,6 +226,7 @@ class MediaPostScreen extends StatefulWidget {
   final String description;
   final String location;
   final String type;
+  final Function(bool)? isDeleted;
 
   const MediaPostScreen({
     super.key,
@@ -234,45 +239,11 @@ class MediaPostScreen extends StatefulWidget {
     required this.description,
     required this.location,
     required this.type,
+    required this.isDeleted,
   });
 
   @override
   State<MediaPostScreen> createState() => _MediaPostScreenState();
-
-  static Future<bool> show(
-    BuildContext context, {
-    required String postId,
-    required dynamic media,
-    required String title,
-    required String userId,
-    required List<String> likes,
-    required Timestamp timestamp,
-    required String description,
-    required String location,
-    required String type,
-  }) async {
-    final likesChange = await Navigator.of(context).push(
-      SlidingNav(
-        builder: (context) => MediaPostScreen(
-          postId: postId,
-          media: media,
-          title: title,
-          userId: userId,
-          likes: likes,
-          timestamp: timestamp,
-          description: description,
-          location: location,
-          type: type,
-        ),
-      ),
-    );
-
-    if (likesChange != null) {
-      return likesChange["isPlaying"] ?? false;
-    }
-
-    return false;
-  }
 }
 
 class _MediaPostScreenState extends State<MediaPostScreen> {
@@ -281,6 +252,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   int likeCount = 0;
   late int currentIndex = 0;
   bool isDeletingPost = false;
+  bool isDeleted = false;
   VideoPlayerController? videoController;
   ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
   VideoWithDimension? video;
@@ -292,6 +264,9 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
     if (widget.type == "Video") {
       initializeVideoController();
     }
+    setState(() {
+      likeCount = widget.likes.length;
+    });
   }
 
   @override
@@ -379,7 +354,9 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       for (Reference fileRef in result.items) {
         await fileRef.delete();
       }
-
+      setState(() {
+        isDeleted = true;
+      });
       return true;
     } catch (error) {
       debugPrint('Error deleting post: $error');
@@ -481,7 +458,8 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
               if (didPop) {
                 return;
               }
-              Navigator.pop(context, widget.likes);
+              Navigator.pop(context, {'likes': widget.likes});
+              debugPrint(likeCount.toString());
               dispose();
             }),
             child: Scaffold(
@@ -493,7 +471,7 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                     color: Color.fromRGBO(247, 243, 237, 1),
                   ),
                   onPressed: () {
-                    Navigator.pop(context, widget.likes);
+                    Navigator.pop(context, {'likes': widget.likes});
                     dispose();
                   },
                 ),
@@ -557,6 +535,9 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                                     false,
                                     onOKPressed: () {
                                       Navigator.of(context).pop();
+                                      if (widget.isDeleted != null) {
+                                        widget.isDeleted!(true);
+                                      }
                                     },
                                   );
                                 } else {
@@ -701,6 +682,9 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
                           likes: widget.likes,
                           postId: widget.postId,
                           userId: widget.userId,
+                          onLikeCountChanged: (newLikeCount) {
+                            likeCount = newLikeCount;
+                          },
                         ),
                         const SizedBox(height: 24),
                         StreamBuilder<DatabaseEvent>(

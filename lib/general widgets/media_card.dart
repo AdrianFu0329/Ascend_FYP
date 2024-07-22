@@ -23,6 +23,7 @@ class MediaCard extends StatefulWidget {
   final String type;
   final String videoURL;
   final String page;
+  final Function(bool)? isDeleted;
 
   const MediaCard({
     super.key,
@@ -38,6 +39,7 @@ class MediaCard extends StatefulWidget {
     required this.type,
     required this.videoURL,
     required this.page,
+    this.isDeleted,
   });
 
   @override
@@ -54,6 +56,7 @@ class MediaCardState extends State<MediaCard> {
   double? videoHeight;
   double? videoAspectRatio;
   ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
+  bool deleted = false;
 
   @override
   void initState() {
@@ -169,12 +172,15 @@ class MediaCardState extends State<MediaCard> {
                               videoController!.value.isInitialized
                           ? Stack(
                               children: [
-                                FittedBox(
-                                  fit: BoxFit.fitWidth,
-                                  child: SizedBox(
-                                    width: videoController!.value.size.width,
-                                    height: videoController!.value.size.height,
-                                    child: VideoPlayer(videoController!),
+                                Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.fitWidth,
+                                    child: SizedBox(
+                                      width: videoController!.value.size.width,
+                                      height:
+                                          videoController!.value.size.height,
+                                      child: VideoPlayer(videoController!),
+                                    ),
                                   ),
                                 ),
                                 const Positioned(
@@ -266,31 +272,25 @@ class MediaCardState extends State<MediaCard> {
           description: widget.description,
           location: widget.location,
           type: widget.type,
+          isDeleted: (isDeleted) {
+            if (isDeleted == true) {
+              if (widget.isDeleted != null) {
+                widget.isDeleted!(isDeleted);
+              }
+            }
+          },
         ),
       ),
     );
 
-    if (result != null) {
+    if (result['likes'] != null) {
       setState(() {
-        likes = result;
+        likes = result['likes'];
       });
     }
     // Reset video controller only if it was not playing
     if (widget.type == 'Video') {
       initializeVideoController();
     }
-
-    // final result = await MediaPostScreen.show(
-    //   context,
-    //   postId: widget.postId,
-    //   media: widget.media,
-    //   title: widget.title,
-    //   userId: widget.userId,
-    //   likes: widget.likes,
-    //   timestamp: widget.timestamp,
-    //   description: widget.description,
-    //   location: widget.location,
-    //   type: widget.type,
-    // );
   }
 }

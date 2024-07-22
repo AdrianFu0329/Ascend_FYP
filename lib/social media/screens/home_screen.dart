@@ -308,6 +308,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             type: type,
                             videoURL: videoURL,
                             page: "Home",
+                            isDeleted: (isDeleted) {
+                              if (isDeleted) {
+                                refreshPosts();
+                              }
+                            },
                           )
                         : MediaCard(
                             index: index,
@@ -323,6 +328,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             type: type,
                             videoURL: videoURL,
                             page: "Home",
+                            isDeleted: (isDeleted) {
+                              if (isDeleted) {
+                                refreshPosts();
+                              }
+                            },
                           );
                   },
                   childCount: postList.length,

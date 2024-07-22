@@ -107,6 +107,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
                 onPressed: () {
                   Navigator.pop(context);
                   if (completed) {
+                    Navigator.pop(context);
                     Navigator.pushReplacementNamed(context, '/start');
                   }
                 },
@@ -360,6 +361,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
                     const SizedBox(height: 36.0),
                     SingleChildScrollView(
                       child: TextField(
+                        cursorColor: const Color.fromRGBO(247, 243, 237, 1),
                         maxLines: null,
                         controller: descriptionController,
                         style: Theme.of(context).textTheme.titleMedium,

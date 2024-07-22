@@ -11,7 +11,8 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:video_player/video_player.dart';
 
 class CurrentUserPosts extends StatefulWidget {
-  const CurrentUserPosts({super.key});
+  final Function(bool)? isDeleted;
+  const CurrentUserPosts({super.key, this.isDeleted});
 
   @override
   State<CurrentUserPosts> createState() => _CurrentUserPostsState();
@@ -166,6 +167,13 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
                           type: type,
                           videoURL: videoURL,
                           page: "Profile",
+                          isDeleted: (isDeleted) {
+                            if (isDeleted) {
+                              if (widget.isDeleted != null) {
+                                widget.isDeleted!(isDeleted);
+                              }
+                            }
+                          },
                         )
                       : MediaCard(
                           index: index,
@@ -181,6 +189,13 @@ class _CurrentUserPostsState extends State<CurrentUserPosts> {
                           type: type,
                           videoURL: videoURL,
                           page: "Profile",
+                          isDeleted: (isDeleted) {
+                            if (isDeleted) {
+                              if (widget.isDeleted != null) {
+                                widget.isDeleted!(isDeleted);
+                              }
+                            }
+                          },
                         );
                 },
                 childCount: postList.length,
