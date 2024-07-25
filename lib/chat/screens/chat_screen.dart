@@ -18,6 +18,7 @@ class ChatScreen extends StatefulWidget {
   final String receiverUsername;
   final String receiverFcmToken;
   final String receiverPhotoUrl;
+  final Function(bool)? toRefresh;
 
   const ChatScreen({
     super.key,
@@ -26,6 +27,7 @@ class ChatScreen extends StatefulWidget {
     required this.receiverPhotoUrl,
     required this.chatRoomId,
     required this.receiverFcmToken,
+    this.toRefresh,
   });
 
   @override
@@ -252,7 +254,12 @@ class _ChatScreenState extends State<ChatScreen> {
           return;
         }
         deleteChatsWithoutMessages();
-        Navigator.pop(context);
+        setState(() {
+          if (widget.toRefresh != null) {
+            widget.toRefresh!(true);
+          }
+        });
+        Navigator.of(context).pop();
       }),
       child: Scaffold(
         appBar: AppBar(
@@ -300,7 +307,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             onPressed: () {
               deleteChatsWithoutMessages();
-              Navigator.pop(context);
+              Navigator.of(context).pop(true);
             },
           ),
         ),
@@ -398,16 +405,27 @@ class _ChatScreenState extends State<ChatScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (data['type'] == 'text')
+                  if (data['type'] == 'first')
+                    const SizedBox.shrink()
+                  else if (data['type'] == 'text')
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
                         ChatBubble(
                           message: data['message'],
                           isCurrentUser: (data['senderId'] ==
                               firebaseAuth.currentUser!.uid),
+                        ),
+                        Text(
+                          fromDateToString(data['timestamp']),
+                          style: Theme.of(context).textTheme.labelSmall,
                         )
-                      else if (data['type'] == 'image')
+                      ],
+                    )
+                  else if (data['type'] == 'image')
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
                         GestureDetector(
                           onTap: () {
                             showFullScreenImage(data['message']);
@@ -454,19 +472,21 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                           ),
                         ),
-                      Text(
-                        fromDateToString(data['timestamp']),
-                        style: Theme.of(context).textTheme.labelSmall,
-                      )
-                    ],
-                  ),
+                        Text(
+                          fromDateToString(data['timestamp']),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        )
+                      ],
+                    ),
                   const SizedBox(width: 5),
-                  ProfilePicture(
-                    userId: firebaseAuth.currentUser!.uid,
-                    photoURL: currentUserphotoURL,
-                    radius: 18,
-                    onTap: () {},
-                  ),
+                  data['type'] == 'first'
+                      ? const SizedBox.shrink()
+                      : ProfilePicture(
+                          userId: firebaseAuth.currentUser!.uid,
+                          photoURL: currentUserphotoURL,
+                          radius: 18,
+                          onTap: () {},
+                        ),
                 ],
               )
             : Row(
@@ -476,25 +496,36 @@ class _ChatScreenState extends State<ChatScreen> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      ProfilePicture(
-                        userId: widget.receiverUserId,
-                        photoURL: widget.receiverPhotoUrl,
-                        radius: 18,
-                        onTap: () {},
-                      ),
+                      data['type'] == 'first'
+                          ? const SizedBox.shrink()
+                          : ProfilePicture(
+                              userId: widget.receiverUserId,
+                              photoURL: widget.receiverPhotoUrl,
+                              radius: 18,
+                              onTap: () {},
+                            ),
                     ],
                   ),
                   const SizedBox(width: 5),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (data['type'] == 'text')
+                  if (data['type'] == 'text')
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         ChatBubble(
                           message: data['message'],
                           isCurrentUser: (data['senderId'] ==
                               firebaseAuth.currentUser!.uid),
+                        ),
+                        Text(
+                          fromDateToString(data['timestamp']),
+                          style: Theme.of(context).textTheme.labelSmall,
                         )
-                      else if (data['type'] == 'image')
+                      ],
+                    )
+                  else if (data['type'] == 'image')
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         GestureDetector(
                           onTap: () {
                             showFullScreenImage(data['message']);
@@ -514,16 +545,39 @@ class _ChatScreenState extends State<ChatScreen> {
                                 width: 200,
                                 height: 250,
                                 fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 25,
+                                      height: 25,
+                                      child: CircularProgressIndicator(
+                                        backgroundColor:
+                                            Theme.of(context).cardColor,
+                                        color: Colors.red,
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
                         ),
-                      Text(
-                        fromDateToString(data['timestamp']),
-                        style: Theme.of(context).textTheme.labelSmall,
-                      )
-                    ],
-                  ),
+                        Text(
+                          fromDateToString(data['timestamp']),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        )
+                      ],
+                    ),
                 ],
               ),
       ),

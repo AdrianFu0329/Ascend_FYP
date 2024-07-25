@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 class UserListTile extends StatefulWidget {
   final String userId;
+
   const UserListTile({
     super.key,
     required this.userId,
@@ -94,13 +95,26 @@ class _UserListTileState extends State<UserListTile> {
                 );
               } else {
                 // Create a new chat room
-                ChatService().createChatRoom(
+                String? chatRoomId = await ChatService().createChatRoom(
                   widget.userId,
                   username,
                   photoUrl,
-                  userFcmToken,
-                  context,
                 );
+
+                if (chatRoomId != null) {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    SlidingNav(
+                      builder: (context) => ChatScreen(
+                        receiverUserId: widget.userId,
+                        receiverUsername: username,
+                        receiverPhotoUrl: photoUrl,
+                        chatRoomId: chatRoomId,
+                        receiverFcmToken: userFcmToken,
+                      ),
+                    ),
+                  );
+                }
               }
             },
             horizontalTitleGap: 12,

@@ -1,8 +1,10 @@
+import 'package:ascend_fyp/chat/screens/chat_screen.dart';
 import 'package:ascend_fyp/chat/service/chat_service.dart';
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/getters/user_data.dart';
 import 'package:ascend_fyp/models/constants.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
+import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -367,13 +369,28 @@ class _EventNotificationDetailsScreenState
                           final userFcmToken =
                               userData["fcmToken"] ?? "Unknown";
 
-                          ChatService().createChatRoom(
+                          String? chatRoomId =
+                              await ChatService().createChatRoom(
                             widget.requestUserId,
                             username,
                             photoUrl,
-                            userFcmToken,
-                            context,
                           );
+
+                          if (chatRoomId != null) {
+                            // Push to chat screen with chosen user
+                            Navigator.of(context).pop();
+                            Navigator.of(context).push(
+                              SlidingNav(
+                                builder: (context) => ChatScreen(
+                                  receiverUserId: widget.requestUserId,
+                                  receiverUsername: username,
+                                  receiverPhotoUrl: photoUrl,
+                                  receiverFcmToken: userFcmToken,
+                                  chatRoomId: chatRoomId,
+                                ),
+                              ),
+                            );
+                          }
                         },
                         child: Text(
                           'Contact User',

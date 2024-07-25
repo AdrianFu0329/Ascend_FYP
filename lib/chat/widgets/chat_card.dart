@@ -14,6 +14,7 @@ class ChatCard extends StatefulWidget {
   final Timestamp timestamp;
   final String chatRoomId;
   final bool hasRead;
+  final Function(bool) toRefresh;
 
   const ChatCard({
     super.key,
@@ -21,6 +22,7 @@ class ChatCard extends StatefulWidget {
     required this.timestamp,
     required this.chatRoomId,
     required this.hasRead,
+    required this.toRefresh,
   });
 
   @override
@@ -33,7 +35,6 @@ class _ChatCardState extends State<ChatCard> {
 
   @override
   void initState() {
-    deleteChatsWithoutMessages();
     super.initState();
   }
 
@@ -82,7 +83,7 @@ class _ChatCardState extends State<ChatCard> {
         CollectionReference messagesRef =
             chatDoc.reference.collection('messages');
         QuerySnapshot messagesSnapshot = await messagesRef.get();
-        if (messagesSnapshot.docs.isEmpty) {
+        if (messagesSnapshot.docs.length == 1) {
           await chatDoc.reference.delete();
           debugPrint('Deleted chat document with id: ${chatDoc.id}');
         }
@@ -191,6 +192,11 @@ class _ChatCardState extends State<ChatCard> {
                           receiverPhotoUrl: photoUrl,
                           receiverFcmToken: userFcmToken,
                           chatRoomId: widget.chatRoomId,
+                          toRefresh: (refresh) {
+                            if (refresh) {
+                              widget.toRefresh(true);
+                            }
+                          },
                         ),
                       ),
                     );
@@ -234,6 +240,13 @@ class _ChatCardState extends State<ChatCard> {
                                               receiverPhotoUrl: photoUrl,
                                               receiverFcmToken: userFcmToken,
                                               chatRoomId: widget.chatRoomId,
+                                              toRefresh: (refresh) {
+                                                if (refresh) {
+                                                  setState(() {
+                                                    widget.toRefresh(true);
+                                                  });
+                                                }
+                                              },
                                             ),
                                           ),
                                         );

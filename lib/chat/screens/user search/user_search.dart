@@ -90,6 +90,15 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     );
                   } else if (snapshot.hasData) {
                     List<DocumentSnapshot> allUsersList = snapshot.data!.docs;
+                    allUsersList.sort((a, b) {
+                      var aData = a.data() as Map<String, dynamic>;
+                      var bData = b.data() as Map<String, dynamic>;
+                      return aData['displayName']
+                          .toString()
+                          .toLowerCase()
+                          .compareTo(
+                              bData['displayName'].toString().toLowerCase());
+                    });
                     return ListView.builder(
                       itemCount: allUsersList.length,
                       itemBuilder: (context, index) {

@@ -69,7 +69,7 @@ class _MessagesScreenState extends State<MessagesScreen>
         CollectionReference messagesRef =
             chatDoc.reference.collection('messages');
         QuerySnapshot messagesSnapshot = await messagesRef.get();
-        if (messagesSnapshot.docs.isEmpty) {
+        if (messagesSnapshot.docs.length == 1) {
           await chatDoc.reference.delete();
           debugPrint('Deleted chat document with id: ${chatDoc.id}');
         }
@@ -86,7 +86,9 @@ class _MessagesScreenState extends State<MessagesScreen>
         .collection('chats')
         .orderBy('timestamp', descending: true)
         .snapshots()
-        .map((querySnapshot) => querySnapshot.docs.toList());
+        .map((querySnapshot) => querySnapshot.docs
+            .where((doc) => doc['timestamp'] != null)
+            .toList());
   }
 
   Future<bool> onChatDelete(String chatRoomId) async {
@@ -205,6 +207,7 @@ class _MessagesScreenState extends State<MessagesScreen>
                   ),
                 );
               } else {
+                _refreshChats();
                 List<DocumentSnapshot> filteredChatsList = snapshot.data!;
 
                 return ListView.builder(
@@ -215,7 +218,7 @@ class _MessagesScreenState extends State<MessagesScreen>
                         doc.data() as Map<String, dynamic>?;
 
                     // Handle the case where data is null
-                    if (data == null) {
+                    if (data == null || data['timestamp'] == null) {
                       debugPrint(
                           'Chat document with id: ${doc.id} has null data.');
                       return const SizedBox.shrink();
@@ -228,6 +231,11 @@ class _MessagesScreenState extends State<MessagesScreen>
                     bool hasRead = data['senderId'] == currentUser!.uid
                         ? data['senderRead']
                         : data['receiverRead'];
+
+                    debugPrint('Timestamp: ${data['timestamp']}');
+                    debugPrint('Document ID: ${doc.id}');
+                    debugPrint('Sender ID: ${data['senderId']}');
+                    debugPrint('Receiver ID: ${data['receiverId']}');
 
                     return Dismissible(
                       key: Key(doc.id), // Unique key for each chat card
@@ -288,6 +296,11 @@ class _MessagesScreenState extends State<MessagesScreen>
                           timestamp: data['timestamp'],
                           chatRoomId: doc.id,
                           hasRead: hasRead,
+                          toRefresh: (refresh) {
+                            if (refresh) {
+                              _refreshChats();
+                            }
+                          },
                         ),
                       ),
                     );

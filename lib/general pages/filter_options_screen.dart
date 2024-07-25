@@ -2,7 +2,8 @@ import 'package:ascend_fyp/general%20widgets/checkBox_sport_list.dart';
 import 'package:flutter/material.dart';
 
 class FilterOptionsScreen extends StatefulWidget {
-  const FilterOptionsScreen({super.key});
+  final String pageTitle;
+  const FilterOptionsScreen({super.key, required this.pageTitle});
 
   @override
   State<FilterOptionsScreen> createState() => _FilterOptionsScreenState();
@@ -14,7 +15,7 @@ class _FilterOptionsScreenState extends State<FilterOptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    void _showMessage(String message) {
+    void showMessage(String message) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -87,7 +88,7 @@ class _FilterOptionsScreenState extends State<FilterOptionsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Filter Events",
+                      widget.pageTitle,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     IconButton(

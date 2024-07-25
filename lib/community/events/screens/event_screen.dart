@@ -106,7 +106,8 @@ class _EventScreenState extends State<EventScreen> {
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       isScrollControlled: true,
-      builder: (context) => const FilterOptionsScreen(),
+      builder: (context) =>
+          const FilterOptionsScreen(pageTitle: 'Filter Events'),
     );
 
     if (selectedFilters != null) {
