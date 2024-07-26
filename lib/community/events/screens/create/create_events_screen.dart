@@ -120,6 +120,9 @@ class _CreateEventsScreenState extends State<CreateEventsScreen>
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+                  if (completed) {
+                    Navigator.of(context).pop(true);
+                  }
                 },
                 child: Text(
                   'OK',

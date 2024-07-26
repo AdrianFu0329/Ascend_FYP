@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ascend_fyp/database/database_service.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 
-class EventCard extends StatelessWidget {
+class EventCard extends StatefulWidget {
   final String eventId;
   final String groupId;
   final String userId;
@@ -22,6 +22,7 @@ class EventCard extends StatelessWidget {
   final int participants;
   final bool isOther;
   final bool isGroupEvent;
+  final Function(bool)? toRefresh;
 
   const EventCard({
     super.key,
@@ -42,34 +43,48 @@ class EventCard extends StatelessWidget {
     required this.isOther,
     required this.isGroupEvent,
     required this.groupId,
+    this.toRefresh,
   });
 
   @override
+  State<EventCard> createState() => _EventCardState();
+}
+
+class _EventCardState extends State<EventCard> {
+  @override
   Widget build(BuildContext context) {
-    void navigateToEventDetailsScreen() {
-      Navigator.of(context).push(
+    void navigateToEventDetailsScreen() async {
+      final result = await Navigator.of(context).push(
         SlidingNav(
           builder: (context) => EventDetailsScreen(
-            eventId: eventId,
-            groupId: groupId,
-            userId: userId,
-            eventTitle: eventTitle,
-            requestList: requestList,
-            acceptedList: acceptedList,
-            attendanceList: attendanceList,
-            eventDate: eventDate,
-            eventStartTime: eventStartTime,
-            eventEndTime: eventEndTime,
-            eventFees: eventFees,
-            eventSport: eventSport,
-            eventLocation: eventLocation,
-            posterURL: posterURL,
-            participants: participants,
-            isOther: isOther,
-            isGroupEvent: isGroupEvent,
+            eventId: widget.eventId,
+            groupId: widget.groupId,
+            userId: widget.userId,
+            eventTitle: widget.eventTitle,
+            requestList: widget.requestList,
+            acceptedList: widget.acceptedList,
+            attendanceList: widget.attendanceList,
+            eventDate: widget.eventDate,
+            eventStartTime: widget.eventStartTime,
+            eventEndTime: widget.eventEndTime,
+            eventFees: widget.eventFees,
+            eventSport: widget.eventSport,
+            eventLocation: widget.eventLocation,
+            posterURL: widget.posterURL,
+            participants: widget.participants,
+            isOther: widget.isOther,
+            isGroupEvent: widget.isGroupEvent,
           ),
         ),
       );
+
+      if (result) {
+        setState(() {
+          if (widget.toRefresh != null) {
+            widget.toRefresh!(true);
+          }
+        });
+      }
     }
 
     Widget buildCard() {
@@ -85,7 +100,7 @@ class EventCard extends StatelessWidget {
           child: Stack(
             children: [
               FutureBuilder<Image>(
-                future: getPoster(posterURL),
+                future: getPoster(widget.posterURL),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CustomLoadingAnimation();
@@ -123,7 +138,7 @@ class EventCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        eventTitle,
+                        widget.eventTitle,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
@@ -133,13 +148,13 @@ class EventCard extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            eventSport,
+                            widget.eventSport,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),
                         Flexible(
                           child: Text(
-                            "Date: $eventDate",
+                            "Date: ${widget.eventDate}",
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),

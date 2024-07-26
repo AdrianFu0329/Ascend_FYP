@@ -209,7 +209,7 @@ class ChatService extends ChangeNotifier {
         'receiverId': receiverUserId,
         'senderId': currentUser.uid,
         'timestamp': Timestamp.now(),
-        'receiverRead': false,
+        'receiverRead': true,
         'senderRead': true,
       };
 

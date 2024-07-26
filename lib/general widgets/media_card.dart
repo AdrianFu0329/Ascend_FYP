@@ -200,7 +200,7 @@ class MediaCardState extends State<MediaCard> {
             ),
           ),
           SizedBox(
-            height: 90,
+            height: 80,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,21 +218,27 @@ class MediaCardState extends State<MediaCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Row(
-                        children: [
-                          ProfilePicture(
-                            userId: widget.userId,
-                            photoURL: photoUrl,
-                            radius: 12,
-                            onTap: () {},
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            username,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
+                      Expanded(
+                        child: Row(
+                          children: [
+                            ProfilePicture(
+                              userId: widget.userId,
+                              photoURL: photoUrl,
+                              radius: 12,
+                              onTap: () {},
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                username,
+                                style: Theme.of(context).textTheme.bodySmall,
+                                overflow: TextOverflow.visible,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

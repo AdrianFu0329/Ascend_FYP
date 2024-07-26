@@ -157,7 +157,7 @@ class _ChatScreenState extends State<ChatScreen> {
         CollectionReference messagesRef =
             chatDoc.reference.collection('messages');
         QuerySnapshot messagesSnapshot = await messagesRef.get();
-        if (messagesSnapshot.docs.isEmpty) {
+        if (messagesSnapshot.docs.length == 1) {
           await chatDoc.reference.delete();
           debugPrint('Deleted chat document with id: ${chatDoc.id}');
         }

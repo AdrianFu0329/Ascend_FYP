@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:ascend_fyp/community/events/screens/edit/mark_attendance_screen.dart';
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/community/events/screens/edit/edit_event_details_screen.dart';
 import 'package:ascend_fyp/community/events/screens/edit/edit_event_participants_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class EventSettingsScreen extends StatefulWidget {
   final String eventId;
@@ -45,7 +48,8 @@ class EventSettingsScreen extends StatefulWidget {
   State<EventSettingsScreen> createState() => _EventSettingsScreenState();
 }
 
-class _EventSettingsScreenState extends State<EventSettingsScreen> {
+class _EventSettingsScreenState extends State<EventSettingsScreen>
+    with SingleTickerProviderStateMixin {
   late String eventDate;
   late String eventEndTime;
   late String eventFees;
@@ -57,10 +61,18 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
   late String posterURL;
   late List<dynamic> acceptedList;
   late bool isOther;
+  late AnimationController animationController;
 
   @override
   void initState() {
     super.initState();
+    animationController = AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          animationController.stop();
+          animationController.animateTo(0.8);
+        }
+      });
     eventDate = widget.eventDate;
     eventEndTime = widget.eventEndTime;
     eventFees = widget.eventFees;
@@ -74,6 +86,12 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
     isOther = widget.isOther;
   }
 
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
+
   void _showMessage(String message, bool confirm,
       {VoidCallback? onYesPressed, VoidCallback? onOKPressed}) {
     showDialog(
@@ -81,10 +99,35 @@ class _EventSettingsScreenState extends State<EventSettingsScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          content: Text(
-            message,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+          content: confirm == false
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Lottie.asset(
+                      "lib/assets/lottie/check.json",
+                      width: 150,
+                      height: 150,
+                      controller: animationController,
+                      onLoaded: (composition) {
+                        animationController.duration = composition.duration;
+                        animationController.forward(from: 0.0);
+                        final durationToStop = composition.duration * 0.8;
+                        Timer(durationToStop, () {
+                          animationController.stop();
+                          animationController.value = 0.8;
+                        });
+                      },
+                    ),
+                    Text(
+                      message,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ],
+                )
+              : Text(
+                  message,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
           actions: <Widget>[
             TextButton(
               onPressed: () {

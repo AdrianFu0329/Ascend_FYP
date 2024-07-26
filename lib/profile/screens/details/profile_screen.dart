@@ -279,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                 'No description',
                                         style: Theme.of(context)
                                             .textTheme
-                                            .titleMedium,
+                                            .bodySmall,
                                       ),
                                       trailing: ElevatedButton(
                                         onPressed: () async {

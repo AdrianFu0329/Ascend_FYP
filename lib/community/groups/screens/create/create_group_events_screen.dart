@@ -131,6 +131,9 @@ class _CreateGroupEventsScreenState extends State<CreateGroupEventsScreen>
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+                  if (completed) {
+                    Navigator.of(context).pop(true);
+                  }
                 },
                 child: Text(
                   'OK',

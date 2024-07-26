@@ -92,13 +92,17 @@ class _EventScreenState extends State<EventScreen> {
     });
   }
 
-  void modalBottomSheet(Widget screen) {
-    showModalBottomSheet(
+  void modalBottomSheet(Widget screen) async {
+    final shouldRefresh = await showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       isScrollControlled: true,
       builder: (context) => screen,
     );
+
+    if (shouldRefresh) {
+      refreshEvents();
+    }
   }
 
   void filterEvents() async {
@@ -265,6 +269,11 @@ class _EventScreenState extends State<EventScreen> {
                           participants: data['participants'],
                           isOther: data['isOther'],
                           isGroupEvent: data['isGroupEvent'],
+                          toRefresh: (refresh) {
+                            if (refresh) {
+                              refreshEvents();
+                            }
+                          },
                         ),
                       );
                     },

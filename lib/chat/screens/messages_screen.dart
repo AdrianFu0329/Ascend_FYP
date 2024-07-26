@@ -33,7 +33,7 @@ class _MessagesScreenState extends State<MessagesScreen>
   Future<void> _refreshChats() async {
     setState(() {
       _filteredChatsListStream = _fetchAndFilterChats();
-      deleteChatsWithoutMessages();
+      //deleteChatsWithoutMessages();
     });
   }
 

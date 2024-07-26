@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:ascend_fyp/auth_service/AuthService.dart';
 import 'package:ascend_fyp/general%20widgets/custom_text_field.dart';
 import 'package:ascend_fyp/general%20widgets/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -10,7 +13,8 @@ class RegistrationScreen extends StatefulWidget {
   State<RegistrationScreen> createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen>
+    with SingleTickerProviderStateMixin {
   bool passwordText = true;
   bool confirmPasswordText = true;
   bool passwordsMatch = false;
@@ -19,6 +23,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  late AnimationController animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          animationController.stop();
+          animationController.animateTo(0.8);
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
 
   bool _passwordMatch() {
     return passwordController.text == confirmPasswordController.text;
@@ -200,15 +223,51 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     if (message == "Registration Successful") {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
-                                        SnackBar(content: Text(message)),
+                                        SnackBar(
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Lottie.asset(
+                                                "lib/assets/lottie/check.json",
+                                                width: 150,
+                                                height: 150,
+                                                controller: animationController,
+                                                onLoaded: (composition) {
+                                                  animationController.duration =
+                                                      composition.duration;
+                                                  animationController.forward(
+                                                      from: 0.0);
+                                                  final durationToStop =
+                                                      composition.duration *
+                                                          0.8;
+                                                  Timer(durationToStop, () {
+                                                    animationController.stop();
+                                                    animationController.value =
+                                                        0.8;
+                                                  });
+                                                },
+                                              ),
+                                              Text(
+                                                message,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleSmall,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       );
                                     } else if (message ==
                                         "Registration Failed") {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                             content: Text(
-                                                "Registration failed!\nPlease try again!")),
+                                          "Registration failed!\nPlease try again!",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall,
+                                        )),
                                       );
                                     } else {
                                       ScaffoldMessenger.of(context)

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:ascend_fyp/navigation/animation/sliding_nav.dart';
 import 'package:ascend_fyp/community/groups/screens/edit/edit_group_details_screen.dart';
 import 'package:ascend_fyp/community/groups/screens/edit/edit_group_participants_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class GroupSettingsScreen extends StatefulWidget {
   final String groupId;
@@ -28,23 +31,38 @@ class GroupSettingsScreen extends StatefulWidget {
   State<GroupSettingsScreen> createState() => _GroupSettingsScreenState();
 }
 
-class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
+class _GroupSettingsScreenState extends State<GroupSettingsScreen>
+    with SingleTickerProviderStateMixin {
   late String groupSport;
   late String groupTitle;
   late int participants;
   late String posterURL;
   late List<dynamic> memberList;
   late bool isOther;
+  late AnimationController animationController;
 
   @override
   void initState() {
     super.initState();
+    animationController = AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          animationController.stop();
+          animationController.animateTo(0.8);
+        }
+      });
     groupSport = widget.groupSport;
     groupTitle = widget.groupTitle;
     participants = widget.participants;
     posterURL = widget.posterURL;
     memberList = widget.memberList;
     isOther = widget.isOther;
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
   }
 
   void _showMessage(String message, bool confirm,
@@ -54,10 +72,35 @@ class _GroupSettingsScreenState extends State<GroupSettingsScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          content: Text(
-            message,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+          content: confirm == false
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Lottie.asset(
+                      "lib/assets/lottie/check.json",
+                      width: 150,
+                      height: 150,
+                      controller: animationController,
+                      onLoaded: (composition) {
+                        animationController.duration = composition.duration;
+                        animationController.forward(from: 0.0);
+                        final durationToStop = composition.duration * 0.8;
+                        Timer(durationToStop, () {
+                          animationController.stop();
+                          animationController.value = 0.8;
+                        });
+                      },
+                    ),
+                    Text(
+                      message,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ],
+                )
+              : Text(
+                  message,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
