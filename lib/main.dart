@@ -65,11 +65,11 @@ class _MyAppState extends State<MyApp> {
       final String? type = message.data['type'];
 
       if (type == 'chat') {
-        navigatorKey.currentState?.pushNamed('/messages');
+        navigatorKey.currentState?.pushReplacementNamed('/messages');
       } else if (type == 'group') {
-        navigatorKey.currentState?.pushNamed('/group');
+        navigatorKey.currentState?.pushReplacementNamed('/group');
       } else {
-        navigatorKey.currentState?.pushNamed('/start');
+        navigatorKey.currentState?.pushReplacementNamed('/start');
       }
     }
   }
