@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rxdart/rxdart.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -69,7 +70,7 @@ class _MessagesScreenState extends State<MessagesScreen>
         CollectionReference messagesRef =
             chatDoc.reference.collection('messages');
         QuerySnapshot messagesSnapshot = await messagesRef.get();
-        if (messagesSnapshot.docs.length == 1) {
+        if (messagesSnapshot.docs.length <= 1) {
           await chatDoc.reference.delete();
           debugPrint('Deleted chat document with id: ${chatDoc.id}');
         }
@@ -80,7 +81,7 @@ class _MessagesScreenState extends State<MessagesScreen>
   }
 
   Stream<List<DocumentSnapshot>> _fetchAndFilterChats() {
-    return FirebaseFirestore.instance
+    final userChatsStream = FirebaseFirestore.instance
         .collection('users')
         .doc(currentUser!.uid)
         .collection('chats')
@@ -89,6 +90,31 @@ class _MessagesScreenState extends State<MessagesScreen>
         .map((querySnapshot) => querySnapshot.docs
             .where((doc) => doc['timestamp'] != null)
             .toList());
+
+    final groupChatsStream = FirebaseFirestore.instance
+        .collection('group_chats')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((querySnapshot) => querySnapshot.docs
+            .where((doc) =>
+                doc['timestamp'] != null &&
+                doc['memberMap'].containsKey(currentUser!.uid))
+            .toList());
+
+    return Rx.combineLatest2<List<DocumentSnapshot>, List<DocumentSnapshot>,
+        List<DocumentSnapshot>>(
+      userChatsStream,
+      groupChatsStream,
+      (userChats, groupChats) {
+        final combinedChats = [...userChats, ...groupChats];
+        combinedChats.sort((a, b) {
+          final aTimestamp = a['timestamp'] as Timestamp;
+          final bTimestamp = b['timestamp'] as Timestamp;
+          return bTimestamp.compareTo(aTimestamp);
+        });
+        return combinedChats;
+      },
+    );
   }
 
   Future<bool> onChatDelete(String chatRoomId) async {
@@ -224,18 +250,21 @@ class _MessagesScreenState extends State<MessagesScreen>
                       return const SizedBox.shrink();
                     }
 
-                    String userId = data['senderId'] == currentUser!.uid
-                        ? data['receiverId']
-                        : data['senderId'];
+                    String userId = data['type'] == "group"
+                        ? "Unknown"
+                        : data['senderId'] == currentUser!.uid
+                            ? data['receiverId']
+                            : data['senderId'];
 
-                    bool hasRead = data['senderId'] == currentUser!.uid
-                        ? data['senderRead']
-                        : data['receiverRead'];
-
-                    debugPrint('Timestamp: ${data['timestamp']}');
-                    debugPrint('Document ID: ${doc.id}');
-                    debugPrint('Sender ID: ${data['senderId']}');
-                    debugPrint('Receiver ID: ${data['receiverId']}');
+                    bool hasRead;
+                    if (data['type'] == "group") {
+                      Map<String, dynamic> memberMap = data['memberMap'];
+                      hasRead = memberMap[currentUser!.uid] ?? false;
+                    } else {
+                      hasRead = data['senderId'] == currentUser!.uid
+                          ? data['senderRead']
+                          : data['receiverRead'];
+                    }
 
                     return Dismissible(
                       key: Key(doc.id), // Unique key for each chat card
@@ -292,10 +321,11 @@ class _MessagesScreenState extends State<MessagesScreen>
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: ChatCard(
-                          userId: userId,
+                          userId: data['type'] == "group" ? "Unknown" : userId,
                           timestamp: data['timestamp'],
                           chatRoomId: doc.id,
                           hasRead: hasRead,
+                          type: data['type'] ?? "normal", // group or normal
                           toRefresh: (refresh) {
                             if (refresh) {
                               _refreshChats();
