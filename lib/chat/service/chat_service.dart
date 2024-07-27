@@ -55,6 +55,30 @@ class ChatService extends ChangeNotifier {
     }
   }
 
+  //Update Read Status for Group
+  Future<void> updateIsReadGrp(String chatRoomId) async {
+    DocumentReference grpChatRef =
+        FirebaseFirestore.instance.collection('group_chats').doc(chatRoomId);
+
+    try {
+      DocumentSnapshot grpChatSnapshot = await grpChatRef.get();
+
+      if (grpChatSnapshot.exists) {
+        Map<String, dynamic> grpChatData =
+            grpChatSnapshot.data() as Map<String, dynamic>;
+        Map<String, bool> memberMap =
+            Map<String, bool>.from(grpChatData["memberMap"]);
+
+        memberMap
+            .updateAll((key, value) => key == currentUser.uid ? true : false);
+
+        await grpChatRef.update({"memberMap": memberMap});
+      }
+    } catch (e) {
+      debugPrint("Failed to update read status for user: $e");
+    }
+  }
+
   // Send Messages
   Future<void> sendMessage(
       String receiverId, String message, String chatRoomId) async {
@@ -107,6 +131,39 @@ class ChatService extends ChangeNotifier {
           .collection('chats')
           .doc(chatRoomId);
       await receiverChatRef.update({
+        'timestamp': Timestamp.now(),
+      });
+    } catch (e) {
+      debugPrint("Error sending message: $e");
+    }
+  }
+
+  // Send Group Messages
+  Future<void> sendGroupTextMessage(String message, String chatRoomId) async {
+    try {
+      final String currentUserId = firebaseAuth.currentUser!.uid;
+      final Timestamp timestamp = Timestamp.now();
+
+      Message newMsg = Message(
+        senderId: currentUserId,
+        message: message,
+        timestamp: timestamp,
+        type: "text",
+      );
+
+      await updateIsReadGrp(chatRoomId);
+
+      // Write message to current user doc
+      firestore
+          .collection('group_chats')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add(newMsg.toMap());
+
+      // Update timestamp for chatroom in current user docs
+      DocumentReference currentChatRef =
+          firestore.collection('group_chats').doc(chatRoomId);
+      await currentChatRef.update({
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
@@ -173,6 +230,39 @@ class ChatService extends ChangeNotifier {
     }
   }
 
+  // Send Image Message
+  Future<void> sendGroupImageMessage(String imageUrl, String chatRoomId) async {
+    try {
+      final String currentUserId = firebaseAuth.currentUser!.uid;
+      final Timestamp timestamp = Timestamp.now();
+
+      Message newMsg = Message(
+        senderId: currentUserId,
+        message: imageUrl,
+        timestamp: timestamp,
+        type: 'image',
+      );
+
+      await updateIsReadGrp(chatRoomId);
+
+      // Write image message to current user doc
+      firestore
+          .collection('group_chats')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add(newMsg.toMap());
+
+      // Update timestamp for chatroom in current user docs
+      DocumentReference currentChatRef =
+          firestore.collection('group_chats').doc(chatRoomId);
+      await currentChatRef.update({
+        'timestamp': Timestamp.now(),
+      });
+    } catch (e) {
+      debugPrint("Error sending image message: $e");
+    }
+  }
+
   // Upload Image
   Future<String> uploadImage(File imageFile) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
@@ -189,6 +279,16 @@ class ChatService extends ChangeNotifier {
         .collection('users')
         .doc(currentUser.uid)
         .collection('chats')
+        .doc(chatRoomId)
+        .collection('messages')
+        .orderBy('timestamp', descending: false)
+        .snapshots();
+  }
+
+  // Get Messages
+  Stream<QuerySnapshot> getGroupMessages(String chatRoomId) {
+    return firestore
+        .collection('group_chats')
         .doc(chatRoomId)
         .collection('messages')
         .orderBy('timestamp', descending: false)
@@ -235,7 +335,7 @@ class ChatService extends ChangeNotifier {
         receiverId: receiverUserId,
         message: "first",
         timestamp: Timestamp.now(),
-        type: "first",
+        type: "system",
       );
 
       // Write first message to current user doc
@@ -252,6 +352,59 @@ class ChatService extends ChangeNotifier {
           .collection('users')
           .doc(receiverUserId)
           .collection('chats')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add(newMsg.toMap());
+
+      return chatRoomId;
+    } catch (e) {
+      debugPrint('Error creating chat with user: $e');
+      return null;
+    }
+  }
+
+  // Create Group Chat Room
+  Future<String?> createGroupChatRoom(
+    List<String> groupMembersId,
+    String groupChatName,
+    List<String> memberFCMToken,
+  ) async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    try {
+      Map<String, bool> membersMap = {
+        for (var item in groupMembersId) item: false
+      };
+
+      String chatRoomId =
+          FirebaseFirestore.instance.collection('group_chats').doc().id;
+
+      // Create group chat room in firebase
+      final Map<String, dynamic> chatRoomData = {
+        'groupChatName': groupChatName,
+        'memberMap': membersMap, // Map<String, bool>
+        'memberFCMToken': memberFCMToken,
+        'timestamp': Timestamp.now(),
+        'type': 'group',
+      };
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentReference groupChatDoc = FirebaseFirestore.instance
+            .collection('group_chats')
+            .doc(chatRoomId);
+
+        transaction.set(groupChatDoc, chatRoomData);
+      });
+
+      Message newMsg = Message(
+        senderId: currentUser.uid,
+        message: "'$groupChatName' has been created!",
+        type: "system",
+        timestamp: Timestamp.now(),
+      );
+
+      // Write first message to current user doc
+      await firestore
+          .collection('group_chats')
           .doc(chatRoomId)
           .collection('messages')
           .add(newMsg.toMap());

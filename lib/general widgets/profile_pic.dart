@@ -4,14 +4,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePicture extends StatelessWidget {
-  final String userId;
+  final String? userId;
   final String photoURL;
   final double radius;
   final VoidCallback onTap;
 
   const ProfilePicture({
     super.key,
-    required this.userId,
+    this.userId,
     required this.photoURL,
     required this.radius,
     required this.onTap,
@@ -20,7 +20,7 @@ class ProfilePicture extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<ImageWithDimension>(
-      future: getProfilePic(userId),
+      future: getProfilePic(userId ?? photoURL),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container();

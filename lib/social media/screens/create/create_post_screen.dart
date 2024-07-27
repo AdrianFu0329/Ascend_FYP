@@ -124,7 +124,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
 
     bool validatePost() {
       if (titleController.text.trim().isEmpty) {
-        showMessage('Please enter a title.', true);
+        showMessage('Please enter a title.', false);
         return false;
       }
 
@@ -190,9 +190,6 @@ class _CreatePostScreenState extends State<CreatePostScreen>
           });
 
           try {
-            // final String postId =
-            //     FirebaseFirestore.instance.collection('posts').doc().id;
-
             // Id for FirebaseDatabase
             final String? postId =
                 FirebaseDatabase.instance.ref().child('posts').push().key;

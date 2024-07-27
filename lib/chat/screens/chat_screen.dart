@@ -157,7 +157,7 @@ class _ChatScreenState extends State<ChatScreen> {
         CollectionReference messagesRef =
             chatDoc.reference.collection('messages');
         QuerySnapshot messagesSnapshot = await messagesRef.get();
-        if (messagesSnapshot.docs.length == 1) {
+        if (messagesSnapshot.docs.length <= 1) {
           await chatDoc.reference.delete();
           debugPrint('Deleted chat document with id: ${chatDoc.id}');
         }
@@ -405,7 +405,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (data['type'] == 'first')
+                  if (data['type'] == 'system')
                     const SizedBox.shrink()
                   else if (data['type'] == 'text')
                     Column(
@@ -479,7 +479,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       ],
                     ),
                   const SizedBox(width: 5),
-                  data['type'] == 'first'
+                  data['type'] == 'system'
                       ? const SizedBox.shrink()
                       : ProfilePicture(
                           userId: firebaseAuth.currentUser!.uid,
@@ -496,7 +496,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      data['type'] == 'first'
+                      data['type'] == 'system'
                           ? const SizedBox.shrink()
                           : ProfilePicture(
                               userId: widget.receiverUserId,
@@ -507,7 +507,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     ],
                   ),
                   const SizedBox(width: 5),
-                  if (data['type'] == 'text')
+                  if (data['type'] == 'system')
+                    const SizedBox.shrink()
+                  else if (data['type'] == 'text')
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
