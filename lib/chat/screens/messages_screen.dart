@@ -117,13 +117,15 @@ class _MessagesScreenState extends State<MessagesScreen>
     );
   }
 
-  Future<bool> onChatDelete(String chatRoomId) async {
+  Future<bool> onChatDelete(String chatRoomId, String type) async {
     try {
-      DocumentReference chatDocRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser!.uid)
-          .collection('chats')
-          .doc(chatRoomId);
+      DocumentReference chatDocRef = type == "group"
+          ? FirebaseFirestore.instance.collection('group_chats').doc(chatRoomId)
+          : FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentUser!.uid)
+              .collection('chats')
+              .doc(chatRoomId);
 
       CollectionReference messagesCollectionRef =
           chatDocRef.collection('messages');
@@ -316,7 +318,7 @@ class _MessagesScreenState extends State<MessagesScreen>
                       },
                       onDismissed: (DismissDirection direction) {
                         // Delete chat from Firestore after swipe action
-                        onChatDelete(doc.id);
+                        onChatDelete(doc.id, data['type']);
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
