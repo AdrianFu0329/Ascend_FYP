@@ -69,13 +69,7 @@ class _ChatCardState extends State<ChatCard> {
       int endIndex = words.length < maxWords ? words.length : maxWords;
       return "System: ${words.sublist(0, endIndex).join(' ')}...";
     } else if (type == "image") {
-      Map<String, dynamic> userData = await getUserData(grpUserId);
-      return isGroupChat ? "${userData['username']}: Image" : "Image";
-    } else if (isGroupChat) {
-      Map<String, dynamic> userData = await getUserData(grpUserId);
-      List<String> words = message.split(' ');
-      int endIndex = words.length < maxWords ? words.length : maxWords;
-      return "${userData['username']}: ${words.sublist(0, endIndex).join(' ')}...";
+      return "Image";
     } else {
       List<String> words = message.split(' ');
       int endIndex = words.length < maxWords ? words.length : maxWords;

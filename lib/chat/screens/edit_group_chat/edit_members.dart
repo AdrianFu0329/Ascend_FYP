@@ -89,9 +89,6 @@ class _EditMembersState extends State<EditMembers>
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                if (completed) {
-                  Navigator.of(context).pop(true);
-                }
               },
               child: Text(
                 'OK',
@@ -149,6 +146,7 @@ class _EditMembersState extends State<EditMembers>
       showMessage("Group members updated successfully", true);
     } catch (e) {
       showMessage("Failed to update group members: $e", false);
+      debugPrint('Error updating group members: $e');
     }
   }
 
@@ -156,14 +154,23 @@ class _EditMembersState extends State<EditMembers>
     final selectedIds = Set<String>.from(selectedUserIds.value);
     if (selectedIds.contains(userId)) {
       selectedIds.remove(userId);
-      newGrpMembers.remove(userId);
     } else {
       selectedIds.add(userId);
-      if (!widget.existingGrpMembers.contains(userId)) {
-        newGrpMembers.add(userId);
-      }
     }
     selectedUserIds.value = selectedIds;
+
+    // Update newGrpMembers accordingly
+    if (widget.existingGrpMembers.contains(userId)) {
+      if (!selectedIds.contains(userId)) {
+        newGrpMembers.remove(userId);
+      }
+    } else {
+      if (selectedIds.contains(userId)) {
+        newGrpMembers.add(userId);
+      } else {
+        newGrpMembers.remove(userId);
+      }
+    }
   }
 
   @override
@@ -202,10 +209,17 @@ class _EditMembersState extends State<EditMembers>
                   ),
                   IconButton(
                     onPressed: () {
-                      if (newGrpMembers.isEmpty &&
-                          widget.existingGrpMembers
-                              .toSet()
-                              .containsAll(selectedUserIds.value)) {
+                      final currentSelectedUserIds =
+                          selectedUserIds.value.toSet();
+                      final existingMemberIds =
+                          widget.existingGrpMembers.toSet();
+
+                      final usersToAdd =
+                          currentSelectedUserIds.difference(existingMemberIds);
+                      final usersToRemove =
+                          existingMemberIds.difference(currentSelectedUserIds);
+
+                      if (usersToAdd.isEmpty && usersToRemove.isEmpty) {
                         showMessage(
                             "No changes made to Group Chat Members", false);
                       } else {
@@ -229,58 +243,8 @@ class _EditMembersState extends State<EditMembers>
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: [
-                          // Display existing group members first
-                          ...widget.existingGrpMembers.map((userId) {
-                            return FutureBuilder<Map<String, dynamic>>(
-                              future: getUserData(userId),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Container();
-                                } else if (snapshot.hasError) {
-                                  return Center(
-                                      child: Text('Error: ${snapshot.error}'));
-                                } else {
-                                  final userData = snapshot.data!;
-                                  final username =
-                                      userData["username"] ?? "Unknown";
-                                  final photoUrl =
-                                      userData["photoURL"] ?? "Unknown";
-                                  return Padding(
-                                    key: Key(userId),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 4.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        ProfilePicture(
-                                          userId: userId,
-                                          photoURL: photoUrl,
-                                          radius: 22,
-                                          onTap: () {},
-                                        ),
-                                        const SizedBox(height: 8),
-                                        SizedBox(
-                                          width: 75,
-                                          child: Text(
-                                            username,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelSmall,
-                                            overflow: TextOverflow.visible,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }
-                              },
-                            );
-                          }),
-                          // Display newly selected group members
-                          ...newGrpMembers.map((userId) {
+                          // Display selected group members
+                          ...selectedIds.map((userId) {
                             return FutureBuilder<Map<String, dynamic>>(
                               future: getUserData(userId),
                               builder: (context, snapshot) {
