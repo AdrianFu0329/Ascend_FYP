@@ -13,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
 
@@ -226,6 +227,7 @@ class MediaPostScreen extends StatefulWidget {
   final String description;
   final String location;
   final String type;
+  final VideoPlayerController? videoController;
   final Function(bool)? isDeleted;
 
   const MediaPostScreen({
@@ -240,6 +242,7 @@ class MediaPostScreen extends StatefulWidget {
     required this.location,
     required this.type,
     required this.isDeleted,
+    this.videoController,
   });
 
   @override
@@ -262,44 +265,22 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
   void initState() {
     super.initState();
     if (widget.type == "Video") {
-      initializeVideoController();
+      videoController = widget.videoController;
+      if (videoController == null || !videoController!.value.isInitialized) {
+        _initializeVideoController(widget.media);
+      }
     }
     setState(() {
       likeCount = widget.likes.length;
     });
   }
 
-  @override
-  void dispose() {
-    videoController?.dispose();
-    super.dispose();
-  }
-
-  void initializeVideoController() async {
+  Future<void> _initializeVideoController(String videoURL) async {
     try {
-      Uri videoUri = Uri.parse(widget.media);
-      VideoPlayerController controller =
-          VideoPlayerController.networkUrl(videoUri);
-
-      await controller.initialize();
-
-      double height = controller.value.size.height;
-      double width = controller.value.size.width;
-
-      VideoWithDimension videoWithDimension = VideoWithDimension(
-        videoController: controller,
-        height: height,
-        width: width,
-        aspectRatio: width / height,
-      );
-
-      videoController = videoWithDimension.videoController;
+      videoController = await _initializeVideoControllerHelper(videoURL);
 
       if (mounted) {
-        setState(() {
-          video = videoWithDimension;
-          videoLoadFailed = false;
-        });
+        setState(() {});
       }
 
       videoController!.play();
@@ -310,10 +291,37 @@ class _MediaPostScreenState extends State<MediaPostScreen> {
       });
     } catch (e) {
       debugPrint("Error loading video: $e");
-      setState(() {
-        videoLoadFailed = true;
-      });
     }
+  }
+
+  Future<VideoPlayerController?> _initializeVideoControllerHelper(
+      String videoURL) async {
+    try {
+      final videoCacheManager = DefaultCacheManager();
+      final fileInfo = await videoCacheManager.getFileFromCache(videoURL);
+
+      VideoPlayerController controller;
+
+      if (fileInfo != null) {
+        controller = VideoPlayerController.file(fileInfo.file);
+      } else {
+        Uri videoUri = Uri.parse(videoURL);
+        controller = VideoPlayerController.networkUrl(videoUri);
+      }
+
+      await controller.initialize();
+
+      return controller;
+    } catch (e) {
+      debugPrint("Error loading video: $e");
+      return null;
+    }
+  }
+
+  @override
+  void dispose() {
+    videoController?.dispose();
+    super.dispose();
   }
 
   void resetVideoController() {

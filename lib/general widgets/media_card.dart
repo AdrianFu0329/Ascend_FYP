@@ -200,7 +200,7 @@ class MediaCardState extends State<MediaCard> {
             ),
           ),
           SizedBox(
-            height: 80,
+            height: 85,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
