@@ -58,25 +58,35 @@ class _EventNotificationDetailsScreenState
   }
 
   Future<void> _fetchEventData() async {
-    DocumentSnapshot eventRef;
-    if (widget.groupId != "Unknown") {
-      eventRef = await getSpecificGroupEventFromDatabase(
-          widget.groupId, widget.eventId);
-    } else {
-      eventRef = await getEventData(widget.eventId);
+    try {
+      DocumentSnapshot eventRef;
+      if (widget.groupId != "Unknown") {
+        eventRef = await getSpecificGroupEventFromDatabase(
+            widget.groupId, widget.eventId);
+      } else {
+        eventRef = await getEventData(widget.eventId);
+      }
+
+      Map<String, dynamic> eventData = eventRef.data() as Map<String, dynamic>;
+
+      setState(() {
+        eventTitle = eventData['title'] ?? 'No title';
+        eventSport = eventData['sports'] ?? 'Unknown sport';
+        eventDate = eventData['date'] ?? 'Unknown date';
+        eventLocation = eventData['location'] ?? 'Unknown location';
+        participants = (eventData['participants'] ?? 0).toString();
+        requestList = List<dynamic>.from(eventData['requestList'] ?? []);
+        acceptedList = List<dynamic>.from(eventData['acceptedList'] ?? []);
+      });
+    } catch (e) {
+      // Handle error
+      deleteNotification();
+      _showMessage(
+          "Failed to load event data. Your event may have been expired!.",
+          onOkPressed: () {
+        Navigator.pop(context);
+      });
     }
-
-    Map<String, dynamic> eventData = eventRef.data() as Map<String, dynamic>;
-
-    setState(() {
-      eventTitle = eventData['title'];
-      eventSport = eventData['sports'];
-      eventDate = eventData['date'];
-      eventLocation = eventData['location'];
-      participants = eventData['participants'].toString();
-      requestList = List<dynamic>.from(eventData['requestList']);
-      acceptedList = List<dynamic>.from(eventData['acceptedList']);
-    });
   }
 
   void _showMessage(String message, {VoidCallback? onOkPressed}) {
