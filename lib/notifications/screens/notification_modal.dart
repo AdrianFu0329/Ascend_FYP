@@ -85,6 +85,8 @@ class NotificationModal extends StatelessWidget {
                         Map<String, dynamic> data =
                             doc.data() as Map<String, dynamic>;
 
+                        debugPrint("GroupID: ${data['groupId']}");
+
                         return Dismissible(
                           key: Key(
                               doc.id), // Unique key for each notification card
