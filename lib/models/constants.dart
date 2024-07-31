@@ -1,4 +1,4 @@
-String placesAPIKey = "AIzaSyAmxOsutPA5NZEEtyj6C7XjjmRNboP_uKw";
+String placesAPIKey = ""; ////Confidential Data; Get permission from author";
 
 // Event Card Posters
 const String eventBadminton =
