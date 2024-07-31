@@ -1,16 +1,7 @@
-# ascend_fyp
+# Ascend_FYP
 
-A new Flutter project.
+A social media application focused entirely on sports. Be free to create media posts, sport events, and community groups to connect yourself with others in a healthy way!
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# To install the system using your IDE, contact the author for the required API keys
+Author phone number: 011-1087 8646
+Author Email: adrianfwl0329@gmail.com
